@@ -60,18 +60,14 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation("com.google.dagger:hilt-android:2.57.2")
-    ksp("com.google.dagger:hilt-android-compiler:2.57.2")
+    ksp("com.google.dagger:hilt-compiler:2.57.2")
 
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.2.1")
 
     implementation("androidx.compose.material:material-icons-core:1.7.8")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // Hilt Navigation Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
-
-    // Pull to refresh
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.36.0")
 }
