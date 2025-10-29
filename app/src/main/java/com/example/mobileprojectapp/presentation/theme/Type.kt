@@ -1,10 +1,15 @@
 package com.example.mobileprojectapp.presentation.theme
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.mobileprojectapp.R
+import androidx.compose.ui.text.font.Font
+
 
 // Set of Material typography styles to start with
 val Typography = Typography(
@@ -32,3 +37,10 @@ val Typography = Typography(
     )
     */
 )
+
+@RequiresApi(Build.VERSION_CODES.Q)
+val KaushanFontFamily = FontFamily(
+    Font(R.font.kaushanscript_regular, FontWeight.Normal),
+)
+
+val PrimaryFontFamily = Font(R.font.inter, FontWeight.Normal)
