@@ -9,6 +9,10 @@ import com.example.mobileprojectapp.data.remote.dto.CreateUserRequest
 import com.example.mobileprojectapp.data.remote.dto.UpdateProjectRequest
 import com.example.mobileprojectapp.data.remote.dto.LoginRequest
 import com.example.mobileprojectapp.data.remote.dto.LoginResponse
+import com.example.mobileprojectapp.data.remote.dto.ProjectByUserId
+import com.example.mobileprojectapp.data.remote.dto.ProjectCategoryByUserId
+import com.example.mobileprojectapp.data.remote.dto.ProjectSummaryByUserId
+import com.example.mobileprojectapp.data.remote.dto.ProjectsById
 import com.example.mobileprojectapp.data.remote.dto.RegisterRequest
 import com.example.mobileprojectapp.data.remote.dto.UpdateProjectExpenseItemRequest
 import com.example.mobileprojectapp.data.remote.dto.UpdateProjectExpenseRequest
@@ -81,24 +85,24 @@ interface ApiService {
     @GET("projects/by-id/{id}")
     suspend fun getProjectById(
         @Path("id") id: String
-    ): Response<BaseResponse<ProjectResponse>>
+    ): Response<BaseResponse<ProjectsById>>
 
     @GET("projects/user/{user_id}")
     suspend fun getProjectsByUserId(
         @Path("user_id") userId: String,
         @Query("status") status: String? = null,
         @Query("sort") sort: String? = null
-    ): Response<BaseResponse<List<ProjectResponse>>>
+    ): Response<BaseResponse<List<ProjectByUserId>>>
 
     @GET("projects/user/{user_id}/category")
     suspend fun getProjectCategoryByUserId(
         @Path("user_id") userId: String
-    ): Response<BaseResponse<List<ProjectCategoryResponse>>>
+    ): Response<BaseResponse<List<ProjectCategoryByUserId>>>
 
     @GET("projects/user/{user_id}/summary")
     suspend fun getAllProjectSummaryByUserId(
         @Path("user_id") userId: String
-    ): Response<BaseResponse<ProjectSummaryResponse>>
+    ): Response<BaseResponse<ProjectSummaryByUserId>>
 
     @POST("projects")
     suspend fun createProject(
@@ -119,7 +123,6 @@ interface ApiService {
     // ========================================
     // PROJECT EXPENSES ROUTES (Protected)
     // ========================================
-
     @POST("project-expenses")
     suspend fun createProjectExpense(
         @Body request: CreateProjectExpenseRequest
