@@ -126,7 +126,8 @@ data class ProjectsById(
     @SerializedName("total_todolist_completed_item")
     val totalTodolistCompletedItem: Long,
     @SerializedName("project_expenses")
-    val projectExpenses: List<Any?>,
+    val projectExpenses: List<ProjectExpense>,
     @SerializedName("project_todolists")
-    val projectTodolists: List<Any?>,
+    val projectTodolists: List<ProjectTodolist>,
 )
+

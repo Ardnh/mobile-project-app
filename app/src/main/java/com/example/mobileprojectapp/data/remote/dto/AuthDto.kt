@@ -32,12 +32,3 @@ data class TokenData (
     @SerializedName("token")
     val token: String
 )
-
-
-data class RegisterResponse (
-    @SerializedName("success")
-    val success: Boolean,
-
-    @SerializedName("message")
-    val message: Boolean,
-)

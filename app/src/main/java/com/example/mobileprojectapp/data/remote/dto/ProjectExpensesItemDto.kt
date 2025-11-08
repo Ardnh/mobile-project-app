@@ -1,6 +1,18 @@
 package com.example.mobileprojectapp.data.remote.dto
 import com.google.gson.annotations.SerializedName
 
+
+data class ExpensesItem(
+    val id: String,
+    @SerializedName("project_expenses_id")
+    val projectExpensesId: String,
+    val name: String,
+    val amount: Long,
+    @SerializedName("category_name")
+    val categoryName: String,
+)
+
+
 data class CreateProjectExpenseItemRequest(
     @SerializedName("project_expense_id")
     val projectExpenseId: String,

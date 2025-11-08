@@ -44,18 +44,18 @@ interface ApiService {
     @POST("register")
     suspend fun register(
         @Body request: RegisterRequest
-    ): Response<BaseResponse<Any>>
+    ): Response<BaseResponse<Unit>>
 
     // ========================================
     // USER ROUTES (Protected)
     // ========================================
 
-    @GET("users/all")
-    suspend fun getAllUsers(
-        @Query("page") page: Int? = null,
-        @Query("limit") limit: Int? = null,
-        @Query("search") search: String? = null
-    ): Response<BaseResponse<List<UserResponse>>>
+//    @GET("users/all")
+//    suspend fun getAllUsers(
+//        @Query("page") page: Int? = null,
+//        @Query("limit") limit: Int? = null,
+//        @Query("search") search: String? = null
+//    ): Response<BaseResponse<List<UserResponse>>>
 
     @GET("users")
     suspend fun getUserById(
@@ -65,13 +65,13 @@ interface ApiService {
     @POST("users")
     suspend fun createUser(
         @Body request: CreateUserRequest
-    ): Response<BaseResponse<UserResponse>>
+    ): Response<BaseResponse<Unit>>
 
     @PUT("users/{id}")
     suspend fun updateUser(
         @Path("id") id: String,
         @Body request: UpdateUserRequest
-    ): Response<BaseResponse<UserResponse>>
+    ): Response<BaseResponse<Unit>>
 
     @DELETE("users/{id}")
     suspend fun deleteUser(
@@ -81,7 +81,6 @@ interface ApiService {
     // ========================================
     // PROJECT ROUTES (Protected)
     // ========================================
-
     @GET("projects/by-id/{id}")
     suspend fun getProjectById(
         @Path("id") id: String
@@ -107,13 +106,13 @@ interface ApiService {
     @POST("projects")
     suspend fun createProject(
         @Body request: CreateProjectRequest
-    ): Response<BaseResponse<Any>>
+    ): Response<BaseResponse<Unit>>
 
     @PUT("projects/{id}")
     suspend fun updateProject(
         @Path("id") id: String,
         @Body request: UpdateProjectRequest
-    ): Response<BaseResponse<Any>>
+    ): Response<BaseResponse<Unit>>
 
     @DELETE("projects/{id}")
     suspend fun deleteProject(
@@ -123,16 +122,17 @@ interface ApiService {
     // ========================================
     // PROJECT EXPENSES ROUTES (Protected)
     // ========================================
+
     @POST("project-expenses")
     suspend fun createProjectExpense(
         @Body request: CreateProjectExpenseRequest
-    ): Response<BaseResponse<ProjectExpenseResponse>>
+    ): Response<BaseResponse<Unit>>
 
     @PUT("project-expenses/{id}")
     suspend fun updateProjectExpense(
         @Path("id") id: String,
         @Body request: UpdateProjectExpenseRequest
-    ): Response<BaseResponse<ProjectExpenseResponse>>
+    ): Response<BaseResponse<Unit>>
 
     @DELETE("project-expenses/{id}")
     suspend fun deleteProjectExpense(
@@ -146,13 +146,13 @@ interface ApiService {
     @POST("project-expenses-item")
     suspend fun createProjectExpenseItem(
         @Body request: CreateProjectExpenseItemRequest
-    ): Response<BaseResponse<ProjectExpenseItemResponse>>
+    ): Response<BaseResponse<Unit>>
 
     @PUT("project-expenses-item/{id}")
     suspend fun updateProjectExpenseItem(
         @Path("id") id: String,
         @Body request: UpdateProjectExpenseItemRequest
-    ): Response<BaseResponse<ProjectExpenseItemResponse>>
+    ): Response<BaseResponse<Unit>>
 
     @DELETE("project-expenses-item/{id}")
     suspend fun deleteProjectExpenseItem(
@@ -166,13 +166,13 @@ interface ApiService {
     @POST("project-todolist")
     suspend fun createProjectTodolist(
         @Body request: CreateProjectTodolistRequest
-    ): Response<BaseResponse<ProjectTodolistResponse>>
+    ): Response<BaseResponse<Unit>>
 
     @PUT("project-todolist/{id}")
     suspend fun updateProjectTodolist(
         @Path("id") id: String,
         @Body request: UpdateProjectTodolistRequest
-    ): Response<BaseResponse<ProjectTodolistResponse>>
+    ): Response<BaseResponse<Unit>>
 
     @DELETE("project-todolist/{id}")
     suspend fun deleteProjectTodolist(
@@ -186,13 +186,13 @@ interface ApiService {
     @POST("project-todolist-item")
     suspend fun createProjectTodolistItem(
         @Body request: CreateProjectTodolistItemRequest
-    ): Response<BaseResponse<ProjectTodolistItemResponse>>
+    ): Response<BaseResponse<Unit>>
 
     @PUT("project-todolist-item/{id}")
     suspend fun updateProjectTodolistItem(
         @Path("id") id: String,
         @Body request: UpdateProjectTodolistItemRequest
-    ): Response<BaseResponse<ProjectTodolistItemResponse>>
+    ): Response<BaseResponse<Unit>>
 
     @DELETE("project-todolist-item/{id}")
     suspend fun deleteProjectTodolistItem(
