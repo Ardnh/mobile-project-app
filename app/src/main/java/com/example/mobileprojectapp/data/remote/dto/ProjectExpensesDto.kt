@@ -1,7 +1,7 @@
 package com.example.mobileprojectapp.data.remote.dto
 import com.google.gson.annotations.SerializedName
 
-data class ProjectExpense(
+data class ProjectExpenseDto(
     val id: String,
     @SerializedName("project_id")
     val projectId: String,
@@ -9,10 +9,10 @@ data class ProjectExpense(
     @SerializedName("expenses_used")
     val expensesUsed: Long,
     @SerializedName("expenses_item")
-    val expensesItem: List<ExpensesItem>,
+    val expensesItem: List<ExpensesItemDto>,
 )
 
-data class CreateProjectExpenseRequest(
+data class CreateProjectExpenseRequestDto(
     @SerializedName("project_id")
     val projectId: String,
 
@@ -20,7 +20,7 @@ data class CreateProjectExpenseRequest(
     val name: String
 )
 
-data class UpdateProjectExpenseRequest(
+data class UpdateProjectExpenseRequestDto(
     @SerializedName("id")
     val id: String,
 

@@ -2,13 +2,13 @@ package com.example.mobileprojectapp.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class ProjectTodolist(
+data class ProjectTodolistDto(
     val id: String,
     @SerializedName("project_id")
     val projectId: String,
     val name: String,
     @SerializedName("todolist_items")
-    val todolistItems: List<TodolistItem>,
+    val todolistItems: List<TodolistItemDto>,
     @SerializedName("total_todo")
     val totalTodo: Long,
     @SerializedName("total_completed_todo")
@@ -24,7 +24,7 @@ data class ProjectTodolist(
 )
 
 
-data class CreateProjectTodolistRequest(
+data class CreateProjectTodolistRequestDto(
     @SerializedName("project_id")
     val projectId: String,
 
@@ -32,7 +32,7 @@ data class CreateProjectTodolistRequest(
     val name: String
 )
 
-data class UpdateProjectTodolistRequest(
+data class UpdateProjectTodolistRequestDto(
     @SerializedName("id")
     val id: String,
 

@@ -1,25 +1,25 @@
 package com.example.mobileprojectapp.data.remote.api
 
-import com.example.mobileprojectapp.data.remote.dto.CreateProjectExpenseItemRequest
-import com.example.mobileprojectapp.data.remote.dto.CreateProjectExpenseRequest
-import com.example.mobileprojectapp.data.remote.dto.CreateProjectRequest
-import com.example.mobileprojectapp.data.remote.dto.CreateProjectTodolistItemRequest
-import com.example.mobileprojectapp.data.remote.dto.CreateProjectTodolistRequest
-import com.example.mobileprojectapp.data.remote.dto.CreateUserRequest
-import com.example.mobileprojectapp.data.remote.dto.UpdateProjectRequest
-import com.example.mobileprojectapp.data.remote.dto.LoginRequest
-import com.example.mobileprojectapp.data.remote.dto.LoginResponse
-import com.example.mobileprojectapp.data.remote.dto.ProjectByUserId
-import com.example.mobileprojectapp.data.remote.dto.ProjectCategoryByUserId
-import com.example.mobileprojectapp.data.remote.dto.ProjectSummaryByUserId
-import com.example.mobileprojectapp.data.remote.dto.ProjectsById
-import com.example.mobileprojectapp.data.remote.dto.RegisterRequest
-import com.example.mobileprojectapp.data.remote.dto.UpdateProjectExpenseItemRequest
-import com.example.mobileprojectapp.data.remote.dto.UpdateProjectExpenseRequest
-import com.example.mobileprojectapp.data.remote.dto.UpdateProjectTodolistItemRequest
-import com.example.mobileprojectapp.data.remote.dto.UpdateProjectTodolistRequest
-import com.example.mobileprojectapp.data.remote.dto.UpdateUserRequest
-import com.example.mobileprojectapp.data.remote.dto.UserByTokenResponse
+import com.example.mobileprojectapp.data.remote.dto.CreateProjectExpenseItemRequestDto
+import com.example.mobileprojectapp.data.remote.dto.CreateProjectExpenseRequestDto
+import com.example.mobileprojectapp.data.remote.dto.CreateProjectRequestDto
+import com.example.mobileprojectapp.data.remote.dto.CreateProjectTodolistItemRequestDto
+import com.example.mobileprojectapp.data.remote.dto.CreateProjectTodolistRequestDto
+import com.example.mobileprojectapp.data.remote.dto.CreateUserRequestDto
+import com.example.mobileprojectapp.data.remote.dto.UpdateProjectRequestDto
+import com.example.mobileprojectapp.data.remote.dto.LoginRequestDto
+import com.example.mobileprojectapp.data.remote.dto.LoginResponseDto
+import com.example.mobileprojectapp.data.remote.dto.ProjectByIdDto
+import com.example.mobileprojectapp.data.remote.dto.ProjectByUserIdDto
+import com.example.mobileprojectapp.data.remote.dto.ProjectCategoryByUserIdDto
+import com.example.mobileprojectapp.data.remote.dto.ProjectSummaryByUserIdDto
+import com.example.mobileprojectapp.data.remote.dto.RegisterRequestDto
+import com.example.mobileprojectapp.data.remote.dto.UpdateProjectExpenseItemRequestDto
+import com.example.mobileprojectapp.data.remote.dto.UpdateProjectExpenseRequestDto
+import com.example.mobileprojectapp.data.remote.dto.UpdateProjectTodolistItemRequestDto
+import com.example.mobileprojectapp.data.remote.dto.UpdateProjectTodolistRequestDto
+import com.example.mobileprojectapp.data.remote.dto.UpdateUserRequestDto
+import com.example.mobileprojectapp.data.remote.dto.UserByTokenResponseDto
 import com.example.mobileprojectapp.data.remote.dto.response.BaseResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -38,12 +38,12 @@ interface ApiService {
 
     @POST("login")
     suspend fun login(
-        @Body request: LoginRequest
-    ): Response<BaseResponse<LoginResponse>>
+        @Body request: LoginRequestDto
+    ): Response<BaseResponse<LoginResponseDto>>
 
     @POST("register")
     suspend fun register(
-        @Body request: RegisterRequest
+        @Body request: RegisterRequestDto
     ): Response<BaseResponse<Unit>>
 
     // ========================================
@@ -60,17 +60,17 @@ interface ApiService {
     @GET("users")
     suspend fun getUserById(
         @Path("id") id: String
-    ): Response<BaseResponse<UserByTokenResponse>>
+    ): Response<BaseResponse<UserByTokenResponseDto>>
 
     @POST("users")
     suspend fun createUser(
-        @Body request: CreateUserRequest
+        @Body request: CreateUserRequestDto
     ): Response<BaseResponse<Unit>>
 
     @PUT("users/{id}")
     suspend fun updateUser(
         @Path("id") id: String,
-        @Body request: UpdateUserRequest
+        @Body request: UpdateUserRequestDto
     ): Response<BaseResponse<Unit>>
 
     @DELETE("users/{id}")
@@ -84,34 +84,37 @@ interface ApiService {
     @GET("projects/by-id/{id}")
     suspend fun getProjectById(
         @Path("id") id: String
-    ): Response<BaseResponse<ProjectsById>>
+    ): Response<BaseResponse<ProjectByIdDto>>
 
     @GET("projects/user/{user_id}")
     suspend fun getProjectsByUserId(
         @Path("user_id") userId: String,
-        @Query("status") status: String? = null,
-        @Query("sort") sort: String? = null
-    ): Response<BaseResponse<List<ProjectByUserId>>>
+        @Query("limit") limit: Int? = null,
+        @Query("page") page: Int? = null,
+        @Query("sort_by") sortBy: String? = null,
+        @Query("sort_order") sortOrder: String? = null,
+        @Query("search") search: String? = null
+    ): Response<BaseResponse<List<ProjectByUserIdDto>>>
 
     @GET("projects/user/{user_id}/category")
     suspend fun getProjectCategoryByUserId(
         @Path("user_id") userId: String
-    ): Response<BaseResponse<List<ProjectCategoryByUserId>>>
+    ): Response<BaseResponse<List<ProjectCategoryByUserIdDto>>>
 
     @GET("projects/user/{user_id}/summary")
     suspend fun getAllProjectSummaryByUserId(
         @Path("user_id") userId: String
-    ): Response<BaseResponse<ProjectSummaryByUserId>>
+    ): Response<BaseResponse<ProjectSummaryByUserIdDto>>
 
     @POST("projects")
     suspend fun createProject(
-        @Body request: CreateProjectRequest
+        @Body request: CreateProjectRequestDto
     ): Response<BaseResponse<Unit>>
 
     @PUT("projects/{id}")
     suspend fun updateProject(
         @Path("id") id: String,
-        @Body request: UpdateProjectRequest
+        @Body request: UpdateProjectRequestDto
     ): Response<BaseResponse<Unit>>
 
     @DELETE("projects/{id}")
@@ -125,13 +128,13 @@ interface ApiService {
 
     @POST("project-expenses")
     suspend fun createProjectExpense(
-        @Body request: CreateProjectExpenseRequest
+        @Body request: CreateProjectExpenseRequestDto
     ): Response<BaseResponse<Unit>>
 
     @PUT("project-expenses/{id}")
     suspend fun updateProjectExpense(
         @Path("id") id: String,
-        @Body request: UpdateProjectExpenseRequest
+        @Body request: UpdateProjectExpenseRequestDto
     ): Response<BaseResponse<Unit>>
 
     @DELETE("project-expenses/{id}")
@@ -145,13 +148,13 @@ interface ApiService {
 
     @POST("project-expenses-item")
     suspend fun createProjectExpenseItem(
-        @Body request: CreateProjectExpenseItemRequest
+        @Body request: CreateProjectExpenseItemRequestDto
     ): Response<BaseResponse<Unit>>
 
     @PUT("project-expenses-item/{id}")
     suspend fun updateProjectExpenseItem(
         @Path("id") id: String,
-        @Body request: UpdateProjectExpenseItemRequest
+        @Body request: UpdateProjectExpenseItemRequestDto
     ): Response<BaseResponse<Unit>>
 
     @DELETE("project-expenses-item/{id}")
@@ -165,13 +168,13 @@ interface ApiService {
 
     @POST("project-todolist")
     suspend fun createProjectTodolist(
-        @Body request: CreateProjectTodolistRequest
+        @Body request: CreateProjectTodolistRequestDto
     ): Response<BaseResponse<Unit>>
 
     @PUT("project-todolist/{id}")
     suspend fun updateProjectTodolist(
         @Path("id") id: String,
-        @Body request: UpdateProjectTodolistRequest
+        @Body request: UpdateProjectTodolistRequestDto
     ): Response<BaseResponse<Unit>>
 
     @DELETE("project-todolist/{id}")
@@ -185,13 +188,13 @@ interface ApiService {
 
     @POST("project-todolist-item")
     suspend fun createProjectTodolistItem(
-        @Body request: CreateProjectTodolistItemRequest
+        @Body request: CreateProjectTodolistItemRequestDto
     ): Response<BaseResponse<Unit>>
 
     @PUT("project-todolist-item/{id}")
     suspend fun updateProjectTodolistItem(
         @Path("id") id: String,
-        @Body request: UpdateProjectTodolistItemRequest
+        @Body request: UpdateProjectTodolistItemRequestDto
     ): Response<BaseResponse<Unit>>
 
     @DELETE("project-todolist-item/{id}")

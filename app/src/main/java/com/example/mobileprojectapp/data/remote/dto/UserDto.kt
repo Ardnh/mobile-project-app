@@ -3,7 +3,7 @@ package com.example.mobileprojectapp.data.remote.dto
 import com.google.gson.annotations.SerializedName
 
 // User Request
-data class CreateUserRequest(
+data class CreateUserRequestDto(
     @SerializedName("username")
     val username: String,
 
@@ -17,7 +17,7 @@ data class CreateUserRequest(
     val fullName: String
 )
 
-data class UpdateUserRequest(
+data class UpdateUserRequestDto(
     @SerializedName("username")
     val username: String?,
 
@@ -29,7 +29,7 @@ data class UpdateUserRequest(
 )
 
 // User Response
-data class UserByTokenResponse(
+data class UserByTokenResponseDto(
     @SerializedName("id")
     val id: String?,
 

@@ -3,7 +3,7 @@ package com.example.mobileprojectapp.data.remote.dto
 import com.google.gson.annotations.SerializedName
 
 
-data class TodolistItem(
+data class TodolistItemDto(
     val id: String,
     @SerializedName("project_todolist_id")
     val projectTodolistId: String,
@@ -20,7 +20,7 @@ data class TodolistItem(
     val deletedAt: Any?,
 )
 
-data class CreateProjectTodolistItemRequest(
+data class CreateProjectTodolistItemRequestDto(
     @SerializedName("project_todolist_id")
     val projectTodolistId: String,
 
@@ -34,7 +34,7 @@ data class CreateProjectTodolistItemRequest(
     val isCompleted: Boolean  // *bool di Go = Boolean di Kotlin (tidak null karena required)
 )
 
-data class UpdateProjectTodolistItemRequest(
+data class UpdateProjectTodolistItemRequestDto(
     @SerializedName("id")
     val id: String,
 

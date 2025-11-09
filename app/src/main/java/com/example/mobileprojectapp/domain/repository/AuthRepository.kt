@@ -1,10 +1,11 @@
 package com.example.mobileprojectapp.domain.repository
 
-import com.example.mobileprojectapp.data.remote.dto.LoginRequest
-import com.example.mobileprojectapp.data.remote.dto.RegisterRequest
-import com.example.mobileprojectapp.data.remote.dto.TokenData
+import com.example.mobileprojectapp.data.remote.dto.LoginRequestDto
+import com.example.mobileprojectapp.data.remote.dto.RegisterRequestDto
+import com.example.mobileprojectapp.data.remote.dto.TokenDataDto
+import com.example.mobileprojectapp.domain.model.TokenData
 
 interface AuthRepository {
-    suspend fun login(req: LoginRequest) : Result<TokenData>
-    suspend fun register(req: RegisterRequest) : Result<Unit>
+    suspend fun login(req: LoginRequestDto) : Result<TokenData>
+    suspend fun register(req: RegisterRequestDto) : Result<Unit>
 }

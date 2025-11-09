@@ -1,5 +1,49 @@
 package com.example.mobileprojectapp.domain.model
 
-data class Projects(
-    val id : String
+import com.example.mobileprojectapp.data.remote.dto.ProjectExpenseDto
+import com.example.mobileprojectapp.data.remote.dto.ProjectTodolistDto
+import com.google.gson.annotations.SerializedName
+import java.time.LocalDate
+
+data class ProjectByUserId(
+    val projectId: String,
+    val userId: String,
+    val name: String,
+    val budget: String,
+    val isCompleted: Boolean,
+    val categoryName: String,
+    val startDate: LocalDate?,
+    val endDate: LocalDate?,
+    val totalTodolist: Long,
+    val totalTodolistItemDone: Long,
+    val totalTodolistItem: Long,
+    val daysRemaining: Long,
+    val daysRemainingStatus: String,
+    val completionPercentage: Long
+)
+
+data class ProjectCategory (
+    val categoryName: String,
+    val total: Int
+)
+
+data class ProjectSummary (
+    val totalBudgetUsed: String,
+    val totalProjects: String,
+    val totalProjectsDone: String
+)
+
+data class ProjectById(
+    val id: String,
+    val userId: String,
+    val name: String,
+    val budget: Long,
+    val startDate: String,
+    val endDate: String,
+    val categoryName: String,
+    val budgetUsed: Long,
+    val totalTodolistItem: Long,
+    val totalTodolistCompletedItem: Long,
+    val projectExpenses: List<ProjectExpense>,
+    val projectTodolists: List<ProjectTodolist>,
 )

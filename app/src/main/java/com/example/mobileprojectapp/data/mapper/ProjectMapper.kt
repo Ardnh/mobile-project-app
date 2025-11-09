@@ -1,0 +1,71 @@
+package com.example.mobileprojectapp.data.mapper
+
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.example.mobileprojectapp.data.remote.dto.ProjectByIdDto
+import com.example.mobileprojectapp.data.remote.dto.ProjectByUserIdDto
+import com.example.mobileprojectapp.data.remote.dto.ProjectCategoryByUserIdDto
+import com.example.mobileprojectapp.data.remote.dto.ProjectSummaryByUserIdDto
+import com.example.mobileprojectapp.domain.model.ProjectById
+import com.example.mobileprojectapp.domain.model.ProjectByUserId
+import com.example.mobileprojectapp.domain.model.ProjectCategory
+import com.example.mobileprojectapp.domain.model.ProjectSummary
+import com.example.mobileprojectapp.utils.toCurrencyFormat
+import com.example.mobileprojectapp.utils.toLocalDateOrNull
+import com.example.mobileprojectapp.utils.toNumberFormat
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun ProjectByUserIdDto.toDomain(): ProjectByUserId {
+    return ProjectByUserId(
+        projectId = projectId,
+        userId = userId,
+        name = name,
+        budget = budget.toCurrencyFormat(),
+        isCompleted = isCompleted,
+        categoryName = categoryName,
+        startDate = startDate.toLocalDateOrNull(),
+        endDate = endDate.toLocalDateOrNull(),
+        totalTodolist = totalTodolist,
+        totalTodolistItemDone = totalTodolistItemDone,
+        totalTodolistItem = totalTodolistItem,
+        daysRemaining = daysRemaining,
+        daysRemainingStatus = daysRemainingStatus,
+        completionPercentage = completionPercentage
+    )
+}
+
+fun ProjectCategoryByUserIdDto.toDomain() : ProjectCategory {
+    return ProjectCategory(
+        categoryName = this.categoryName,
+        total = this.total
+    )
+}
+
+fun ProjectSummaryByUserIdDto.toDomain(): ProjectSummary {
+    return ProjectSummary(
+        totalBudgetUsed = totalBudgetUsed.toCurrencyFormat(),
+        totalProjects = totalProjects.toNumberFormat(),
+        totalProjectsDone = totalProjectsDone.toNumberFormat()
+    )
+}
+
+fun ProjectByIdDto.toDomain() : ProjectById {
+
+    val projectExpenses = projectExpenses.map { it.toDomain() }
+    val projectTodolist = projectTodolists.map { it.toDomain() }
+
+    return ProjectById(
+        id = id,
+        userId = userId,
+        name = name,
+        budget = budget,
+        startDate = startDate,
+        endDate = endDate,
+        categoryName = categoryName,
+        budgetUsed = budgetUsed,
+        totalTodolistItem = totalTodolistItem,
+        totalTodolistCompletedItem = totalTodolistCompletedItem,
+        projectExpenses = projectExpenses,
+        projectTodolists = projectTodolist
+    )
+}
