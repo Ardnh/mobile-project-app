@@ -14,7 +14,6 @@ class AuthRepositoryImpl @Inject constructor(private val api : ApiService) : Aut
     override suspend fun login(req: LoginRequestDto) : Result<TokenData> {
         return try {
             val response = api.login(req)
-
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null && body.success && body.data != null) {
