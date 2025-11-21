@@ -1,4 +1,4 @@
-package com.example.mobileprojectapp.presentation.features.auth
+package com.example.mobileprojectapp.presentation.features.login
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -19,10 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.input.InputTransformation
-import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
@@ -34,9 +31,9 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +50,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.mobileprojectapp.R
 import com.example.mobileprojectapp.presentation.theme.KaushanFontFamily
@@ -60,10 +58,10 @@ import com.example.mobileprojectapp.presentation.theme.PrimaryFontFamily
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun LoginView(navigation: NavHostController) {
+fun LoginView(navigation: NavHostController, viewModel: LoginViewModel = hiltViewModel()) {
 
-    var emailState by remember { mutableStateOf("") }
-    var passwordState by remember { mutableStateOf("") }
+    val formState by viewModel.loginForm.collectAsState()
+
     var passwordVisible by remember { mutableStateOf(false) }
     val emailInteractionSource = remember { MutableInteractionSource() }
     val passwordInteractionSource = remember { MutableInteractionSource() }
@@ -130,8 +128,8 @@ fun LoginView(navigation: NavHostController) {
                     .fillMaxWidth(),
             ) {
                 BasicTextField(
-                    value = emailState,
-                    onValueChange = { emailState = it },
+                    value = formState.username,
+                    onValueChange = { it -> viewModel.onUsernameChange(it) },
                     singleLine = true,
                     textStyle = LocalTextStyle.current.copy(color = Color.Black),
                     interactionSource = emailInteractionSource,
@@ -141,7 +139,7 @@ fun LoginView(navigation: NavHostController) {
                         .fillMaxWidth(),
                     decorationBox = { innerTextField ->
                         TextFieldDefaults.DecorationBox(
-                            value = emailState,
+                            value = formState.username,
                             innerTextField = innerTextField,
                             enabled = true,
                             singleLine = true,
@@ -172,8 +170,8 @@ fun LoginView(navigation: NavHostController) {
                 )
 
                 BasicTextField(
-                    value = passwordState,
-                    onValueChange = { passwordState = it },
+                    value = formState.password,
+                    onValueChange = { it -> viewModel.onPasswordChange(it) },
                     singleLine = true,
                     textStyle = LocalTextStyle.current.copy(color = Color.Black),
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -184,7 +182,7 @@ fun LoginView(navigation: NavHostController) {
                         .fillMaxWidth(),
                     decorationBox = { innerTextField ->
                         TextFieldDefaults.DecorationBox(
-                            value = passwordState,
+                            value = formState.password,
                             innerTextField = innerTextField,
                             enabled = true,
                             singleLine = true,
@@ -240,7 +238,7 @@ fun LoginView(navigation: NavHostController) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Button(
-                        onClick = {  },
+                        onClick = { viewModel.login() },
                         colors = ButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = Color.White,

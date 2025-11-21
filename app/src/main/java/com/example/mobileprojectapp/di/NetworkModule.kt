@@ -1,10 +1,13 @@
 package com.example.mobileprojectapp.di
+import android.content.Context
 import com.example.mobileprojectapp.data.remote.api.ApiService
+import com.example.mobileprojectapp.utils.SecureStorageManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -56,4 +59,9 @@ object NetworkModule {
     @Singleton
     fun provideApiService(retrofit: Retrofit) : ApiService = retrofit.create(ApiService::class.java)
 
+    @Provides
+    @Singleton
+    fun provideSecureStorageManager(@ApplicationContext context: Context): SecureStorageManager {
+        return SecureStorageManager(context)
+    }
 }

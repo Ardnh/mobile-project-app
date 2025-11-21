@@ -75,4 +75,7 @@ dependencies {
 
     // Hilt Navigation Compose
     implementation(libs.androidx.hilt.navigation.compose)
+
+    // Data Store
+    implementation(libs.androidx.security.crypto)
 }
