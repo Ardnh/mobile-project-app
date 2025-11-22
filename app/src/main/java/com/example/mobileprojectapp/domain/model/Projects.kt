@@ -1,8 +1,5 @@
 package com.example.mobileprojectapp.domain.model
 
-import com.example.mobileprojectapp.data.remote.dto.ProjectExpenseDto
-import com.example.mobileprojectapp.data.remote.dto.ProjectTodolistDto
-import com.google.gson.annotations.SerializedName
 import java.time.LocalDate
 
 data class ProjectByUserId(

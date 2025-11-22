@@ -19,25 +19,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Visibility
-import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,26 +35,40 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.mobileprojectapp.R
+import com.example.mobileprojectapp.presentation.components.form.CustomTextField
+import com.example.mobileprojectapp.presentation.navigation.NavigationEvent
 import com.example.mobileprojectapp.presentation.theme.KaushanFontFamily
 import com.example.mobileprojectapp.presentation.theme.PrimaryFontFamily
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun LoginView(navigation: NavHostController, viewModel: LoginViewModel = hiltViewModel()) {
+fun LoginView(navController: NavHostController, viewModel: LoginViewModel = hiltViewModel()) {
 
     val formState by viewModel.loginForm.collectAsState()
 
-    var passwordVisible by remember { mutableStateOf(false) }
-    val emailInteractionSource = remember { MutableInteractionSource() }
-    val passwordInteractionSource = remember { MutableInteractionSource() }
+    // Observasi navigation events
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is NavigationEvent.NavigateToHome -> {
+                    navController.navigate("HomeView") {
+                        // Hapus login dari back stack
+                        popUpTo("LoginView") { inclusive = true }
+                    }
+                }
+                is NavigationEvent.NavigateBack -> {
+                    navController.navigateUp()
+                }
+                else -> {}
+            }
+        }
+    }
 
     Scaffold { innerPadding ->
         Column(
@@ -127,98 +131,22 @@ fun LoginView(navigation: NavHostController, viewModel: LoginViewModel = hiltVie
                     .padding(horizontal = 40.dp, vertical = 30.dp)
                     .fillMaxWidth(),
             ) {
-                BasicTextField(
+
+                // Username field
+                CustomTextField(
                     value = formState.username,
-                    onValueChange = { it -> viewModel.onUsernameChange(it) },
-                    singleLine = true,
-                    textStyle = LocalTextStyle.current.copy(color = Color.Black),
-                    interactionSource = emailInteractionSource,
-                    modifier = Modifier
-                        .padding(bottom = 10.dp)
-                        .height(40.dp)
-                        .fillMaxWidth(),
-                    decorationBox = { innerTextField ->
-                        TextFieldDefaults.DecorationBox(
-                            value = formState.username,
-                            innerTextField = innerTextField,
-                            enabled = true,
-                            singleLine = true,
-                            visualTransformation = VisualTransformation.None,
-                            interactionSource = emailInteractionSource,
-                            placeholder = { Text("Email") },
-                            shape = RoundedCornerShape(50.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                disabledContainerColor = Color(0xFFF5F5F5),
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent,
-                                cursorColor = Color.Black,
-                                focusedTextColor = Color.Black,
-                                unfocusedTextColor = Color.Black
-                            ),
-                            // 👇 Tambahkan padding dalam untuk geser teks dari tepi kiri
-                            contentPadding = PaddingValues(
-                                start = 30.dp,
-                                end = 8.dp,
-                                top = 0.dp,
-                                bottom = 0.dp
-                            )
-                        )
-                    }
+                    onValueChange = { viewModel.onUsernameChange(it) },
+                    placeholder = "Username",
+                    errorMessage = formState.usernameError
                 )
 
-                BasicTextField(
+                // Password field
+                CustomTextField(
                     value = formState.password,
-                    onValueChange = { it -> viewModel.onPasswordChange(it) },
-                    singleLine = true,
-                    textStyle = LocalTextStyle.current.copy(color = Color.Black),
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    interactionSource = passwordInteractionSource,
-                    modifier = Modifier
-                        .padding(bottom = 15.dp)
-                        .height(40.dp)
-                        .fillMaxWidth(),
-                    decorationBox = { innerTextField ->
-                        TextFieldDefaults.DecorationBox(
-                            value = formState.password,
-                            innerTextField = innerTextField,
-                            enabled = true,
-                            singleLine = true,
-                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                            interactionSource = passwordInteractionSource,
-                            placeholder = { Text("Password") },
-                            trailingIcon = {
-                                IconButton(
-                                    onClick = { passwordVisible = !passwordVisible }
-                                ) {
-                                    Icon(
-                                        imageVector = if (passwordVisible)
-                                            Icons.Rounded.Visibility
-                                        else
-                                            Icons.Rounded.VisibilityOff,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            },
-                            shape = RoundedCornerShape(50.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            ),
-                            // 👇 Ini inti dari solusi: padding internal teks
-                            contentPadding = PaddingValues(
-                                start = 30.dp,
-                                end = 8.dp,
-                                top = 0.dp,
-                                bottom = 0.dp
-                            )
-                        )
-                    }
+                    onValueChange = { viewModel.onPasswordChange(it) },
+                    placeholder = "Password",
+                    errorMessage = formState.passwordError,
+                    isPassword = true
                 )
 
                 Row(
@@ -287,7 +215,7 @@ fun LoginView(navigation: NavHostController, viewModel: LoginViewModel = hiltVie
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier
                             .clickable{
-                                navigation.navigate("registerView")
+                                navController.navigate("registerView")
                             }
                     )
                 }

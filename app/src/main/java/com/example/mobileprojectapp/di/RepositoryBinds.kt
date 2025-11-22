@@ -31,10 +31,6 @@ abstract class RepositoryBinds {
 
     @Binds
     @Singleton
-    abstract fun bindProjectDetailRepository(impl: ProjectDetailsRepositoryImpl) : ProjectDetailsRepository
-
-    @Binds
-    @Singleton
     abstract fun bindProjectTodolistRepository(impl: ProjectTodolistRepositoryImpl) : ProjectTodolistRepository
 
     @Binds

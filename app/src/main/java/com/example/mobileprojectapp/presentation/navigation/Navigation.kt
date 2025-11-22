@@ -23,7 +23,7 @@ fun Navigation(context: Context) {
         composable(route = "LoginView") { LoginView(navController) }
         composable(route = "RegisterView") { RegisterView(navController) }
         composable(route = "HomeView") { HomeView(navController) }
-        composable(route = "ProjecsView") { ProjectsView(navController) }
+        composable(route = "ProjectsView") { ProjectsView(navController) }
         composable(route = "ProjectDetailsView") { ProjectDetailsView(navController) }
 
     }

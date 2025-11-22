@@ -3,12 +3,15 @@ package com.example.mobileprojectapp.presentation.features.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mobileprojectapp.domain.repository.AuthRepository
+import com.example.mobileprojectapp.presentation.navigation.NavigationEvent
 import com.example.mobileprojectapp.utils.LoginValidator
 import com.example.mobileprojectapp.utils.SecureStorageManager
 import com.example.mobileprojectapp.utils.State
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,6 +24,10 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
     // -----------------------------
     private val _loginForm = MutableStateFlow(LoginState())
     val loginForm = _loginForm.asStateFlow()
+
+    // SharedFlow untuk navigation events (one-time events)
+    private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
 
     // -----------------------------
     // API Result State
@@ -67,6 +74,7 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
                     onSuccess = { data ->
                         storage.saveAuthToken(data.token)
                         _loginResult.value = State.Success(Unit)
+                        _navigationEvent.emit(NavigationEvent.NavigateToHome)
                     },
                     onFailure = { throwable ->
                         _loginResult.value = State.Error(throwable.message ?: "Unknown Error")

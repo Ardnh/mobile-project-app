@@ -33,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,19 +54,35 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.mobileprojectapp.R
+import com.example.mobileprojectapp.presentation.components.form.CustomTextField
+import com.example.mobileprojectapp.presentation.navigation.NavigationEvent
 import com.example.mobileprojectapp.presentation.theme.KaushanFontFamily
 import com.example.mobileprojectapp.presentation.theme.PrimaryFontFamily
 import dagger.hilt.android.lifecycle.HiltViewModel
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun RegisterView(navigation: NavHostController, viewModel: RegisterViewModel = hiltViewModel()) {
+fun RegisterView(navController: NavHostController, viewModel: RegisterViewModel = hiltViewModel()) {
 
-    val state by viewModel.registerForm.collectAsState()
+    val formState by viewModel.registerForm.collectAsState()
 
-    var passwordVisible by remember { mutableStateOf(false) }
-    val emailInteractionSource = remember { MutableInteractionSource() }
-    val passwordInteractionSource = remember { MutableInteractionSource() }
+    // Observasi navigation events
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is NavigationEvent.NavigateToLogin -> {
+                    navController.navigate("LoginView") {
+                        // Hapus register dari back stack
+                        popUpTo("RegisterView") { inclusive = true }
+                    }
+                }
+                is NavigationEvent.NavigateBack -> {
+                    navController.navigateUp()
+                }
+                else -> {}
+            }
+        }
+    }
 
     Scaffold { innerPadding ->
         Column(
@@ -129,194 +146,30 @@ fun RegisterView(navigation: NavHostController, viewModel: RegisterViewModel = h
                     .fillMaxWidth(),
             ) {
 
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    BasicTextField(
-                        value = state.username,
-                        onValueChange = { viewModel.onUsernameChange(it) },
-                        singleLine = true,
-                        textStyle = LocalTextStyle.current.copy(color = Color.Black),
-                        interactionSource = emailInteractionSource,
-                        modifier = Modifier
-                            .padding(bottom = 10.dp)
-                            .height(40.dp)
-                            .fillMaxWidth(),
-                        decorationBox = { innerTextField ->
-                            TextFieldDefaults.DecorationBox(
-                                value = state.username,
-                                innerTextField = innerTextField,
-                                enabled = true,
-                                singleLine = true,
-                                visualTransformation = VisualTransformation.None,
-                                interactionSource = emailInteractionSource,
-                                placeholder = { Text("Username") },
-                                shape = RoundedCornerShape(50.dp),
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                    disabledContainerColor = Color(0xFFF5F5F5),
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    disabledIndicatorColor = Color.Transparent,
-                                    cursorColor = Color.Black,
-                                    focusedTextColor = Color.Black,
-                                    unfocusedTextColor = Color.Black
-                                ),
-                                // 👇 Tambahkan padding dalam untuk geser teks dari tepi kiri
-                                contentPadding = PaddingValues(
-                                    start = 30.dp,
-                                    end = 8.dp,
-                                    top = 0.dp,
-                                    bottom = 0.dp
-                                )
-                            )
-                        }
-                    )
+                // Username field
+                CustomTextField(
+                    value = formState.username,
+                    onValueChange = { viewModel.onUsernameChange(it) },
+                    placeholder = "Username",
+                    errorMessage = formState.usernameError
+                )
 
-                    // Error message
-                    if (state.usernameError != null) {
-                        Text(
-                            text = state.usernameError!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 30.dp, top = 2.dp, bottom = 6.dp)
-                        )
-                    } else {
-                        // Spacer untuk menjaga konsistensi tinggi layout
-                        Spacer(modifier = Modifier.height(6.dp))
-                    }
+                // Email field
+                CustomTextField(
+                    value = formState.email,
+                    onValueChange = { viewModel.onEmailChange(it) },
+                    placeholder = "Email",
+                    errorMessage = formState.emailError
+                )
 
-                }
-
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    BasicTextField(
-                        value = state.email,
-                        onValueChange = { viewModel.onEmailChange(it) },
-                        singleLine = true,
-                        textStyle = LocalTextStyle.current.copy(color = Color.Black),
-                        interactionSource = emailInteractionSource,
-                        modifier = Modifier
-                            .padding(bottom = 4.dp)
-                            .height(40.dp)
-                            .fillMaxWidth(),
-                        decorationBox = { innerTextField ->
-                            TextFieldDefaults.DecorationBox(
-                                value = state.email,
-                                innerTextField = innerTextField,
-                                enabled = true,
-                                singleLine = true,
-                                visualTransformation = VisualTransformation.None,
-                                interactionSource = emailInteractionSource,
-                                placeholder = { Text("Email") },
-                                shape = RoundedCornerShape(50.dp),
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                    disabledContainerColor = Color(0xFFF5F5F5),
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    disabledIndicatorColor = Color.Transparent,
-                                    cursorColor = Color.Black,
-                                    focusedTextColor = Color.Black,
-                                    unfocusedTextColor = Color.Black
-                                ),
-                                contentPadding = PaddingValues(
-                                    start = 30.dp,
-                                    end = 8.dp,
-                                    top = 0.dp,
-                                    bottom = 0.dp
-                                ),
-                                // Tambahkan border merah jika ada error
-                                isError = state.emailError != null
-                            )
-                        }
-                    )
-
-                    // Error message
-                    if (state.emailError != null) {
-                        Text(
-                            text = state.emailError!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 30.dp, top = 2.dp, bottom = 6.dp)
-                        )
-                    } else {
-                        // Spacer untuk menjaga konsistensi tinggi layout
-                        Spacer(modifier = Modifier.height(6.dp))
-                    }
-                }
-
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    BasicTextField(
-                        value = state.password,
-                        onValueChange = { viewModel.onPasswordChange(it) },
-                        singleLine = true,
-                        textStyle = LocalTextStyle.current.copy(color = Color.Black),
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        interactionSource = passwordInteractionSource,
-                        modifier = Modifier
-                            .padding(bottom = 15.dp)
-                            .height(40.dp)
-                            .fillMaxWidth(),
-                        decorationBox = { innerTextField ->
-                            TextFieldDefaults.DecorationBox(
-                                value = state.password,
-                                innerTextField = innerTextField,
-                                enabled = true,
-                                singleLine = true,
-                                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                                interactionSource = passwordInteractionSource,
-                                placeholder = { Text("Password") },
-                                trailingIcon = {
-                                    IconButton(
-                                        onClick = { passwordVisible = !passwordVisible }
-                                    ) {
-                                        Icon(
-                                            imageVector = if (passwordVisible)
-                                                Icons.Rounded.Visibility
-                                            else
-                                                Icons.Rounded.VisibilityOff,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                },
-                                shape = RoundedCornerShape(50.dp),
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent
-                                ),
-                                // 👇 Ini inti dari solusi: padding internal teks
-                                contentPadding = PaddingValues(
-                                    start = 30.dp,
-                                    end = 8.dp,
-                                    top = 0.dp,
-                                    bottom = 0.dp
-                                )
-                            )
-                        }
-                    )
-
-                    // Error message
-                    if (state.passwordError != null) {
-                        Text(
-                            text = state.passwordError!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 30.dp, top = 2.dp, bottom = 6.dp)
-                        )
-                    } else {
-                        // Spacer untuk menjaga konsistensi tinggi layout
-                        Spacer(modifier = Modifier.height(6.dp))
-                    }
-                }
+                // Password field
+                CustomTextField(
+                    value = formState.password,
+                    onValueChange = { viewModel.onPasswordChange(it) },
+                    placeholder = "Password",
+                    errorMessage = formState.passwordError,
+                    isPassword = true
+                )
 
                 Row(
                     horizontalArrangement = Arrangement.End,
@@ -384,7 +237,7 @@ fun RegisterView(navigation: NavHostController, viewModel: RegisterViewModel = h
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier
                             .clickable{
-                                navigation.navigate("loginView")
+                                navController.navigate("loginView")
                             }
                     )
                 }
