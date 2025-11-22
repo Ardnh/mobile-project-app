@@ -21,6 +21,7 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
     // -----------------------------
     private val _loginForm = MutableStateFlow(LoginState())
     val loginForm = _loginForm.asStateFlow()
+
     // -----------------------------
     // API Result State
     // -----------------------------
@@ -56,7 +57,10 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
                 passwordError = validation.passwordError
             )
 
-            if (!validation.isValid) return@launch
+            if (!validation.isValid) {
+                _loginResult.value = State.Idle
+                return@launch
+            }
             try {
                 val result =  authRepository.login(state.username, state.password)
                 result.fold(
