@@ -1,8 +1,10 @@
 package com.example.mobileprojectapp.presentation.features.login
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mobileprojectapp.domain.repository.AuthRepository
+import com.example.mobileprojectapp.domain.repository.UserRepository
 import com.example.mobileprojectapp.presentation.navigation.NavigationEvent
 import com.example.mobileprojectapp.utils.LoginValidator
 import com.example.mobileprojectapp.utils.SecureStorageManager
@@ -17,7 +19,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(private val authRepository: AuthRepository, private val storage: SecureStorageManager) : ViewModel() {
+class LoginViewModel @Inject constructor(private val authRepository: AuthRepository, private val userRepository: UserRepository, private val storage: SecureStorageManager) : ViewModel() {
 
     // -----------------------------
     // UI State
@@ -33,7 +35,7 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
     // API Result State
     // -----------------------------
     private val _loginResult = MutableStateFlow<State<Unit>>(State.Idle)
-    val loginResult: StateFlow<State<Unit>> = _loginResult
+    val loginResult: StateFlow<State<Unit>> = _loginResult.asStateFlow()
 
     // -----------------------------
     // UI Event Actions
@@ -74,7 +76,26 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
                     onSuccess = { data ->
                         storage.saveAuthToken(data.token)
                         _loginResult.value = State.Success(Unit)
-                        _navigationEvent.emit(NavigationEvent.NavigateToHome)
+
+                        val profileResult = userRepository.getUserProfile()
+                        profileResult.fold(
+                            onSuccess = { userProfile ->
+
+                                storage.saveUserId(userProfile.id)
+                                storage.saveUsername(userProfile.username)
+
+                                _loginResult.value = State.Success(Unit)
+                                _navigationEvent.emit(NavigationEvent.NavigateToHome)
+                            },
+                            onFailure = { throwable ->
+                                Log.d("Get profile", throwable.message ?: "Unknown error")
+                                _loginResult.value = State.Error(
+                                    "Login successful but failed to load profile: ${throwable.message}"
+                                )
+                                // Optional: Tetap navigate atau tidak
+                                // _navigationEvent.emit(NavigationEvent.NavigateToHome)
+                            }
+                        )
                     },
                     onFailure = { throwable ->
                         _loginResult.value = State.Error(throwable.message ?: "Unknown Error")

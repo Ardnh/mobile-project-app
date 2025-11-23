@@ -20,7 +20,6 @@ private val LightColorScheme = lightColorScheme(
     primary = ColorPalette.Primary70,
     secondary = ColorPalette.Gray200,
     tertiary = Pink40
-
 )
 
 @Composable

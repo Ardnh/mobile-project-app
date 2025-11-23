@@ -7,7 +7,7 @@ import com.example.mobileprojectapp.data.remote.dto.ProjectByUserIdDto
 import com.example.mobileprojectapp.data.remote.dto.ProjectCategoryByUserIdDto
 import com.example.mobileprojectapp.data.remote.dto.ProjectSummaryByUserIdDto
 import com.example.mobileprojectapp.domain.model.ProjectById
-import com.example.mobileprojectapp.domain.model.ProjectByUserId
+import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.domain.model.ProjectCategory
 import com.example.mobileprojectapp.domain.model.ProjectSummary
 import com.example.mobileprojectapp.utils.toCurrencyFormat
@@ -15,8 +15,8 @@ import com.example.mobileprojectapp.utils.toLocalDateOrNull
 import com.example.mobileprojectapp.utils.toNumberFormat
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun ProjectByUserIdDto.toDomain(): ProjectByUserId {
-    return ProjectByUserId(
+fun ProjectByUserIdDto.toDomain(): ProjectItem {
+    return ProjectItem(
         projectId = projectId,
         userId = userId,
         name = name,

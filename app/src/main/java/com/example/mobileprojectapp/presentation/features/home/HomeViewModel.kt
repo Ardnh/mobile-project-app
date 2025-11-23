@@ -2,13 +2,15 @@ package com.example.mobileprojectapp.presentation.features.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mobileprojectapp.domain.model.ProjectByUserId
 import com.example.mobileprojectapp.domain.model.ProjectCategory
+import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.domain.model.ProjectSummary
+import com.example.mobileprojectapp.domain.model.UserProfile
 import com.example.mobileprojectapp.domain.repository.ProjectsRepository
 import com.example.mobileprojectapp.presentation.navigation.NavigationEvent
 import com.example.mobileprojectapp.utils.SecureStorageManager
 import com.example.mobileprojectapp.utils.State
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -16,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
+@HiltViewModel
 class HomeViewModel @Inject constructor(private val projectRepository: ProjectsRepository, private val storage: SecureStorageManager) : ViewModel() {
 
     // -----------------------------
@@ -30,13 +34,16 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
     // -----------------------------
     // API Result State
     // -----------------------------
+    private val _userProfile = MutableStateFlow<State<UserProfile>>(State.Idle)
+    val userProfile = _userProfile.asStateFlow()
+
     private val _projectSummary = MutableStateFlow<State<ProjectSummary>>(State.Idle)
     val projectSummary = _projectSummary.asStateFlow()
 
     private val _projectCategory = MutableStateFlow<State<List<ProjectCategory>>>(State.Idle)
     val projectCategory = _projectCategory.asStateFlow()
 
-    private val _projectList = MutableStateFlow<State<List<ProjectByUserId>>>(State.Idle)
+    private val _projectList = MutableStateFlow<State<List<ProjectItem>>>(State.Idle)
     val projectList = _projectList.asStateFlow()
 
     // -----------------------------
@@ -47,6 +54,17 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
     // -----------------------------
     // API Actions
     // -----------------------------
+
+    fun loadInitialData(){
+
+        val username = storage.getUsername()
+        val userId = storage.getUserId()
+        _userProfile.value = State.Success(UserProfile(
+            id = userId ?: "",
+            username = username ?: "",
+        ))
+
+    }
 
     fun getSummaryByUserId(){
         viewModelScope.launch {

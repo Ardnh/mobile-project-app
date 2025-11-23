@@ -2,7 +2,7 @@ package com.example.mobileprojectapp.domain.model
 
 import java.time.LocalDate
 
-data class ProjectByUserId(
+data class ProjectItem(
     val projectId: String,
     val userId: String,
     val name: String,

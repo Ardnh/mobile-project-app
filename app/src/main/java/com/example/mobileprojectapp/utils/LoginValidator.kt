@@ -18,7 +18,7 @@ object LoginValidator {
 
         if (password.isBlank()) {
             passwordErr = "Password is required"
-        } else if (password.length < 6) {
+        } else if (password.length < 3) {
             passwordErr = "Password must be at least 6 characters"
         }
 

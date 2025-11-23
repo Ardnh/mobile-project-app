@@ -18,8 +18,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://api.nasa.gov/"
-    private const val API_KEY = "PFvhK6GfcQhvz2YX3GzFRbmVsbe2dGg7415esoak"
+    private const val BASE_URL = "http://10.0.2.2:8080/api/v1/"
+    //    private const val API_KEY = "PFvhK6GfcQhvz2YX3GzFRbmVsbe2dGg7415esoak"
 
     @Provides
     @Singleton
@@ -27,21 +27,19 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(storage: SecureStorageManager): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
-                val original = chain.request()
-                val originalUrl = original.url
+                val originalRequest = chain.request()
+                val token = storage.getAuthToken()
 
-                val newUrl = originalUrl.newBuilder()
-                    .addQueryParameter("api_key", API_KEY)
-                    .build()
+                val newRequestBuilder = originalRequest.newBuilder()
 
-                val newRequest = original.newBuilder()
-                    .url(newUrl)
-                    .build()
+                if (!token.isNullOrBlank()) {
+                    newRequestBuilder.addHeader("Authorization", "Bearer $token")
+                }
 
-                chain.proceed(newRequest)
+                chain.proceed(newRequestBuilder.build())
             }
             .build()
     }

@@ -58,9 +58,7 @@ interface ApiService {
 //    ): Response<BaseResponse<List<UserResponse>>>
 
     @GET("users")
-    suspend fun getUserById(
-        @Path("id") id: String
-    ): Response<BaseResponse<UserByTokenResponseDto>>
+    suspend fun getUserById(): Response<BaseResponse<UserByTokenResponseDto>>
 
     @POST("users")
     suspend fun createUser(

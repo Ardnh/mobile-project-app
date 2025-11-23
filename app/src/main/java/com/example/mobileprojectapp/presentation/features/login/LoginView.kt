@@ -18,16 +18,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,35 +48,74 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.mobileprojectapp.R
 import com.example.mobileprojectapp.presentation.components.form.CustomTextField
+import com.example.mobileprojectapp.presentation.components.snackbar.CustomSnackbar
 import com.example.mobileprojectapp.presentation.navigation.NavigationEvent
 import com.example.mobileprojectapp.presentation.theme.KaushanFontFamily
 import com.example.mobileprojectapp.presentation.theme.PrimaryFontFamily
+import com.example.mobileprojectapp.utils.State
+
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun LoginView(navController: NavHostController, viewModel: LoginViewModel = hiltViewModel()) {
 
     val formState by viewModel.loginForm.collectAsState()
+    val loginState by viewModel.loginResult.collectAsState()
 
-    // Observasi navigation events
-    LaunchedEffect(Unit) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(key1 = "navigation") {
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is NavigationEvent.NavigateToHome -> {
                     navController.navigate("HomeView") {
-                        // Hapus login dari back stack
                         popUpTo("LoginView") { inclusive = true }
+                        launchSingleTop = true
                     }
                 }
                 is NavigationEvent.NavigateBack -> {
                     navController.navigateUp()
                 }
-                else -> {}
+
+                is NavigationEvent.NavigateToDetail -> {}
+                NavigationEvent.NavigateToLogin -> {}
             }
         }
     }
 
-    Scaffold { innerPadding ->
+    LaunchedEffect(key1 = loginState) {
+        if (loginState is State.Error) {
+            snackbarHostState.showSnackbar(
+                message = (loginState as State.Error).message,
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
+
+    Scaffold(
+        snackbarHost = {
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.TopCenter
+            ){
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(Alignment.Top)
+                        .padding(top = 25.dp),
+                    snackbar = { data ->
+                        CustomSnackbar(
+                            message = data.visuals.message,
+                            actionLabel = data.visuals.actionLabel,
+                            onActionClick = { data.performAction() },
+                        )
+                    }
+                )
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -166,7 +211,11 @@ fun LoginView(navController: NavHostController, viewModel: LoginViewModel = hilt
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Button(
-                        onClick = { viewModel.login() },
+                        enabled = loginState !is State.Loading,
+                        onClick = {
+                            viewModel.login()
+//                            navController.navigate("HomeView")
+                        },
                         colors = ButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = Color.White,
@@ -174,7 +223,15 @@ fun LoginView(navController: NavHostController, viewModel: LoginViewModel = hilt
                             disabledContentColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
-                        Text("Sign In")
+                        if (loginState is State.Loading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Sign In")
+                        }
                     }
                 }
 

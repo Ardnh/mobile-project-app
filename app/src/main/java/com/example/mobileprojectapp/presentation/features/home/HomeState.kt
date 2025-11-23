@@ -1,11 +1,11 @@
 package com.example.mobileprojectapp.presentation.features.home
 
-import com.example.mobileprojectapp.domain.model.ProjectByUserId
+import com.example.mobileprojectapp.domain.model.ProjectItem
 
 data class HomeState(
     val projectSummary: HomeProjectSummaryState = HomeProjectSummaryState(),
     val projectCategory: List<String> = emptyList<String>(),
-    val projectList: List<ProjectByUserId> = emptyList<ProjectByUserId>(),
+    val projectList: List<ProjectItem> = emptyList<ProjectItem>(),
     val projectSummaryError: String?,
     val projectCategoryError: String?,
     val projectListError: String?

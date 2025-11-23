@@ -2,7 +2,7 @@ package com.example.mobileprojectapp.domain.repository
 
 import com.example.mobileprojectapp.data.remote.dto.CreateProjectRequestDto
 import com.example.mobileprojectapp.data.remote.dto.UpdateProjectRequestDto
-import com.example.mobileprojectapp.domain.model.ProjectByUserId
+import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.domain.model.ProjectCategory
 import com.example.mobileprojectapp.domain.model.ProjectSummary
 import com.example.mobileprojectapp.domain.model.ProjectById
@@ -10,7 +10,7 @@ import com.example.mobileprojectapp.presentation.features.home.ProjectByUserIdPa
 
 interface ProjectsRepository {
     suspend fun getProjectCategory(userId: String) : Result<List<ProjectCategory>>
-    suspend fun getProjectsByUserId(userId: String, param: ProjectByUserIdParams) : Result<List<ProjectByUserId>>
+    suspend fun getProjectsByUserId(userId: String, param: ProjectByUserIdParams) : Result<List<ProjectItem>>
     suspend fun getProjectSummaryByUserId(userId: String) : Result<ProjectSummary>
     suspend fun getProjectById(id: String) : Result<ProjectById>
     suspend fun createProject(req: CreateProjectRequestDto) : Result<Unit>

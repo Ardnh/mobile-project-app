@@ -21,11 +21,11 @@ data class RegisterRequestDto(
 
 // Auth Response
 data class LoginResponseDto(
-    @SerializedName("data")
-    val data: TokenDataDto,
-)
-
-data class TokenDataDto (
     @SerializedName("token")
     val token: String
 )
+
+//data class TokenDataDto (
+//    @SerializedName("token")
+//    val token: String
+//)

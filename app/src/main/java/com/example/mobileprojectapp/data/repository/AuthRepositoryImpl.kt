@@ -11,13 +11,19 @@ import retrofit2.HttpException
 import java.io.IOException
 
 class AuthRepositoryImpl @Inject constructor(private val api : ApiService) : AuthRepository {
-    override suspend fun login(req: LoginRequestDto) : Result<TokenData> {
+    override suspend fun login(username: String, password: String) : Result<TokenData> {
         return try {
-            val response = api.login(req)
+
+            val request = LoginRequestDto(
+                email = username,
+                password = password
+            )
+
+            val response = api.login(request)
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null && body.success && body.data != null) {
-                    val token = body.data.data.toDomain()
+                    val token = body.data.toDomain()
                     Result.success(token)
                 } else {
                     Result.failure(Exception(body?.message ?: "Login failed"))
@@ -34,10 +40,16 @@ class AuthRepositoryImpl @Inject constructor(private val api : ApiService) : Aut
         }
     }
 
-    override suspend fun register(req: RegisterRequestDto): Result<Unit> {
+    override suspend fun register(username: String, email: String, password: String): Result<Unit> {
         return try {
-            val response = api.register(req)
 
+            val request = RegisterRequestDto(
+                username = username,
+                email = email,
+                password = password
+            )
+
+            val response = api.register(request)
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null && body.success && body.data != null) {
