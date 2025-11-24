@@ -20,7 +20,7 @@ fun ProjectByUserIdDto.toDomain(): ProjectItem {
         projectId = projectId,
         userId = userId,
         name = name,
-        budget = budget.toCurrencyFormat(),
+        budget = budget.toNumberFormat(),
         isCompleted = isCompleted,
         categoryName = categoryName,
         startDate = startDate.toLocalDateOrNull(),
@@ -43,7 +43,7 @@ fun ProjectCategoryByUserIdDto.toDomain() : ProjectCategory {
 
 fun ProjectSummaryByUserIdDto.toDomain(): ProjectSummary {
     return ProjectSummary(
-        totalBudgetUsed = totalBudgetUsed.toCurrencyFormat(),
+        totalBudgetUsed = totalBudgetUsed.toNumberFormat(),
         totalProjects = totalProjects.toNumberFormat(),
         totalProjectsDone = totalProjectsDone.toNumberFormat()
     )

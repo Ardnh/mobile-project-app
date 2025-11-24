@@ -25,7 +25,7 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
     // -----------------------------
     // UI State
     // -----------------------------
-    private val _projectByUserIdParamsParams = MutableStateFlow<ProjectByUserIdParams>(ProjectByUserIdParams())
+    private val _projectByUserIdParams = MutableStateFlow<ProjectByUserIdParams>(ProjectByUserIdParams())
 
     // SharedFlow untuk navigation events (one-time events)
     private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
@@ -54,102 +54,95 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
     // -----------------------------
     // API Actions
     // -----------------------------
-
     fun loadInitialData(){
-
-        val username = storage.getUsername()
-        val userId = storage.getUserId()
-        _userProfile.value = State.Success(UserProfile(
-            id = userId ?: "",
-            username = username ?: "",
-        ))
-
-    }
-
-    fun getSummaryByUserId(){
         viewModelScope.launch {
+            val userId = storage.getUserId()
+            val username = storage.getUsername()
 
-            try {
-
-                _projectSummary.value = State.Loading
-
-                val userId = storage.getUserId()
-                if(userId == null){
-                    _projectSummary.value = State.Error("User Id not found!")
-                    return@launch
-                }
-                val result = projectRepository.getProjectSummaryByUserId(userId = userId)
-                result.fold(
-                    onSuccess = { data ->
-                        _projectSummary.value = State.Success(data)
-                    },
-                    onFailure = { throwable ->
-                        _projectSummary.value = State.Error(throwable.message ?: "Unkown Error")
-                    }
-                )
-
-            } catch (e: Exception){
-                _projectSummary.value = State.Error(e.message ?: "Unkown Error")
+            if (userId.isNullOrEmpty() || username.isNullOrEmpty()) {
+                _userProfile.value = State.Error("User credentials not found")
+                return@launch
             }
 
+            _userProfile.value = State.Success(UserProfile(userId, username))
+
+            launch{ getSummaryByUserId() }
+            launch{ getProjectCategory() }
+            launch{ getProjectsByUserId() }
         }
     }
 
-    fun getProjectCategory(){
-        viewModelScope.launch {
-            try {
+    suspend fun getSummaryByUserId(){
+        try {
+            _projectSummary.value = State.Loading
 
-                _projectCategory.value = State.Loading
-
-                val userId = storage.getUserId()
-                if(userId == null){
-                    _projectCategory.value = State.Error("User Id not found!")
-                    return@launch
-                }
-                val result = projectRepository.getProjectCategory(userId = userId)
-                result.fold(
-                    onSuccess = { data ->
-                        _projectCategory.value = State.Success(data)
-                    },
-                    onFailure = { throwable ->
-                        _projectCategory.value = State.Error(throwable.message ?: "Unkown Error")
-                    }
-                )
-
-            } catch (e: Exception) {
-                _projectCategory.value = State.Error(e.message ?: "Unkown Error")
+            val userId = storage.getUserId()
+            if(userId == null){
+                _projectSummary.value = State.Error("User Id not found!")
+                return
             }
+            val result = projectRepository.getProjectSummaryByUserId(userId = userId)
+            result.fold(
+                onSuccess = { data ->
+                    _projectSummary.value = State.Success(data)
+                },
+                onFailure = { throwable ->
+                    _projectSummary.value = State.Error(throwable.message ?: "Unknown Error")
+                }
+            )
 
+        } catch (e: Exception){
+            _projectSummary.value = State.Error(e.message ?: "Unknown Error")
         }
     }
 
-    fun getProjectsByUserId(){
-        viewModelScope.launch {
+    suspend fun getProjectCategory(){
+        try {
+            _projectCategory.value = State.Loading
 
-            try {
-                _projectList.value = State.Loading
-                val userId = storage.getUserId()
-                if(userId == null){
-                    _projectList.value = State.Error("User Id not found!")
-                    return@launch
-                }
-                val result = projectRepository.getProjectsByUserId(
-                    userId = userId,
-                    param = _projectByUserIdParamsParams.value
-                )
-                result.fold(
-                    onSuccess = { data ->
-                        _projectList.value = State.Success(data)
-                    },
-                    onFailure = { throwable ->
-                        _projectList.value = State.Error(throwable.message ?: "Unkown Error")
-                    }
-                )
-
-            } catch (e: Exception){
-                _projectList.value = State.Error(e.message ?: "Unkown Error")
+            val userId = storage.getUserId()
+            if(userId == null){
+                _projectCategory.value = State.Error("User Id not found!")
+                return
             }
+            val result = projectRepository.getProjectCategory(userId = userId)
+            result.fold(
+                onSuccess = { data ->
+                    _projectCategory.value = State.Success(data)
+                },
+                onFailure = { throwable ->
+                    _projectCategory.value = State.Error(throwable.message ?: "Unknown Error")
+                }
+            )
 
+        } catch (e: Exception) {
+            _projectCategory.value = State.Error(e.message ?: "Unknown Error")
+        }
+    }
+
+    suspend fun getProjectsByUserId(){
+        try {
+            _projectList.value = State.Loading
+            val userId = storage.getUserId()
+            if(userId == null){
+                _projectList.value = State.Error("User Id not found!")
+                return
+            }
+            val result = projectRepository.getProjectsByUserId(
+                userId = userId,
+                param = _projectByUserIdParams.value
+            )
+            result.fold(
+                onSuccess = { data ->
+                    _projectList.value = State.Success(data)
+                },
+                onFailure = { throwable ->
+                    _projectList.value = State.Error(throwable.message ?: "Unknown Error")
+                }
+            )
+
+        } catch (e: Exception){
+            _projectList.value = State.Error(e.message ?: "Unknown Error")
         }
     }
 }
