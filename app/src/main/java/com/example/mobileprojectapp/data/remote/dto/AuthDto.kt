@@ -22,7 +22,9 @@ data class RegisterRequestDto(
 // Auth Response
 data class LoginResponseDto(
     @SerializedName("token")
-    val token: String
+    val token: String,
+    @SerializedName("expired_at")
+    val expiredAt: String
 )
 
 //data class TokenDataDto (

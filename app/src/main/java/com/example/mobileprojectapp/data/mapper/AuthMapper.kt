@@ -5,6 +5,7 @@ import com.example.mobileprojectapp.domain.model.TokenData
 
 fun LoginResponseDto.toDomain(): TokenData {
     return TokenData(
-        token = this.token
+        token = this.token,
+        expiredAt = this.expiredAt
     )
 }

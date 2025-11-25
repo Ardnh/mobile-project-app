@@ -1,6 +1,8 @@
 package com.example.mobileprojectapp.presentation.features.login
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mobileprojectapp.domain.repository.AuthRepository
@@ -9,6 +11,7 @@ import com.example.mobileprojectapp.presentation.navigation.NavigationEvent
 import com.example.mobileprojectapp.utils.LoginValidator
 import com.example.mobileprojectapp.utils.SecureStorageManager
 import com.example.mobileprojectapp.utils.State
+import com.example.mobileprojectapp.utils.isExpired
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class LoginViewModel @Inject constructor(private val authRepository: AuthRepository, private val userRepository: UserRepository, private val storage: SecureStorageManager) : ViewModel() {
 
@@ -28,7 +32,7 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
     val loginForm = _loginForm.asStateFlow()
 
     // SharedFlow untuk navigation events (one-time events)
-    private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
+    private val _navigationEvent = MutableSharedFlow<NavigationEvent>(replay = 1)
     val navigationEvent = _navigationEvent.asSharedFlow()
 
     // -----------------------------
@@ -50,6 +54,7 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
     // -----------------------------
     // API Actions
     // -----------------------------
+
     fun login(){
         viewModelScope.launch {
 
@@ -70,11 +75,13 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
                 _loginResult.value = State.Idle
                 return@launch
             }
+
             try {
                 val result =  authRepository.login(state.username, state.password)
                 result.fold(
                     onSuccess = { data ->
                         storage.saveAuthToken(data.token)
+                        storage.saveAuthTokenExpireDate(data.expiredAt)
                         _loginResult.value = State.Success(Unit)
 
                         val profileResult = userRepository.getUserProfile()

@@ -12,14 +12,16 @@ import com.example.mobileprojectapp.presentation.features.register.RegisterView
 import com.example.mobileprojectapp.presentation.features.home.HomeView
 import com.example.mobileprojectapp.presentation.features.projectdetail.ProjectDetailsView
 import com.example.mobileprojectapp.presentation.features.projects.ProjectsView
+import com.example.mobileprojectapp.presentation.features.splash.SplashView
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun Navigation(context: Context) {
 
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "loginView", route = "root_graph") {
+    NavHost(navController = navController, startDestination = "SplashView", route = "root_graph") {
 
+        composable(route = "SplashView") { SplashView(navController) }
         composable(route = "LoginView") { LoginView(navController) }
         composable(route = "RegisterView") { RegisterView(navController) }
         composable(route = "HomeView") { HomeView(navController) }

@@ -30,6 +30,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -58,7 +59,6 @@ import com.example.mobileprojectapp.utils.State
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun LoginView(navController: NavHostController, viewModel: LoginViewModel = hiltViewModel()) {
-
     val formState by viewModel.loginForm.collectAsState()
     val loginState by viewModel.loginResult.collectAsState()
 

@@ -6,6 +6,23 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+import java.time.OffsetDateTime
+import java.time.ZonedDateTime
+
+/**
+ * Check time validity
+ */
+@RequiresApi(Build.VERSION_CODES.O)
+fun isExpired(expiredAt: String): Boolean {
+    val expiredTime = OffsetDateTime.parse(expiredAt).toInstant()
+
+    val now = ZonedDateTime.now().toInstant()
+
+    // true jika sekarang > expiredAt
+    return now.isAfter(expiredTime)
+}
+
+
 /**
  * Format LocalDate ke "12 Okt 2025"
  */

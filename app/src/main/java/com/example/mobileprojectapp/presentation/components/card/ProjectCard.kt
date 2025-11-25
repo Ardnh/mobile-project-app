@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.material.icons.rounded.Paid
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mobileprojectapp.domain.model.ProjectItem
@@ -45,14 +45,15 @@ fun ProjectCard(project: ProjectItem){
         else -> Color(0xFF81C784) // far away
     }
 
-
     Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 5.dp)
             .height(120.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.Gray)
 
     ) {
         Row {
@@ -79,7 +80,6 @@ fun ProjectCard(project: ProjectItem){
                                     fontSize = 12.sp,
                                     modifier = Modifier
                                         .padding(horizontal = 10.dp),
-
                                     )
                             }
                             Box(
@@ -100,7 +100,8 @@ fun ProjectCard(project: ProjectItem){
                         Text(
                             text = project.name,
                             fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
 

@@ -192,10 +192,10 @@ fun HomeView(navigation: NavHostController, viewModel: HomeViewModel = hiltViewM
                                     Box(
                                         modifier = Modifier
                                             .padding(bottom = 7.dp)
-                                            .height(30.dp)
+                                            .height(25.dp)
                                             .clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
                                             .border(
-                                                width = 2.dp,
+                                                width = 1.dp,
                                                 color = if (isSelected) Color.Transparent else Color.LightGray,
                                                 shape = RoundedCornerShape(20.dp)
                                             )
@@ -209,8 +209,9 @@ fun HomeView(navigation: NavHostController, viewModel: HomeViewModel = hiltViewM
                                     ) {
                                         Text(
                                             text = "${it.categoryName} (${it.total})",
+                                            fontSize = 12.sp,
                                             modifier = Modifier
-                                                .padding(horizontal = 15.dp)
+                                                .padding(horizontal = 12.dp)
                                         )
                                     }
                                 }

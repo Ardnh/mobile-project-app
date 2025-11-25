@@ -20,6 +20,7 @@ class SecureStorageManager(private val context: Context) {
 
         // Authentication keys
         const val KEY_AUTH_TOKEN = "auth_token"
+        const val KEY_EXPIRED_TOKEN = "expired_at"
         const val KEY_REFRESH_TOKEN = "refresh_token"
         const val KEY_USER_ID = "user_id"
         const val KEY_USERNAME = "username"
@@ -251,7 +252,9 @@ class SecureStorageManager(private val context: Context) {
     // ========== Authentication Helper Methods ==========
 
     fun saveAuthToken(token: String) = saveString(KEY_AUTH_TOKEN, token)
+    fun saveAuthTokenExpireDate(expireDate: String) = saveString(KEY_EXPIRED_TOKEN, expireDate)
     fun getAuthToken(): String? = getString(KEY_AUTH_TOKEN)
+    fun getAuthTokenExpireDate(): String? = getString(KEY_EXPIRED_TOKEN)
     fun clearAuthToken() = remove(KEY_AUTH_TOKEN)
 
     fun saveRefreshToken(token: String) = saveString(KEY_REFRESH_TOKEN, token)
