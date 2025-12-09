@@ -42,7 +42,6 @@ fun SplashView(navController: NavHostController, viewModel: SplashViewModel = hi
         }
     }
 
-    // tampilin logo / loading
     Box(Modifier.fillMaxSize(), Alignment.Center) {
         CircularProgressIndicator()
     }
