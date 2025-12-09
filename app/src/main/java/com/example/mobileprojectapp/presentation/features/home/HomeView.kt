@@ -23,13 +23,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,11 +59,13 @@ import com.example.mobileprojectapp.presentation.components.card.ProjectCard
 import com.example.mobileprojectapp.presentation.components.view.EmptyProjectsView
 import com.example.mobileprojectapp.presentation.components.view.ErrorView
 import com.example.mobileprojectapp.presentation.features.home.components.SummarySection
+import com.example.mobileprojectapp.presentation.navigation.NavigationEvent
 import com.example.mobileprojectapp.utils.State
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeView(navigation: NavHostController, viewModel: HomeViewModel = hiltViewModel()){
+fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltViewModel()){
 
     val projectListState by viewModel.projectList.collectAsState()
     val projectCategoryState by viewModel.projectCategory.collectAsState()
@@ -68,6 +75,28 @@ fun HomeView(navigation: NavHostController, viewModel: HomeViewModel = hiltViewM
     val snackbarHostState = remember { SnackbarHostState() }
     var isRefreshing by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(0) }
+    var expanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = "navigation") {
+        viewModel.navigationEvent.collectLatest { event ->
+            when (event) {
+                is NavigationEvent.NavigateToHome -> {
+
+                }
+                is NavigationEvent.NavigateBack -> {
+                    navController.navigateUp()
+                }
+
+                is NavigationEvent.NavigateToDetail -> {}
+                NavigationEvent.NavigateToLogin -> {
+                    navController.navigate("LoginView") {
+                        popUpTo("HomeView") { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.loadInitialData()
@@ -83,17 +112,38 @@ fun HomeView(navigation: NavHostController, viewModel: HomeViewModel = hiltViewM
             TopAppBar(
                 title = { Text("") },
                 actions = {
-                    Image(
-                        imageVector = Icons.Rounded.Menu,
-                        contentDescription = "Menu Icon",
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp)
-                            .size(30.dp)
-                    )
+                    Box(
+                    ) {
+                        Image(
+                            imageVector = Icons.Rounded.Menu,
+                            contentDescription = "Menu Icon",
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp)
+                                .size(30.dp)
+                                .clickable {
+                                    expanded = !expanded
+                                }
+                        )
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Logout") },
+                                onClick = {
+                                    viewModel.onLogout()
+                                    expanded = !expanded
+                                }
+                            )
+                        }
+                    }
                 },
                 modifier = Modifier
                     .statusBarsPadding()
-                    .height(40.dp)
+                    .height(40.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         snackbarHost = {
@@ -106,7 +156,9 @@ fun HomeView(navigation: NavHostController, viewModel: HomeViewModel = hiltViewM
                 isRefreshing = true
                 // refresh logic
             },
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             LazyColumn(
                 modifier = Modifier
@@ -152,7 +204,9 @@ fun HomeView(navigation: NavHostController, viewModel: HomeViewModel = hiltViewM
                             fontWeight = FontWeight.Bold
                         )
                         TextButton(
-                            onClick = {}
+                            onClick = {
+                                navController.navigate("ProjectsView")
+                            }
                         ) {
                             Text("See All projects")
                         }

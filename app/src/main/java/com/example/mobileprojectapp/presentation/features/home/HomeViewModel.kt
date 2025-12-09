@@ -49,6 +49,12 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
     // -----------------------------
     // UI Event Actions
     // -----------------------------
+    fun onLogout() {
+        viewModelScope.launch {
+            storage.clearAll()
+            _navigationEvent.emit(NavigationEvent.NavigateToLogin)
+        }
+    }
 
 
     // -----------------------------
@@ -64,7 +70,12 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
                 return@launch
             }
 
-            _userProfile.value = State.Success(UserProfile(userId, username))
+            _userProfile.value = State.Success(
+                UserProfile(
+                    id = userId,
+                    username = username,
+                )
+            )
 
             launch{ getSummaryByUserId() }
             launch{ getProjectCategory() }

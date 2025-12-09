@@ -45,6 +45,7 @@ class SplashViewModel @Inject constructor( private val storage: SecureStorageMan
 
                 if (token.isNullOrEmpty() || expiryTime == null) {
                     Log.d("CheckAuth", "❌ Token or expiry is null/empty")
+                    _navigationEvent.emit(NavigationEvent.NavigateToLogin)
                     return@launch
                 }
 
@@ -54,12 +55,12 @@ class SplashViewModel @Inject constructor( private val storage: SecureStorageMan
                 if (expiryTime.isNotEmpty() && expired) {
                     Log.d("CheckAuth", "❌ Token is expired - clearing data")
                     storage.clearAuthData()
-                    return@launch
+                    _navigationEvent.emit(NavigationEvent.NavigateToLogin)
+                } else {
+                    Log.d("CheckAuth", "✅ Token is VALID - Emitting navigation event")
+                    _navigationEvent.emit(NavigationEvent.NavigateToHome)
+                    Log.d("CheckAuth", "✅ Navigation event EMITTED")
                 }
-
-                Log.d("CheckAuth", "✅ Token is VALID - Emitting navigation event")
-                _navigationEvent.emit(NavigationEvent.NavigateToHome)
-                Log.d("CheckAuth", "✅ Navigation event EMITTED")
 
             } catch (e: Exception) {
                 Log.e("CheckAuth", "❌ Exception occurred", e)

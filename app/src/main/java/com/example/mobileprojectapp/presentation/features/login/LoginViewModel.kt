@@ -88,6 +88,9 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
                         profileResult.fold(
                             onSuccess = { userProfile ->
 
+                                Log.d("Get profile", "user id: ${userProfile.id}")
+                                Log.d("Get Profile", "username: ${userProfile.username}")
+
                                 storage.saveUserId(userProfile.id)
                                 storage.saveUsername(userProfile.username)
 

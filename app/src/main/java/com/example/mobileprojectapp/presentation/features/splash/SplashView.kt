@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.mobileprojectapp.presentation.navigation.NavigationEvent
+import kotlinx.coroutines.flow.collectLatest
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -22,8 +23,8 @@ fun SplashView(navController: NavHostController, viewModel: SplashViewModel = hi
         viewModel.checkExistingAuth()
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { event ->
+    LaunchedEffect("navigation") {
+        viewModel.navigationEvent.collectLatest { event ->
             when(event) {
                 NavigationEvent.NavigateToHome -> {
                     navController.navigate("HomeView") {
