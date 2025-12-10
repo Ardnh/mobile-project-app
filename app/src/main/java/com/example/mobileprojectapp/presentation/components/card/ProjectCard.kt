@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircleOutline
@@ -47,7 +49,7 @@ fun ProjectCard(project: ProjectItem){
 
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.secondary
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -56,11 +58,13 @@ fun ProjectCard(project: ProjectItem){
             .clip(RoundedCornerShape(20.dp))
 
     ) {
-        Row {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Box(
                 modifier = Modifier
-                    .weight(0.70f)
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
+                    .weight(0.75f)
+                    .padding(start = 15.dp, top = 12.dp, bottom = 12.dp)
             ) {
                 Column(
                     verticalArrangement = Arrangement.SpaceBetween,
@@ -71,91 +75,141 @@ fun ProjectCard(project: ProjectItem){
                         Row {
                             Box(
                                 modifier = Modifier
-                                    .padding(bottom = 5.dp, end = 5.dp)
+                                    .padding(bottom = 5.dp, end = 5.dp,)
                                     .clip(RoundedCornerShape(20.dp))
                                     .background(daysStatusColor)
                             ){
                                 Text(
                                     text = project.daysRemainingStatus,
-                                    fontSize = 12.sp,
+                                    fontSize = 11.sp,
+                                    lineHeight = 18.sp,
                                     modifier = Modifier
                                         .padding(horizontal = 10.dp),
-                                    )
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .padding(bottom = 5.dp)
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(Color.LightGray)
-                            ){
-                                Text(
-                                    text = project.categoryName,
-                                    fontSize = 12.sp,
-                                    modifier = Modifier
-                                        .padding(horizontal = 10.dp),
-
                                     )
                             }
                         }
                         Text(
                             text = project.name,
-                            fontSize = 20.sp,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.tertiary,
                         )
                     }
 
-                    Row(
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 0.dp),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.CheckCircleOutline,
-                            contentDescription = "Todolist check",
-                            modifier = Modifier
-                                .padding(end = 3.dp)
-                                .size(18.dp)
-
-                        )
-                        Text(
-                            text = "Task ${ project.totalTodolistItemDone }/${ project.totalTodolistItem }",
-                            fontSize = 12.sp,
-                            modifier = Modifier
-                                .padding(end = 5.dp)
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50.dp))
-                                .background(Color(0xffFFE0A6))
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
+                        item {
+                            Icon(
+                                imageVector = Icons.Rounded.CheckCircleOutline,
+                                contentDescription = "Todolist check",
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
-                                    .padding(start = 5.dp, end = 10.dp, top = 1.dp, bottom = 1.dp)
-                            ) {
-                                Image(
-                                    imageVector = Icons.Rounded.Paid,
-                                    contentDescription = "budget",
-                                    modifier = Modifier
-                                        .size(18.dp)
-                                )
+                                    .padding(end = 3.dp)
+                                    .size(18.dp)
+
+                            )
+                            Text(
+                                text = "Task ${ project.totalTodolistItemDone }/${ project.totalTodolistItem }",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.tertiary,
+                            )
+                        }
+
+                        item {
+                            Icon(
+                                imageVector = Icons.Rounded.Paid,
+                                contentDescription = "budget",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .size(18.dp)
+                            )
+                            Text(
+                                text = project.budget,
+                                color = MaterialTheme.colorScheme.tertiary,
+                                fontSize = 12.sp
+                            )
+                        }
+
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(Color(0xffA6E4FF))
+                            ){
                                 Text(
-                                    text = project.budget,
-                                    fontSize = 12.sp
+                                    text = project.categoryName,
+                                    fontSize = 12.sp,
+                                    lineHeight = 18.sp,
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    modifier = Modifier
+                                        .padding(horizontal = 10.dp),
                                 )
                             }
                         }
                     }
+
+//                    Row(
+//                        verticalAlignment = Alignment.CenterVertically,
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Rounded.CheckCircleOutline,
+//                            contentDescription = "Todolist check",
+//                            tint = MaterialTheme.colorScheme.primary,
+//                            modifier = Modifier
+//                                .padding(end = 3.dp)
+//                                .size(18.dp)
+//
+//                        )
+//                        Text(
+//                            text = "Task ${ project.totalTodolistItemDone }/${ project.totalTodolistItem }",
+//                            fontSize = 12.sp,
+//                            color = MaterialTheme.colorScheme.tertiary,
+//                            modifier = Modifier
+//                                .padding(end = 10.dp)
+//                        )
+//
+//                        Icon(
+//                            imageVector = Icons.Rounded.Paid,
+//                            contentDescription = "budget",
+//                            tint = MaterialTheme.colorScheme.primary,
+//                            modifier = Modifier
+//                                .size(18.dp)
+//                        )
+//                        Text(
+//                            text = project.budget,
+//                            color = MaterialTheme.colorScheme.tertiary,
+//                            fontSize = 12.sp
+//                        )
+//
+//                        Box(
+//                            modifier = Modifier
+//                                .padding(bottom = 5.dp, start = 10.dp)
+//                                .clip(RoundedCornerShape(20.dp))
+//                                .background(Color(0xffA6E4FF))
+//                        ){
+//                            Text(
+//                                text = project.categoryName,
+//                                fontSize = 12.sp,
+//                                lineHeight = 18.sp,
+//                                color = MaterialTheme.colorScheme.tertiary,
+//                                modifier = Modifier
+//                                    .padding(horizontal = 10.dp),
+//                                )
+//                        }
+//                    }
                 }
             }
 
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(0.30f)
+                    .fillMaxSize()
+                    .weight(0.25f)
             ) {
                 CircularProgressIndicator(
                     progress = { 0.74f },
@@ -164,7 +218,10 @@ fun ProjectCard(project: ProjectItem){
                     trackColor = MaterialTheme.colorScheme.secondary,
                 )
 
-                Text("100%")
+                Text(
+                    text = "74%",
+                    color = MaterialTheme.colorScheme.tertiary
+                )
             }
         }
 
