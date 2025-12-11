@@ -26,7 +26,9 @@ fun Navigation(context: Context) {
         composable(route = "RegisterView") { RegisterView(navController) }
         composable(route = "HomeView") { HomeView(navController) }
         composable(route = "ProjectsView") { ProjectsView(navController) }
-        composable(route = "ProjectDetailsView") { ProjectDetailsView(navController) }
-
+        composable(route = "ProjectDetailsView/{projectId}") { backStackEntry ->
+            val projectId = backStackEntry.arguments?.getString("projectId")
+            ProjectDetailsView(navController, projectId = projectId)
+        }
     }
 }

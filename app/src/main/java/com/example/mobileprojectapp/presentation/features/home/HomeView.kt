@@ -55,6 +55,7 @@ import androidx.navigation.NavHostController
 import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.domain.model.ProjectSummary
 import com.example.mobileprojectapp.domain.model.UserProfile
+import com.example.mobileprojectapp.presentation.components.card.CategoryCard
 import com.example.mobileprojectapp.presentation.components.card.ProjectCard
 import com.example.mobileprojectapp.presentation.components.view.EmptyProjectsView
 import com.example.mobileprojectapp.presentation.components.view.ErrorView
@@ -76,6 +77,8 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
     var isRefreshing by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(0) }
     var expanded by remember { mutableStateOf(false) }
+
+
 
     LaunchedEffect(key1 = "navigation") {
         viewModel.navigationEvent.collectLatest { event ->
@@ -243,31 +246,15 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
                                 val category = (projectCategoryState as State.Success).data
                                 itemsIndexed(category) { index, it ->
                                     val isSelected = index == selectedIndex
-                                    Box(
-                                        modifier = Modifier
-                                            .padding(bottom = 7.dp)
-                                            .height(25.dp)
-                                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
-                                            .border(
-                                                width = 1.dp,
-                                                color = if (isSelected) Color.Transparent else Color.LightGray,
-                                                shape = RoundedCornerShape(20.dp)
-                                            )
-                                            .background(
-                                                if (isSelected) Color.LightGray else Color.Transparent
-                                            )
-                                            .clickable {
-                                                selectedIndex = index
-                                            },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "${it.categoryName} (${it.total})",
-                                            fontSize = 12.sp,
-                                            modifier = Modifier
-                                                .padding(horizontal = 12.dp)
-                                        )
-                                    }
+                                    CategoryCard(
+                                        title = it.categoryName,
+                                        count = it.total,
+                                        isSelected = isSelected,
+                                        onClickCategory = { it ->
+                                            viewModel.setProjectCategory(it)
+                                            selectedIndex = index
+                                        }
+                                    )
                                 }
                             }
                         }
@@ -307,7 +294,12 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
                             }
                         } else {
                             items (projects) { project ->
-                                ProjectCard(project = project)
+                                ProjectCard(
+                                    project = project,
+                                    onClick = { projectId ->
+                                        navController.navigate("ProjectDetailsView/${projectId}")
+                                    }
+                                )
                             }
                         }
                     }

@@ -1,5 +1,6 @@
 package com.example.mobileprojectapp.presentation.features.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mobileprojectapp.domain.model.ProjectCategory
@@ -8,6 +9,7 @@ import com.example.mobileprojectapp.domain.model.ProjectSummary
 import com.example.mobileprojectapp.domain.model.UserProfile
 import com.example.mobileprojectapp.domain.repository.ProjectsRepository
 import com.example.mobileprojectapp.presentation.navigation.NavigationEvent
+import com.example.mobileprojectapp.utils.HttpAbortManager
 import com.example.mobileprojectapp.utils.SecureStorageManager
 import com.example.mobileprojectapp.utils.State
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,8 +28,6 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
     // UI State
     // -----------------------------
     private val _projectByUserIdParams = MutableStateFlow<ProjectByUserIdParams>(ProjectByUserIdParams())
-
-    // SharedFlow untuk navigation events (one-time events)
     private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
@@ -56,6 +56,14 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
         }
     }
 
+    fun setProjectCategory(value: String) {
+
+        Log.d("search by category name: ", value)
+        _projectByUserIdParams.value = _projectByUserIdParams.value.copy(
+            search = if (value == "All") "" else value
+        )
+        getProjectsByUserId()
+    }
 
     // -----------------------------
     // API Actions
@@ -77,9 +85,9 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
                 )
             )
 
-            launch{ getSummaryByUserId() }
-            launch{ getProjectCategory() }
-            launch{ getProjectsByUserId() }
+            getSummaryByUserId()
+            getProjectCategory()
+            getProjectsByUserId()
         }
     }
 
@@ -131,29 +139,35 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
         }
     }
 
-    suspend fun getProjectsByUserId(){
-        try {
-            _projectList.value = State.Loading
-            val userId = storage.getUserId()
-            if(userId == null){
-                _projectList.value = State.Error("User Id not found!")
-                return
-            }
-            val result = projectRepository.getProjectsByUserId(
-                userId = userId,
-                param = _projectByUserIdParams.value
-            )
-            result.fold(
-                onSuccess = { data ->
-                    _projectList.value = State.Success(data)
-                },
-                onFailure = { throwable ->
-                    _projectList.value = State.Error(throwable.message ?: "Unknown Error")
-                }
-            )
+    fun getProjectsByUserId(){
 
-        } catch (e: Exception){
-            _projectList.value = State.Error(e.message ?: "Unknown Error")
+        val id = "get_project_by_user_id_home"
+        val job = viewModelScope.launch {
+            try {
+                _projectList.value = State.Loading
+                val userId = storage.getUserId()
+                if(userId == null){
+                    _projectList.value = State.Error("User Id not found!")
+                    return@launch
+                }
+                val result = projectRepository.getProjectsByUserId(
+                    userId = userId,
+                    param = _projectByUserIdParams.value
+                )
+                result.fold(
+                    onSuccess = { data ->
+                        _projectList.value = State.Success(data)
+                    },
+                    onFailure = { throwable ->
+                        _projectList.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+
+            } catch (e: Exception){
+                _projectList.value = State.Error(e.message ?: "Unknown Error")
+            }
         }
+
+        HttpAbortManager.register(id, job)
     }
 }

@@ -2,6 +2,7 @@ package com.example.mobileprojectapp.presentation.components.card
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.example.mobileprojectapp.domain.model.ProjectItem
 
 @Composable
-fun ProjectCard(project: ProjectItem){
+fun ProjectCard(project: ProjectItem, onClick: (id: String) -> Unit){
 
     val daysStatusColor = when {
         project.daysRemaining < 0 -> Color.Red          // overdue
@@ -56,6 +57,9 @@ fun ProjectCard(project: ProjectItem){
             .padding(bottom = 5.dp)
             .height(120.dp)
             .clip(RoundedCornerShape(20.dp))
+            .clickable{
+                onClick(project.projectId)
+            }
 
     ) {
         Row(

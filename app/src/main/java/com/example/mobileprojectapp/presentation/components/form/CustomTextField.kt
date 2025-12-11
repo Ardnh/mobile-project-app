@@ -4,6 +4,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
@@ -25,6 +26,7 @@ fun CustomTextField(
     isPassword: Boolean = false,
     singleLine: Boolean = true,
     enabled: Boolean = true,
+    onTrailingIconClick: (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
@@ -45,7 +47,6 @@ fun CustomTextField(
                 VisualTransformation.None,
             interactionSource = interactionSource,
             modifier = Modifier
-                .padding(bottom = 4.dp)
                 .height(40.dp)
                 .fillMaxWidth(),
             decorationBox = { innerTextField ->
@@ -80,7 +81,17 @@ fun CustomTextField(
                                 }
                             }
                         }
-                        trailingIcon != null -> trailingIcon
+                        trailingIcon != null -> {
+                            {
+                                IconButton(
+                                    onClick = {
+                                        onTrailingIconClick?.invoke()
+                                    }
+                                ) {
+                                    trailingIcon()
+                                }
+                            }
+                        }
                         else -> null
                     },
                     shape = RoundedCornerShape(50.dp),
@@ -115,40 +126,7 @@ fun CustomTextField(
                 modifier = Modifier.padding(start = 30.dp, top = 2.dp, bottom = 6.dp)
             )
         } else {
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(0.dp))
         }
     }
 }
-
-// Contoh penggunaan:
-/*
-@Composable
-fun RegisterScreen(viewModel: RegisterViewModel, state: RegisterState) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        // Email field
-        CustomTextField(
-            value = state.email,
-            onValueChange = { viewModel.onEmailChange(it) },
-            placeholder = "Email",
-            errorMessage = state.emailError
-        )
-
-        // Username field
-        CustomTextField(
-            value = state.username,
-            onValueChange = { viewModel.onUsernameChange(it) },
-            placeholder = "Username",
-            errorMessage = state.usernameError
-        )
-
-        // Password field
-        CustomTextField(
-            value = state.password,
-            onValueChange = { viewModel.onPasswordChange(it) },
-            placeholder = "Password",
-            errorMessage = state.passwordError,
-            isPassword = true
-        )
-    }
-}
-*/
