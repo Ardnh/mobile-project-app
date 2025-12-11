@@ -154,58 +154,6 @@ fun ProjectCard(project: ProjectItem, onClick: (id: String) -> Unit){
                             }
                         }
                     }
-
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.Rounded.CheckCircleOutline,
-//                            contentDescription = "Todolist check",
-//                            tint = MaterialTheme.colorScheme.primary,
-//                            modifier = Modifier
-//                                .padding(end = 3.dp)
-//                                .size(18.dp)
-//
-//                        )
-//                        Text(
-//                            text = "Task ${ project.totalTodolistItemDone }/${ project.totalTodolistItem }",
-//                            fontSize = 12.sp,
-//                            color = MaterialTheme.colorScheme.tertiary,
-//                            modifier = Modifier
-//                                .padding(end = 10.dp)
-//                        )
-//
-//                        Icon(
-//                            imageVector = Icons.Rounded.Paid,
-//                            contentDescription = "budget",
-//                            tint = MaterialTheme.colorScheme.primary,
-//                            modifier = Modifier
-//                                .size(18.dp)
-//                        )
-//                        Text(
-//                            text = project.budget,
-//                            color = MaterialTheme.colorScheme.tertiary,
-//                            fontSize = 12.sp
-//                        )
-//
-//                        Box(
-//                            modifier = Modifier
-//                                .padding(bottom = 5.dp, start = 10.dp)
-//                                .clip(RoundedCornerShape(20.dp))
-//                                .background(Color(0xffA6E4FF))
-//                        ){
-//                            Text(
-//                                text = project.categoryName,
-//                                fontSize = 12.sp,
-//                                lineHeight = 18.sp,
-//                                color = MaterialTheme.colorScheme.tertiary,
-//                                modifier = Modifier
-//                                    .padding(horizontal = 10.dp),
-//                                )
-//                        }
-//                    }
                 }
             }
 

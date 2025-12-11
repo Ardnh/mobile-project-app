@@ -172,6 +172,7 @@ fun LoginView(navController: NavHostController, viewModel: LoginViewModel = hilt
             }
 
             Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier
                     .padding(horizontal = 40.dp, vertical = 30.dp)
                     .fillMaxWidth(),
