@@ -15,18 +15,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.More
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -52,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
@@ -64,6 +72,8 @@ import com.example.mobileprojectapp.domain.model.ProjectById
 import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.presentation.components.accordion.Accordion
 import com.example.mobileprojectapp.presentation.components.card.ProjectCard
+import com.example.mobileprojectapp.presentation.components.dialog.UpdateProjectDialog
+import com.example.mobileprojectapp.presentation.components.dialog.UpdateTodolistItemDialog
 import com.example.mobileprojectapp.presentation.components.view.EmptyProjectsView
 import com.example.mobileprojectapp.presentation.components.view.ErrorView
 import com.example.mobileprojectapp.presentation.features.home.HomeViewModel
@@ -79,6 +89,11 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
 
     var isRefreshing by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableIntStateOf(0) }
+    var menuParentIndex by remember { mutableIntStateOf(-1) }
+    var isMenuExpanded by remember { mutableIntStateOf(-1) }
+    var isProjectMenuExpanded by remember { mutableStateOf(false) }
+    var showUpdateProjectDialog by remember { mutableStateOf(false) }
+    var showUpdateTodolistItemDialog by remember { mutableStateOf(false) }
     val tabs = listOf("Todolist (2/13)", "Expenses")
 
     LaunchedEffect(isRefreshing) {
@@ -130,7 +145,6 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
             isRefreshing = isRefreshing,
             onRefresh = {
                 isRefreshing = true
-                // refresh logic
             },
             modifier = Modifier
                 .padding(innerPadding)
@@ -195,12 +209,14 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                             Column {
                                                 Row(
                                                     horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically,
                                                     modifier = Modifier
                                                         .fillMaxWidth()
                                                         .padding(bottom = 10.dp)
                                                 ) {
                                                     Text(
-                                                        text = "Project"
+                                                        text = "Project",
+                                                        fontSize = 13.sp
                                                     )
                                                     Row(
                                                         verticalAlignment = Alignment.CenterVertically,
@@ -219,10 +235,31 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                                     .padding(horizontal = 10.dp),
                                                             )
                                                         }
-                                                        Icon(
-                                                            imageVector = Icons.Rounded.MoreHoriz,
-                                                            contentDescription = "More options",
-                                                        )
+                                                        Box(){
+                                                            Icon(
+                                                                imageVector = Icons.Rounded.MoreHoriz,
+                                                                contentDescription = "More options",
+                                                                modifier = Modifier
+                                                                    .clickable{
+                                                                        isProjectMenuExpanded = true
+                                                                    }
+                                                            )
+                                                            DropdownMenu(
+                                                                expanded = isProjectMenuExpanded,
+                                                                onDismissRequest = { isProjectMenuExpanded = false },
+                                                                containerColor = Color.White,
+                                                                shape = RoundedCornerShape(20.dp)
+                                                            ) {
+                                                                DropdownMenuItem(
+                                                                    text = { Text("Update") },
+                                                                    onClick = { showUpdateProjectDialog =  true },
+                                                                )
+                                                                DropdownMenuItem(
+                                                                    text = { Text("Delete") },
+                                                                    onClick = { /* Do something... */ },
+                                                                )
+                                                            }
+                                                        }
                                                     }
                                                 }
                                                 Text(
@@ -246,7 +283,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                         fontSize = 15.sp
                                                     )
                                                     Text(
-                                                        text = "Rp 120.000.000",
+                                                        text = "${project.budget}",
                                                         fontWeight = FontWeight.SemiBold
                                                     )
                                                 }
@@ -261,7 +298,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                         fontSize = 15.sp
                                                     )
                                                     Text(
-                                                        text = "Rp 80.000.000",
+                                                        text = "${project.budgetUsed}",
                                                         fontWeight = FontWeight.SemiBold
                                                     )
                                                 }
@@ -283,6 +320,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                         indicator = {},
                         divider = {},
                         modifier = Modifier
+                            .padding(bottom = 10.dp)
                             .clip(RoundedCornerShape(30.dp))
                             .border(
                                 width = 1.dp,
@@ -358,14 +396,105 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
 
                                 if(project.projectTodolists.isEmpty()){
                                     item {
-                                        EmptyProjectsView()
+                                        EmptyProjectsView(
+                                            title = "Todolist is empty",
+                                            description = "Start create new todolist",
+                                            buttonLabel = "New todolist",
+                                            onClickBtn = null
+                                        )
                                     }
                                 } else {
-                                    items(project.projectTodolists) { todo ->
+                                    itemsIndexed(project.projectTodolists) { parentIndex, todo ->
                                         Accordion(
                                             title = todo.name,
+                                            headerContent = {
+                                                Text(
+                                                    text= "${todo.totalCompletedTodo}/${todo.totalTodo}",
+                                                    fontSize = 14.sp
+                                                )
+                                                if(todo.isTodolistCompleted) {
+                                                    Icon(
+                                                        imageVector = Icons.Rounded.CheckCircle,
+                                                        contentDescription = "check",
+                                                        tint = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier
+                                                            .size(20.dp)
+                                                    )
+                                                }
+                                            },
                                             content = {
-                                                Text("Ini adalah jawaban dari pertanyaan pertama. Anda bisa menambahkan konten apapun di sini.")
+                                                Column(
+                                                    verticalArrangement = Arrangement.spacedBy(5.dp),
+                                                    modifier = Modifier
+                                                        .padding(horizontal = 8.dp)
+                                                ) {
+                                                    todo.todolistItems.forEachIndexed { index, todoItem ->
+                                                        Row {
+                                                            Text(
+                                                                "${index + 1}. ",
+                                                                fontSize = 14.sp,
+                                                                lineHeight = 15.sp,
+                                                            )
+                                                            Text(
+                                                                text = todoItem.name,
+                                                                fontSize = 14.sp,
+                                                                lineHeight = 15.sp,
+                                                                modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .weight(1f)
+                                                            )
+
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .padding(horizontal = 10.dp)
+                                                                    .size(20.dp)
+                                                            ) {
+                                                                if(todoItem.isCompleted) {
+                                                                    Icon(
+                                                                        imageVector = Icons.Rounded.CheckCircle,
+                                                                        contentDescription = "check",
+                                                                        tint = MaterialTheme.colorScheme.primary,
+                                                                        modifier = Modifier
+                                                                            .size(20.dp)
+                                                                    )
+                                                                }
+                                                            }
+                                                            Box {
+                                                                Icon(
+                                                                    imageVector = Icons.Rounded.MoreHoriz,
+                                                                    contentDescription = "more options",
+                                                                    tint = MaterialTheme.colorScheme.primary,
+                                                                    modifier = Modifier
+                                                                        .size(20.dp)
+                                                                        .clickable {
+                                                                            menuParentIndex =
+                                                                                parentIndex
+                                                                            isMenuExpanded = index
+                                                                        }
+                                                                )
+                                                                DropdownMenu(
+                                                                    expanded = menuParentIndex == parentIndex && isMenuExpanded == index,
+                                                                    onDismissRequest = { isMenuExpanded = -1 },
+                                                                    containerColor = Color.White,
+                                                                    shape = RoundedCornerShape(20.dp)
+                                                                ) {
+                                                                    DropdownMenuItem(
+                                                                        text = { Text("Done") },
+                                                                        onClick = { /* Do something... */ },
+                                                                    )
+                                                                    DropdownMenuItem(
+                                                                        text = { Text("Update") },
+                                                                        onClick = { showUpdateTodolistItemDialog = true },
+                                                                    )
+                                                                    DropdownMenuItem(
+                                                                        text = { Text("Delete") },
+                                                                        onClick = { /* Do something... */ },
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
                                         )
                                     }
@@ -374,7 +503,12 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                             }
                             1 -> item {
                                 if(project.projectExpenses.isEmpty()){
-                                    EmptyProjectsView()
+                                    EmptyProjectsView(
+                                        title = "Expenses is empty",
+                                        description = "Start create new expenses",
+                                        buttonLabel = "New expenses",
+                                        onClickBtn = null
+                                    )
                                 } else {
                                     ExpensesContent()
                                 }
@@ -387,4 +521,20 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
             }
         }
     }
+
+    if(showUpdateProjectDialog){
+        UpdateProjectDialog(
+            onDismiss = { showUpdateProjectDialog = false },
+            onUpdate = { name, description ->
+
+            }
+        )
+    }
+
+    if(showUpdateTodolistItemDialog){
+        UpdateTodolistItemDialog(
+            onDismiss = { showUpdateTodolistItemDialog = false }
+        )
+    }
+
 }

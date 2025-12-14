@@ -84,6 +84,8 @@ fun CustomTextField(
                         trailingIcon != null -> {
                             {
                                 IconButton(
+                                    modifier = Modifier
+                                        .padding(vertical = 3.dp),
                                     onClick = {
                                         onTrailingIconClick?.invoke()
                                     }

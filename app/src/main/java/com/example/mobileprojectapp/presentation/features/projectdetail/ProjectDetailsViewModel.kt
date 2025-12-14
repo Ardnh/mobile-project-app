@@ -5,6 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mobileprojectapp.domain.model.ProjectById
 import com.example.mobileprojectapp.domain.model.ProjectItem
+import com.example.mobileprojectapp.domain.repository.ProjectExpensesItemRepository
+import com.example.mobileprojectapp.domain.repository.ProjectExpensesRepository
+import com.example.mobileprojectapp.domain.repository.ProjectTodolistItemRepository
+import com.example.mobileprojectapp.domain.repository.ProjectTodolistRepository
 import com.example.mobileprojectapp.domain.repository.ProjectsRepository
 import com.example.mobileprojectapp.presentation.features.home.ProjectByUserIdParams
 import com.example.mobileprojectapp.utils.HttpAbortManager
@@ -17,7 +21,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ProjectDetailsViewModel @Inject constructor(private val repository: ProjectsRepository, private val storage: SecureStorageManager) : ViewModel() {
+class ProjectDetailsViewModel @Inject constructor(
+    private val repository: ProjectsRepository,
+    private val projectTodolistRepository: ProjectTodolistRepository,
+    private val projectTodolistItemRepository: ProjectTodolistItemRepository,
+    private val projectExpensesRepository: ProjectExpensesRepository,
+    private val projectExpensesItemRepository: ProjectExpensesItemRepository,
+    private val storage: SecureStorageManager
+) : ViewModel() {
 
     // -----------------------------
     // UI State
@@ -47,6 +58,62 @@ class ProjectDetailsViewModel @Inject constructor(private val repository: Projec
                 result.fold(
                     onSuccess = { data ->
                         _projectDetail.value = State.Success(data)
+                    },
+                    onFailure = { throwable ->
+                        _projectDetail.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+
+            } catch (e: Exception){
+                _projectDetail.value = State.Error(e.message ?: "Unknown Error")
+            }
+        }
+
+        HttpAbortManager.register(id, job)
+    }
+
+    fun updateProjectTodolistById(){
+
+    }
+
+    fun updateTodolistItemById(){
+
+    }
+
+    fun deleteCategoryTodolistById(projectId: String){
+        val id = "delete_project_by_id"
+        val job = viewModelScope.launch {
+            try {
+
+                _projectDetail.value = State.Loading
+                val result = repository.deleteProjectById(projectId)
+                result.fold(
+                    onSuccess = { data ->
+
+                    },
+                    onFailure = { throwable ->
+                        _projectDetail.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+
+            } catch (e: Exception){
+                _projectDetail.value = State.Error(e.message ?: "Unknown Error")
+            }
+        }
+
+        HttpAbortManager.register(id, job)
+    }
+
+    fun deleteTodolistItemById(projectId: String){
+        val id = "delete_project_by_id"
+        val job = viewModelScope.launch {
+            try {
+
+                _projectDetail.value = State.Loading
+                val result = repository.deleteProjectById(projectId)
+                result.fold(
+                    onSuccess = { data ->
+
                     },
                     onFailure = { throwable ->
                         _projectDetail.value = State.Error(throwable.message ?: "Unknown Error")

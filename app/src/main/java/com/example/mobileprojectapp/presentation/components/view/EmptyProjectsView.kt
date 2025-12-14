@@ -20,7 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun EmptyProjectsView() {
+fun EmptyProjectsView(
+    title: String = "No Title",
+    description: String = "No Description",
+    buttonLabel: String = "No Label",
+    onClickBtn: (() -> Unit)? = null
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -36,21 +41,21 @@ fun EmptyProjectsView() {
         )
 
         Text(
-            text = "No projects yet",
+            text = title,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
 
         Text(
-            text = "Start creating your first project",
+            text = description,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
         )
 
-        Button(onClick = { /* Create project */ }) {
+        Button(onClick = { onClickBtn }) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Create Project")
+            Text(buttonLabel)
         }
     }
 }
