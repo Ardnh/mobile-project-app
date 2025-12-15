@@ -90,6 +90,8 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
 
     val projectDetailState by viewModel.projectDetail.collectAsState()
 
+    var updateProjectState by remember { mutableStateOf<ProjectById?>(null) }
+
     var isRefreshing by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableIntStateOf(0) }
     var menuParentIndex by remember { mutableIntStateOf(-1) }
@@ -255,7 +257,10 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                             ) {
                                                                 DropdownMenuItem(
                                                                     text = { Text("Update") },
-                                                                    onClick = { showUpdateProjectDialog =  true },
+                                                                    onClick = {
+                                                                        updateProjectState = project
+                                                                        showUpdateProjectDialog =  true
+                                                                    },
                                                                 )
                                                                 DropdownMenuItem(
                                                                     text = { Text("Delete") },
@@ -525,12 +530,14 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
         }
     }
 
-    if(showUpdateProjectDialog){
+    if(showUpdateProjectDialog && updateProjectState != null){
         UpdateProjectDialog(
+            projectName = "",
+            projectBudget = "",
+            projectStartDate = "",
+            projectEndDate = "",
+            projectCategory = "",
             onDismiss = { showUpdateProjectDialog = false },
-            onUpdate = { name, description ->
-
-            }
         )
     }
 
