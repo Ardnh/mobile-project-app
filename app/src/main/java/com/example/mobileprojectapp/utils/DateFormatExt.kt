@@ -2,11 +2,13 @@ package com.example.mobileprojectapp.utils
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 /**
@@ -15,7 +17,6 @@ import java.time.ZonedDateTime
 @RequiresApi(Build.VERSION_CODES.O)
 fun isExpired(expiredAt: String): Boolean {
     val expiredTime = OffsetDateTime.parse(expiredAt).toInstant()
-
     val now = ZonedDateTime.now().toInstant()
 
     // true jika sekarang > expiredAt
@@ -57,4 +58,11 @@ fun LocalDate.toDisplayFormatWithDay(): String {
 fun LocalDate.toShortFormat(): String {
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     return this.format(formatter)
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun Long.toMillisToIsoUtc(millis: Long): String {
+    return Instant.ofEpochMilli(millis)
+        .atOffset(ZoneOffset.UTC)
+        .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 }

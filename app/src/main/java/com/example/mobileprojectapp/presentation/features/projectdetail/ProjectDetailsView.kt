@@ -1,5 +1,7 @@
 package com.example.mobileprojectapp.presentation.features.projectdetail
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -81,6 +83,7 @@ import com.example.mobileprojectapp.presentation.theme.ColorPalette
 import com.example.mobileprojectapp.utils.State
 import com.google.android.material.tabs.TabItem
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetailsViewModel = hiltViewModel(), projectId: String?){

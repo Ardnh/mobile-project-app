@@ -109,10 +109,7 @@ fun CustomTextField(
                         unfocusedTextColor = Color.Black
                     ),
                     contentPadding = PaddingValues(
-                        start = 30.dp,
-                        end = 8.dp,
-                        top = 0.dp,
-                        bottom = 0.dp
+                        horizontal = 28.dp, vertical = 10.dp
                     ),
                     isError = errorMessage != null
                 )

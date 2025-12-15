@@ -1,5 +1,7 @@
 package com.example.mobileprojectapp.presentation.components.dialog
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
@@ -35,22 +37,32 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.DialogProperties
 import com.example.mobileprojectapp.presentation.components.bottomsheet.BaseBottomSheet
+import com.example.mobileprojectapp.presentation.components.form.CustomInputSelectDate
 import com.example.mobileprojectapp.presentation.components.form.CustomSelectInput
 import com.example.mobileprojectapp.presentation.components.form.CustomTextField
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdateProjectDialog(
     projectName: String = "",
-    projectDescription: String = "",
+    projectBudget: String = "",
+    projectStartDate: String = "",
+    projectEndDate: String = "",
+    projectCategory: String = "",
     onDismiss: () -> Unit,
-    onUpdate: (name: String, description: String) -> Unit
 ) {
 
     var name by remember { mutableStateOf(projectName) }
-    var description by remember { mutableStateOf(projectDescription) }
+    var budget by remember { mutableStateOf(projectBudget) }
+    var startDate by remember { mutableStateOf(projectStartDate) }
+    var endDate by remember { mutableStateOf(projectEndDate) }
+    var category by remember { mutableStateOf(projectCategory) }
+
     var showBottomSheet by remember { mutableStateOf(false) }
+    var showDatePickerStartDate by remember { mutableStateOf(false) }
+    var showDatePickerEndDate by remember { mutableStateOf(false) }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -88,44 +100,33 @@ fun UpdateProjectDialog(
                 )
 
                 CustomTextField(
-                    value = name,
-                    onValueChange = { name = it },
+                    value = budget,
+                    onValueChange = { budget = it },
                     placeholder = "Budget",
                 )
 
-                CustomTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    placeholder = "Start date",
-                    trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Rounded.CalendarMonth,
-                            contentDescription = "calendar icon",
-                            modifier = Modifier
-                                .size(20.dp)
-                        )
-                    }
+                CustomInputSelectDate(
+                    title = "Start date",
+                    showDatePicker = showDatePickerStartDate,
+                    onDismissRequest = { showDatePickerStartDate =  false },
+                    onShowDatePicker = { showDatePickerStartDate = true },
+                    onSelectDate = { value -> startDate = value }
                 )
 
-                CustomTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    placeholder = "End date",
-                    trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Rounded.CalendarMonth,
-                            contentDescription = "calendar icon",
-                            modifier = Modifier
-                                .size(20.dp)
-                        )
-                    }
+                CustomInputSelectDate(
+                    title = "End date",
+                    showDatePicker = showDatePickerEndDate,
+                    onDismissRequest = { showDatePickerEndDate =  false },
+                    onShowDatePicker = { showDatePickerEndDate = true },
+                    onSelectDate = { value -> endDate = value }
                 )
 
                 BaseBottomSheet(
                     title = "Project Category",
                     showBottomSheet = showBottomSheet,
                     onClickTrigger = { showBottomSheet = true },
-                    onDismiss = { showBottomSheet = false }
+                    onDismiss = { showBottomSheet = false },
+                    onValueSelected = { it -> category = it }
                 )
 
                 Row(

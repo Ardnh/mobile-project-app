@@ -6,7 +6,6 @@ import com.example.mobileprojectapp.domain.model.ProjectExpense
 fun ProjectExpenseDto.toDomain() : ProjectExpense {
 
     val projectExpensesItem = expensesItem.map { it.toDomain() }
-
     return ProjectExpense(
         id = id,
         projectId = projectId,
