@@ -1,5 +1,8 @@
 package com.example.mobileprojectapp.presentation.features.projects
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,21 +52,25 @@ import androidx.navigation.NavHostController
 import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.presentation.components.card.CategoryCard
 import com.example.mobileprojectapp.presentation.components.card.ProjectCard
+import com.example.mobileprojectapp.presentation.components.dialog.CreateProjectDialog
 import com.example.mobileprojectapp.presentation.components.form.CustomTextField
 import com.example.mobileprojectapp.presentation.components.view.EmptyProjectsView
 import com.example.mobileprojectapp.presentation.components.view.ErrorView
 import com.example.mobileprojectapp.utils.State
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectsView(navController: NavHostController, viewModel: ProjectsViewModel = hiltViewModel()){
 
     val projectListState by viewModel.projectList.collectAsState()
     val projectCategoryState by viewModel.projectCategory.collectAsState()
+    val formState by viewModel.searchForm.collectAsState()
+
 
     var isRefreshing by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(0) }
-    val formState by viewModel.searchForm.collectAsState()
+    var selectedIndex by remember { mutableIntStateOf(0) }
+    var showAddNewProjectDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadInitialData()
@@ -77,7 +85,9 @@ fun ProjectsView(navController: NavHostController, viewModel: ProjectsViewModel 
         containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {  },
+                onClick = {
+                    showAddNewProjectDialog = true
+                },
                 modifier = Modifier.size(56.dp),
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.primary
@@ -256,5 +266,20 @@ fun ProjectsView(navController: NavHostController, viewModel: ProjectsViewModel 
                 }
             }
         }
+    }
+
+    if(showAddNewProjectDialog){
+        CreateProjectDialog(
+            onDismiss = { showAddNewProjectDialog = false },
+            onCreateProject = { name, budget, startDate, endDate, category ->
+                viewModel.createProjectByUserId(
+                    name = name,
+                    categoryName = category,
+                    budget = budget,
+                    startDate = startDate,
+                    endDate = endDate
+                )
+            }
+        )
     }
 }

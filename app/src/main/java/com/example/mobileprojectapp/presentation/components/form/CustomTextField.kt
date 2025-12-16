@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -24,6 +25,7 @@ fun CustomTextField(
     modifier: Modifier = Modifier,
     errorMessage: String? = null,
     isPassword: Boolean = false,
+    isNumericOnly: Boolean = false, // Parameter baru untuk angka saja
     singleLine: Boolean = true,
     enabled: Boolean = true,
     onTrailingIconClick: (() -> Unit)? = null,
@@ -37,7 +39,16 @@ fun CustomTextField(
     ) {
         BasicTextField(
             value = value,
-            onValueChange = onValueChange,
+            onValueChange = { newValue ->
+                // Filter hanya angka jika isNumericOnly = true
+                if (isNumericOnly) {
+                    if (newValue.all { it.isDigit() }) {
+                        onValueChange(newValue)
+                    }
+                } else {
+                    onValueChange(newValue)
+                }
+            },
             singleLine = singleLine,
             enabled = enabled,
             textStyle = LocalTextStyle.current.copy(color = Color.Black),
@@ -46,6 +57,10 @@ fun CustomTextField(
             else
                 VisualTransformation.None,
             interactionSource = interactionSource,
+            keyboardOptions = when {
+                isNumericOnly -> KeyboardOptions(keyboardType = KeyboardType.Number)
+                else -> KeyboardOptions.Default
+            },
             modifier = Modifier
                 .height(40.dp)
                 .fillMaxWidth(),

@@ -10,7 +10,6 @@ import com.example.mobileprojectapp.domain.model.ProjectById
 import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.domain.model.ProjectCategory
 import com.example.mobileprojectapp.domain.model.ProjectSummary
-import com.example.mobileprojectapp.utils.toCurrencyFormat
 import com.example.mobileprojectapp.utils.toLocalDateOrNull
 import com.example.mobileprojectapp.utils.toNumberFormat
 
@@ -58,7 +57,7 @@ fun ProjectByIdDto.toDomain() : ProjectById {
         id = id,
         userId = userId,
         name = name,
-        budget = budget,
+        budget = budget.toNumberFormat(),
         startDate = startDate,
         endDate = endDate,
         categoryName = categoryName,

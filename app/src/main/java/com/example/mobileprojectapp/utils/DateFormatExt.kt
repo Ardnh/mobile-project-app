@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
@@ -65,4 +66,18 @@ fun Long.toMillisToIsoUtc(millis: Long): String {
     return Instant.ofEpochMilli(millis)
         .atOffset(ZoneOffset.UTC)
         .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun String.toFormattedDate(locale: Locale = Locale.ENGLISH): String {
+    return try {
+        val instant = Instant.parse(this)
+        val formatter = DateTimeFormatter
+            .ofPattern("MMM, d yyyy", locale)
+            .withZone(ZoneId.systemDefault())
+        formatter.format(instant)
+    } catch (e: Exception) {
+        "failed to format"
+    }
 }

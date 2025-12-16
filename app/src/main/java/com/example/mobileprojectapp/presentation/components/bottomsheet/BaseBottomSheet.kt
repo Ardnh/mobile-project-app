@@ -33,6 +33,7 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +48,7 @@ import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mobileprojectapp.presentation.components.form.CustomTextField
 import com.google.android.material.chip.Chip
 import kotlinx.coroutines.launch
 
@@ -55,6 +57,7 @@ import kotlinx.coroutines.launch
 fun BaseBottomSheet(
     showBottomSheet: Boolean,
     title: String,
+    selectedCategory: String,
     onClickTrigger: () -> Unit,
     onDismiss: () -> Unit,
     onValueSelected: (value: String) -> Unit
@@ -63,12 +66,26 @@ fun BaseBottomSheet(
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
-    var selectedIndex by remember { mutableIntStateOf(-1) }
+    var selectedCategoryState by remember { mutableStateOf("") }
+    var newCategoryState by remember { mutableStateOf("") }
 
     val items = listOf(
         "Kotlin", "Jetpack Compose", "Android", "Material Design",
-        "UI/UX", "Mobile Development", "Clean Architecture", "MVVM"
+        "UI/UX", "Mobile Development", "Clean Architecture", "MVVM",
+        "UI/UX", "Mobile Development", "Clean Architecture", "MVVM",
     )
+
+    fun onSaveCategory(){
+        if(newCategoryState.isNotBlank()){
+            onValueSelected(newCategoryState)
+        } else {
+            onValueSelected(selectedCategoryState)
+        }
+    }
+
+    LaunchedEffect(selectedCategory) {
+        selectedCategoryState = selectedCategory
+    }
 
     Box(
         modifier = Modifier
@@ -87,7 +104,7 @@ fun BaseBottomSheet(
                 .fillMaxSize()
                 .padding(start = 28.dp, end = 15.dp)
         ) {
-            Text("Select category")
+            Text(selectedCategory.ifEmpty { "Select category" })
             Icon(
                 imageVector = if (showBottomSheet) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
                 contentDescription = "Show on bottom sheet false",
@@ -123,6 +140,16 @@ fun BaseBottomSheet(
                         )
                     }
 
+                    item {
+                        CustomTextField(
+                            value = newCategoryState,
+                            onValueChange = { it -> newCategoryState = it },
+                            placeholder = "New category",
+                            modifier = Modifier
+                                .padding(bottom = 20.dp)
+                        )
+                    }
+
                     item{
 
                         FlowRow(
@@ -131,13 +158,14 @@ fun BaseBottomSheet(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items.forEachIndexed { index, item ->
+                            items.forEach { item ->
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(30.dp))
-                                        .background(if ( selectedIndex == index ) Color.LightGray else MaterialTheme.colorScheme.secondary)
+                                        .background(if ( selectedCategoryState == item ) Color.LightGray else MaterialTheme.colorScheme.secondary)
                                         .clickable{
-                                            selectedIndex = index
+                                            newCategoryState = ""
+                                            selectedCategoryState = item
                                         }
                                 ){
                                     Text(
@@ -152,8 +180,8 @@ fun BaseBottomSheet(
                 }
 
                 Button(
-                    onClick = { onValueSelected(items[selectedIndex]) },
-                    enabled = selectedIndex != -1,
+                    onClick = { onSaveCategory() },
+                    enabled = selectedCategoryState.isNotBlank(),
                     modifier = Modifier
                         .fillMaxWidth()
                         .offset(y = 0.dp)

@@ -45,24 +45,30 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpdateProjectDialog(
-    projectName: String = "",
-    projectBudget: String = "",
-    projectStartDate: String = "",
-    projectEndDate: String = "",
-    projectCategory: String = "",
+fun CreateProjectDialog(
     onDismiss: () -> Unit,
+    onCreateProject: (
+        name: String,
+        budget: Long,
+        startDate: String,
+        endDate: String,
+        category: String
+    ) -> Unit
 ) {
 
-    var name by remember { mutableStateOf(projectName) }
-    var budget by remember { mutableStateOf(projectBudget) }
-    var startDate by remember { mutableStateOf(projectStartDate) }
-    var endDate by remember { mutableStateOf(projectEndDate) }
-    var category by remember { mutableStateOf(projectCategory) }
+    var name by remember { mutableStateOf("") }
+    var budget by remember { mutableStateOf("") }
+    var startDate by remember { mutableStateOf("") }
+    var endDate by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("") }
 
     var showBottomSheet by remember { mutableStateOf(false) }
     var showDatePickerStartDate by remember { mutableStateOf(false) }
     var showDatePickerEndDate by remember { mutableStateOf(false) }
+
+    fun createProject(){
+        onCreateProject(name, 100000, startDate, endDate, category)
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -91,7 +97,7 @@ fun UpdateProjectDialog(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
 
-                Text("Update project")
+                Text("Create new project")
 
                 CustomTextField(
                     value = name,
@@ -103,6 +109,7 @@ fun UpdateProjectDialog(
                     value = budget,
                     onValueChange = { budget = it },
                     placeholder = "Budget",
+                    isNumericOnly = true
                 )
 
                 CustomInputSelectDate(
@@ -111,7 +118,10 @@ fun UpdateProjectDialog(
                     showDatePicker = showDatePickerStartDate,
                     onDismissRequest = { showDatePickerStartDate = false },
                     onShowDatePicker = { showDatePickerStartDate = true },
-                    onSelectDate = { value -> startDate = value }
+                    onSelectDate = { value ->
+                        startDate = value
+                        showDatePickerStartDate = false
+                    }
                 )
 
                 CustomInputSelectDate(
@@ -120,7 +130,10 @@ fun UpdateProjectDialog(
                     showDatePicker = showDatePickerEndDate,
                     onDismissRequest = { showDatePickerEndDate =  false },
                     onShowDatePicker = { showDatePickerEndDate = true },
-                    onSelectDate = { value -> endDate = value }
+                    onSelectDate = { value ->
+                        endDate = value
+                        showDatePickerEndDate = false
+                    }
                 )
 
                 BaseBottomSheet(
@@ -129,7 +142,10 @@ fun UpdateProjectDialog(
                     showBottomSheet = showBottomSheet,
                     onClickTrigger = { showBottomSheet = true },
                     onDismiss = { showBottomSheet = false },
-                    onValueSelected = { it -> category = it }
+                    onValueSelected = { it ->
+                        category = it
+                        showBottomSheet = false
+                    }
                 )
 
                 Row(
@@ -142,7 +158,7 @@ fun UpdateProjectDialog(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
-                        onClick = {  },
+                        onClick = { createProject() },
                         modifier = Modifier
                             .width(70.dp)
                     ) {

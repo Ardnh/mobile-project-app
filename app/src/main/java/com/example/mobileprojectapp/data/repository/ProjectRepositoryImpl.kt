@@ -7,10 +7,12 @@ import com.example.mobileprojectapp.data.remote.api.ApiService
 import com.example.mobileprojectapp.data.remote.dto.CreateProjectRequestDto
 import com.example.mobileprojectapp.data.remote.dto.ProjectByUserIdParamsDto
 import com.example.mobileprojectapp.data.remote.dto.UpdateProjectRequestDto
+import com.example.mobileprojectapp.domain.model.CreateProjectRequest
 import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.domain.model.ProjectCategory
 import com.example.mobileprojectapp.domain.model.ProjectSummary
 import com.example.mobileprojectapp.domain.model.ProjectById
+import com.example.mobileprojectapp.domain.model.UpdateProjectRequest
 import com.example.mobileprojectapp.domain.repository.ProjectsRepository
 import com.example.mobileprojectapp.presentation.features.home.ProjectByUserIdParams
 import retrofit2.HttpException
@@ -121,10 +123,20 @@ class ProjectRepositoryImpl @Inject constructor(private val api : ApiService) : 
         }
     }
 
-    override suspend fun createProject(req: CreateProjectRequestDto): Result<Unit> {
+    override suspend fun createProject(req: CreateProjectRequest): Result<Unit> {
         return try {
-            val response = api.createProject(req)
 
+            val reqDto = CreateProjectRequestDto(
+                userId = req.userId,
+                name = req.name,
+                categoryName = req.categoryName,
+                budget = req.budget,
+                startDate = req.startDate,
+                endDate = req.endDate,
+                isCompleted = req.isCompleted
+            )
+
+            val response = api.createProject(reqDto)
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null && body.success) {
@@ -144,10 +156,20 @@ class ProjectRepositoryImpl @Inject constructor(private val api : ApiService) : 
         }
     }
 
-    override suspend fun updateProjectById(id: String, req: UpdateProjectRequestDto): Result<Unit> {
+    override suspend fun updateProjectById(id: String, req: UpdateProjectRequest): Result<Unit> {
         return try {
-            val response = api.updateProject(id, req)
 
+            val request = UpdateProjectRequestDto(
+                userId = req.userId,
+                name = req.name,
+                category = req.categoryName,
+                budget = req.budget,
+                startDate = req.startDate,
+                endDate = req.endDate,
+                isCompleted = req.isCompleted
+            )
+
+            val response = api.updateProject(id, request)
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null && body.success) {

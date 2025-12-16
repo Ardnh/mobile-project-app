@@ -1,5 +1,6 @@
 package com.example.mobileprojectapp.domain.model
 
+import com.google.gson.annotations.SerializedName
 import java.time.LocalDate
 
 data class ProjectItem(
@@ -34,7 +35,7 @@ data class ProjectById(
     val id: String,
     val userId: String,
     val name: String,
-    val budget: Long,
+    val budget: String,
     val startDate: String,
     val endDate: String,
     val categoryName: String,
@@ -43,4 +44,24 @@ data class ProjectById(
     val totalTodolistCompletedItem: Long,
     val projectExpenses: List<ProjectExpense>,
     val projectTodolists: List<ProjectTodolist>,
+)
+
+data class CreateProjectRequest(
+    val userId: String,
+    val name: String,
+    val categoryName: String,
+    val budget: Long,
+    val startDate: String?,
+    val endDate: String?,
+    val isCompleted: Boolean?
+)
+
+data class UpdateProjectRequest(
+    val userId: String,
+    val name: String,
+    val categoryName: String,
+    val budget: Long,
+    val startDate: String,
+    val endDate: String,
+    val isCompleted: Boolean
 )

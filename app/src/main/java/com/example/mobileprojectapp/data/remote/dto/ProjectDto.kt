@@ -21,7 +21,7 @@ data class CreateProjectRequestDto(
     @SerializedName("category_name")
     val categoryName: String,
     @SerializedName("budget")
-    val budget: Double?,
+    val budget: Long,
     @SerializedName("start_date")
     val startDate: String?,
     @SerializedName("end_date")
@@ -31,14 +31,14 @@ data class CreateProjectRequestDto(
 )
 
 data class UpdateProjectRequestDto(
+    @SerializedName("user_id")
+    val userId: String?,
     @SerializedName("name")
     val name: String?,
     @SerializedName("category")
     val category: String?,
     @SerializedName("budget")
-    val budget: Double?,
-    @SerializedName("status")
-    val status: String?,
+    val budget: Long?,
     @SerializedName("start_date")
     val startDate: String?,
     @SerializedName("end_date")
