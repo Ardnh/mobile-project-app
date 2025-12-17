@@ -66,6 +66,7 @@ fun ProjectsView(navController: NavHostController, viewModel: ProjectsViewModel 
     val projectListState by viewModel.projectList.collectAsState()
     val projectCategoryState by viewModel.projectCategory.collectAsState()
     val formState by viewModel.searchForm.collectAsState()
+    val createProjectState by viewModel.createProjectState.collectAsState()
 
 
     var isRefreshing by remember { mutableStateOf(false) }
@@ -270,6 +271,7 @@ fun ProjectsView(navController: NavHostController, viewModel: ProjectsViewModel 
 
     if(showAddNewProjectDialog){
         CreateProjectDialog(
+            loading = createProjectState,
             onDismiss = { showAddNewProjectDialog = false },
             onCreateProject = { name, budget, startDate, endDate, category ->
                 viewModel.createProjectByUserId(
@@ -279,6 +281,7 @@ fun ProjectsView(navController: NavHostController, viewModel: ProjectsViewModel 
                     startDate = startDate,
                     endDate = endDate
                 )
+                showAddNewProjectDialog = false
             }
         )
     }

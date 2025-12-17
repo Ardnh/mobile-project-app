@@ -33,6 +33,8 @@ class ProjectDetailsViewModel @Inject constructor(
     // -----------------------------
     // UI State
     // -----------------------------
+    private val _deleteProjectState = MutableStateFlow<State<Unit>>(State.Idle)
+    val deleteProjectState = _deleteProjectState.asStateFlow()
 
     // -----------------------------
     // API Result State
@@ -80,10 +82,48 @@ class ProjectDetailsViewModel @Inject constructor(
 
     }
 
-    fun deleteCategoryTodolistById(projectId: String){
-        val id = "delete_project_by_id"
-        val job = viewModelScope.launch {
+    fun deleteProjectById(projectId: String?){
+        viewModelScope.launch {
             try {
+
+                if (_deleteProjectState.value is State.Loading) {
+                    Log.w("Delete PROJECT", "Already processing, skipping")
+                    return@launch
+                }
+
+                _deleteProjectState.value = State.Loading
+
+                if(projectId == null){
+                    Log.w("Delete PROJECT", "Project ID NULL")
+                    return@launch
+                }
+
+                val result = repository.deleteProjectById(projectId)
+                result.fold(
+                    onSuccess = { data ->
+
+                    },
+                    onFailure = { throwable ->
+                        _deleteProjectState.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+
+            } catch (e: Exception){
+                _deleteProjectState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                _deleteProjectState.value = State.Idle
+            }
+        }
+    }
+
+    fun deleteCategoryTodolistById(projectId: String){
+        viewModelScope.launch {
+            try {
+
+                if (_projectDetail.value is State.Loading) {
+                    Log.w("CREATE PROJECT", "Already processing, skipping")
+                    return@launch
+                }
 
                 _projectDetail.value = State.Loading
                 val result = repository.deleteProjectById(projectId)
@@ -100,14 +140,16 @@ class ProjectDetailsViewModel @Inject constructor(
                 _projectDetail.value = State.Error(e.message ?: "Unknown Error")
             }
         }
-
-        HttpAbortManager.register(id, job)
     }
 
     fun deleteTodolistItemById(projectId: String){
-        val id = "delete_project_by_id"
-        val job = viewModelScope.launch {
+        viewModelScope.launch {
             try {
+
+                if (_projectDetail.value is State.Loading) {
+                    Log.w("CREATE PROJECT", "Already processing, skipping")
+                    return@launch
+                }
 
                 _projectDetail.value = State.Loading
                 val result = repository.deleteProjectById(projectId)
@@ -124,7 +166,5 @@ class ProjectDetailsViewModel @Inject constructor(
                 _projectDetail.value = State.Error(e.message ?: "Unknown Error")
             }
         }
-
-        HttpAbortManager.register(id, job)
     }
 }

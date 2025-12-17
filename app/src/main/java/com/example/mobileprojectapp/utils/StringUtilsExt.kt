@@ -17,3 +17,7 @@ fun String.toLocalDateOrNull(): LocalDate? {
         null
     }
 }
+
+fun String?.toLong(default: Long = 0L): Long {
+    return this?.toLongOrNull() ?: default
+}

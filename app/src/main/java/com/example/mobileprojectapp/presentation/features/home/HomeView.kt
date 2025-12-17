@@ -219,7 +219,9 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
                 item {
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 0.dp),
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
                     ) {
 
                         when(projectCategoryState) {
@@ -233,11 +235,13 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
                                             .fillMaxWidth()
                                             .height(100.dp)
                                     ) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(20.dp),
-                                            color = Color.White,
-                                            strokeWidth = 2.dp
-                                        )
+                                        Box(){
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(20.dp),
+                                                color = Color.White,
+                                                strokeWidth = 10.dp
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -272,7 +276,7 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
                             ) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(20.dp),
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.primary,
                                     strokeWidth = 2.dp
                                 )
                             }
@@ -280,10 +284,10 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
                     }
 
                     is State.Error -> {
-                        val projectError = (projectListState as State.Error).message
-                        item {
-                            ErrorView(projectError , onRetry = {  })
-                        }
+//                        val projectError = (projectListState as State.Error).message
+//                        item {
+//                            ErrorView(projectError , onRetry = {  })
+//                        }
                     }
 
                     is State.Success<List<ProjectItem>> -> {

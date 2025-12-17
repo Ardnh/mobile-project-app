@@ -74,6 +74,7 @@ import com.example.mobileprojectapp.domain.model.ProjectById
 import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.presentation.components.accordion.Accordion
 import com.example.mobileprojectapp.presentation.components.card.ProjectCard
+import com.example.mobileprojectapp.presentation.components.dialog.DeleteProjectDialog
 import com.example.mobileprojectapp.presentation.components.dialog.UpdateProjectDialog
 import com.example.mobileprojectapp.presentation.components.dialog.UpdateTodolistItemDialog
 import com.example.mobileprojectapp.presentation.components.view.EmptyProjectsView
@@ -89,6 +90,7 @@ import com.google.android.material.tabs.TabItem
 fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetailsViewModel = hiltViewModel(), projectId: String?){
 
     val projectDetailState by viewModel.projectDetail.collectAsState()
+    val deleteProjectState by viewModel.deleteProjectState.collectAsState()
 
     var updateProjectState by remember { mutableStateOf<ProjectById?>(null) }
 
@@ -99,6 +101,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     var isProjectMenuExpanded by remember { mutableStateOf(false) }
     var showUpdateProjectDialog by remember { mutableStateOf(false) }
     var showUpdateTodolistItemDialog by remember { mutableStateOf(false) }
+    var showDeleteProjectDialog by remember { mutableStateOf(false) }
     val tabs = listOf("Todolist (2/13)", "Expenses")
 
     LaunchedEffect(isRefreshing) {
@@ -264,7 +267,10 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                                 )
                                                                 DropdownMenuItem(
                                                                     text = { Text("Delete") },
-                                                                    onClick = { /* Do something... */ },
+                                                                    onClick = {
+                                                                        updateProjectState = project
+                                                                        showDeleteProjectDialog =  true
+                                                                    },
                                                                 )
                                                             }
                                                         }
@@ -291,7 +297,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                         fontSize = 15.sp
                                                     )
                                                     Text(
-                                                        text = "${project.budget}",
+                                                        text = project.budget,
                                                         fontWeight = FontWeight.SemiBold
                                                     )
                                                 }
@@ -507,7 +513,6 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                         )
                                     }
                                 }
-
                             }
                             1 -> item {
                                 if(project.projectExpenses.isEmpty()){
@@ -544,6 +549,22 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     if(showUpdateTodolistItemDialog){
         UpdateTodolistItemDialog(
             onDismiss = { showUpdateTodolistItemDialog = false }
+        )
+    }
+
+    if(showDeleteProjectDialog && updateProjectState != null){
+        DeleteProjectDialog(
+            loading = deleteProjectState,
+            title = updateProjectState?.name ?: "",
+            onDismiss = {
+                showDeleteProjectDialog = false
+                updateProjectState = null
+            },
+            onDeleteProject = {
+                viewModel.deleteProjectById(updateProjectState?.id)
+                showDeleteProjectDialog = false
+                navController.navigateUp()
+            }
         )
     }
 

@@ -14,11 +14,13 @@ import com.example.mobileprojectapp.presentation.features.login.LoginState
 import com.example.mobileprojectapp.utils.HttpAbortManager
 import com.example.mobileprojectapp.utils.SecureStorageManager
 import com.example.mobileprojectapp.utils.State
+import com.example.mobileprojectapp.utils.toLong
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -28,12 +30,14 @@ class ProjectsViewModel @Inject constructor(private val repository: ProjectsRepo
     // -----------------------------
     // Instance
     // -----------------------------
-    val projectMutex = Mutex()
 
     // -----------------------------
     // UI State
     // -----------------------------
     private val _projectByUserIdParams = MutableStateFlow<ProjectByUserIdParams>(ProjectByUserIdParams())
+    private val _createProjectState = MutableStateFlow<State<Unit>>(State.Idle)
+    val createProjectState = _createProjectState.asStateFlow()
+
 
     // -----------------------------
     // API Result State
@@ -131,18 +135,22 @@ class ProjectsViewModel @Inject constructor(private val repository: ProjectsRepo
     fun createProjectByUserId(
         name: String,
         categoryName: String,
-        budget: Long,
+        budget: String,
         startDate: String,
         endDate: String,
     ){
-
         viewModelScope.launch {
-            if (!projectMutex.tryLock()) return@launch
             try {
-                _projectList.value = State.Loading
+
+                if (_createProjectState.value is State.Loading) {
+                    Log.w("CREATE PROJECT", "Already processing, skipping")
+                    return@launch
+                }
+
+                _createProjectState.value = State.Loading
                 val userId = storage.getUserId()
                 if(userId == null){
-                    _projectList.value = State.Error("User Id not found!")
+                    _createProjectState.value = State.Error("User Id not found!")
                     return@launch
                 }
 
@@ -152,29 +160,25 @@ class ProjectsViewModel @Inject constructor(private val repository: ProjectsRepo
                     userId = userId,
                     name = name,
                     categoryName = categoryName,
-                    budget = budget,
+                    budget = budget.toLong(),
                     startDate = startDateSplit,
                     endDate = endDateSplit,
                     isCompleted = false
                 )
 
-                Log.d("CREATE PROJECT", "$request")
                 val result = repository.createProject(request)
                 result.fold(
                     onSuccess = { data ->
                         getProjectsByUserId()
                     },
                     onFailure = { throwable ->
-                        _projectList.value = State.Error(throwable.message ?: "Unknown Error")
+                        _createProjectState.value = State.Error(throwable.message ?: "Unknown Error")
                     }
                 )
 
             } catch (e: Exception){
-                _projectList.value = State.Error(e.message ?: "Unknown Error")
-            } finally {
-                projectMutex.unlock()
+                _createProjectState.value = State.Error(e.message ?: "Unknown Error")
             }
-
         }
     }
 
@@ -187,8 +191,11 @@ class ProjectsViewModel @Inject constructor(private val repository: ProjectsRepo
         endDate: String,
     ){
         viewModelScope.launch {
-            if(!projectMutex.tryLock()) return@launch
             try {
+                if (_projectList.value is State.Loading) {
+                    Log.w("CREATE PROJECT", "Already processing, skipping")
+                    return@launch
+                }
 
                 val userId = storage.getUserId()
                 if(userId == null){
@@ -220,16 +227,18 @@ class ProjectsViewModel @Inject constructor(private val repository: ProjectsRepo
 
             } catch (e: Exception){
                 _projectList.value = State.Error(e.message ?: "Unknown Error")
-            } finally {
-                projectMutex.unlock()
             }
         }
     }
 
     fun deleteProjectById(id: String) {
         viewModelScope.launch {
-            if(!projectMutex.tryLock()) return@launch
             try {
+                if (_projectList.value is State.Loading) {
+                    Log.w("CREATE PROJECT", "Already processing, skipping")
+                    return@launch
+                }
+
                 val result = repository.deleteProjectById(id = id)
                 result.fold(
                     onSuccess = { data ->
@@ -241,8 +250,6 @@ class ProjectsViewModel @Inject constructor(private val repository: ProjectsRepo
                 )
             } catch (e: Exception){
                 _projectList.value = State.Error(e.message ?: "Unknown Error")
-            } finally {
-                projectMutex.unlock()
             }
         }
     }

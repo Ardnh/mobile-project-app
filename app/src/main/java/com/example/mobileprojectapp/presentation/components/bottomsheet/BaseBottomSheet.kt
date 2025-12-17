@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -63,15 +65,15 @@ fun BaseBottomSheet(
     onValueSelected: (value: String) -> Unit
 ){
 
-    val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
 
     var selectedCategoryState by remember { mutableStateOf("") }
     var newCategoryState by remember { mutableStateOf("") }
 
     val items = listOf(
         "Kotlin", "Jetpack Compose", "Android", "Material Design",
-        "UI/UX", "Mobile Development", "Clean Architecture", "MVVM",
         "UI/UX", "Mobile Development", "Clean Architecture", "MVVM",
     )
 
@@ -80,6 +82,13 @@ fun BaseBottomSheet(
             onValueSelected(newCategoryState)
         } else {
             onValueSelected(selectedCategoryState)
+        }
+        onDismiss()
+    }
+
+    LaunchedEffect(newCategoryState) {
+        if(newCategoryState.isNotBlank()){
+            selectedCategoryState = ""
         }
     }
 
@@ -119,75 +128,68 @@ fun BaseBottomSheet(
             onDismissRequest = { onDismiss() },
             sheetState = sheetState,
         ) {
-            Column(
-                verticalArrangement = Arrangement.SpaceBetween,
+            LazyColumn(
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp),
                 modifier = Modifier
-                    .padding(horizontal = 20.dp)
+                    .fillMaxWidth()
             ) {
+                item {
+                    Text(
+                        text = title,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(bottom = 20.dp)
+                    )
+                }
 
-                LazyColumn(
-                    contentPadding = PaddingValues(bottom = 20.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    item {
-                        Text(
-                            text = title,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 18.sp,
-                            modifier = Modifier
-                                .padding(bottom = 20.dp)
-                        )
-                    }
+                item {
+                    CustomTextField(
+                        value = newCategoryState,
+                        onValueChange = { it -> newCategoryState = it },
+                        placeholder = "New category",
+                        modifier = Modifier.padding(bottom = 20.dp)
+                    )
+                }
 
-                    item {
-                        CustomTextField(
-                            value = newCategoryState,
-                            onValueChange = { it -> newCategoryState = it },
-                            placeholder = "New category",
-                            modifier = Modifier
-                                .padding(bottom = 20.dp)
-                        )
-                    }
-
-                    item{
-
-                        FlowRow(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items.forEach { item ->
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(30.dp))
-                                        .background(if ( selectedCategoryState == item ) Color.LightGray else MaterialTheme.colorScheme.secondary)
-                                        .clickable{
-                                            newCategoryState = ""
-                                            selectedCategoryState = item
-                                        }
-                                ){
-                                    Text(
-                                        text = item,
-                                        modifier = Modifier
-                                            .padding(horizontal = 20.dp, vertical = 8.dp)
+                item {
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items.forEach { item ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(30.dp))
+                                    .background(
+                                        if (selectedCategoryState == item) Color.LightGray
+                                        else MaterialTheme.colorScheme.secondary
                                     )
-                                }
+                                    .clickable {
+                                        newCategoryState = ""
+                                        selectedCategoryState = item
+                                    }
+                            ) {
+                                Text(
+                                    text = item,
+                                    modifier = Modifier
+                                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                                )
                             }
                         }
                     }
                 }
 
-                Button(
-                    onClick = { onSaveCategory() },
-                    enabled = selectedCategoryState.isNotBlank(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .offset(y = 0.dp)
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                ) {
-                    Text("Save")
+                    Button(
+                        onClick = { onSaveCategory() },
+                        enabled = selectedCategoryState.isNotBlank(),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Save")
+                    }
                 }
             }
         }

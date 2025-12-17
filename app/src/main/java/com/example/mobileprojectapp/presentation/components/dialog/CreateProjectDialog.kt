@@ -40,16 +40,19 @@ import com.example.mobileprojectapp.presentation.components.bottomsheet.BaseBott
 import com.example.mobileprojectapp.presentation.components.form.CustomInputSelectDate
 import com.example.mobileprojectapp.presentation.components.form.CustomSelectInput
 import com.example.mobileprojectapp.presentation.components.form.CustomTextField
+import com.example.mobileprojectapp.utils.State
+import com.example.mobileprojectapp.utils.toLong
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateProjectDialog(
+    loading: State<Unit>,
     onDismiss: () -> Unit,
     onCreateProject: (
         name: String,
-        budget: Long,
+        budget: String,
         startDate: String,
         endDate: String,
         category: String
@@ -67,7 +70,7 @@ fun CreateProjectDialog(
     var showDatePickerEndDate by remember { mutableStateOf(false) }
 
     fun createProject(){
-        onCreateProject(name, 100000, startDate, endDate, category)
+        onCreateProject(name, budget, startDate, endDate, category)
     }
 
     Dialog(
@@ -107,7 +110,7 @@ fun CreateProjectDialog(
 
                 CustomTextField(
                     value = budget,
-                    onValueChange = { budget = it },
+                    onValueChange = { it -> budget},
                     placeholder = "Budget",
                     isNumericOnly = true
                 )
@@ -159,6 +162,7 @@ fun CreateProjectDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
                         onClick = { createProject() },
+                        enabled = loading is State.Loading,
                         modifier = Modifier
                             .width(70.dp)
                     ) {
