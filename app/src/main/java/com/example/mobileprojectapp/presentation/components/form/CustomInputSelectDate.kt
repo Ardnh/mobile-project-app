@@ -1,6 +1,7 @@
 package com.example.mobileprojectapp.presentation.components.form
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,7 +37,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mobileprojectapp.utils.toFormattedDate
-import com.example.mobileprojectapp.utils.toMillisToIsoUtc
+import com.example.mobileprojectapp.utils.toIsoDateString
+import com.example.mobileprojectapp.utils.toMillis
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
@@ -57,24 +59,25 @@ fun CustomInputSelectDate(
     var formattedDate: String by remember { mutableStateOf("") }
 
     LaunchedEffect(selectedDate) {
-        println("selected date $selectedDate")
-        formattedDate = if (selectedDate.isNotEmpty()) {
-            selectedDate.toFormattedDate()
+        if (selectedDate.isNotEmpty()) {
+            formattedDate = selectedDate.toFormattedDate()
+            datePickerState.selectedDateMillis = selectedDate.toMillis()
         } else {
-            title
+            formattedDate = title
+            datePickerState.selectedDateMillis = null
         }
     }
 
     fun onSaveSelectedDate(){
         val timeMillis = datePickerState.selectedDateMillis
-
         if(timeMillis == null) {
             onSelectDate("")
             return
         }
 
-        val dateStr = timeMillis.toMillisToIsoUtc(timeMillis)
+        val dateStr = timeMillis.toIsoDateString()
         onSelectDate(dateStr)
+        onDismissRequest()
     }
 
     Box(
@@ -149,6 +152,5 @@ fun CustomInputSelectDate(
             )
         }
     }
-
 }
 

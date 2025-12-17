@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.mobileprojectapp.domain.model.ProjectCategory
 import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.presentation.components.card.CategoryCard
 import com.example.mobileprojectapp.presentation.components.card.ProjectCard
@@ -270,9 +271,12 @@ fun ProjectsView(navController: NavHostController, viewModel: ProjectsViewModel 
     }
 
     if(showAddNewProjectDialog){
+
+        val categoryList = if(projectCategoryState is State.Success) (projectCategoryState as State.Success<List<ProjectCategory>>).data.map { it -> it.categoryName } else emptyList()
         CreateProjectDialog(
             loading = createProjectState,
             onDismiss = { showAddNewProjectDialog = false },
+            categoryList = categoryList,
             onCreateProject = { name, budget, startDate, endDate, category ->
                 viewModel.createProjectByUserId(
                     name = name,

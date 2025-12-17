@@ -1,6 +1,7 @@
 package com.example.mobileprojectapp.presentation.features.projectdetail
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -104,17 +105,11 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     var showDeleteProjectDialog by remember { mutableStateOf(false) }
     val tabs = listOf("Todolist (2/13)", "Expenses")
 
-    LaunchedEffect(isRefreshing) {
+    LaunchedEffect(projectId, isRefreshing) {
         if (!projectId.isNullOrBlank()) {
-            viewModel.getProjectsByUserId(projectId)
+            viewModel.getProjectsById(projectId)
         }
         isRefreshing = false
-    }
-
-    LaunchedEffect(projectId) {
-        if (!projectId.isNullOrBlank()) {
-            viewModel.getProjectsByUserId(projectId)
-        }
     }
 
     Scaffold(
@@ -535,14 +530,28 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
         }
     }
 
-    if(showUpdateProjectDialog && updateProjectState != null){
+    if(showUpdateProjectDialog && updateProjectState !== null){
+
         UpdateProjectDialog(
-            projectName = "",
-            projectBudget = "",
-            projectStartDate = "",
-            projectEndDate = "",
-            projectCategory = "",
+            projectName = updateProjectState?.name ?: "",
+            projectBudget = updateProjectState?.budget ?: "",
+            projectStartDate = updateProjectState?.startDate ?: "",
+            projectEndDate = updateProjectState?.endDate ?: "",
+            projectCategory = updateProjectState?.categoryName ?: "",
             onDismiss = { showUpdateProjectDialog = false },
+            onUpdateProject = { name, budget, startDate, endDate, category ->
+                viewModel.updateProjectById(
+                    id = updateProjectState?.id,
+                    userId = updateProjectState?.userId,
+                    name = name,
+                    budget = budget,
+                    startDate = startDate,
+                    endDate = endDate,
+                    category = category
+                )
+                showUpdateProjectDialog = false
+                isProjectMenuExpanded = false
+            }
         )
     }
 

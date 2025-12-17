@@ -1,6 +1,7 @@
 package com.example.mobileprojectapp.utils
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import java.time.Instant
 import java.time.LocalDate
@@ -62,22 +63,39 @@ fun LocalDate.toShortFormat(): String {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun Long.toMillisToIsoUtc(millis: Long): String {
-    return Instant.ofEpochMilli(millis)
-        .atOffset(ZoneOffset.UTC)
-        .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+fun Long.toIsoDateString(): String {
+    return try {
+        Instant.ofEpochMilli(this)
+            .atZone(ZoneOffset.UTC)
+            .toLocalDate()
+            .toString() // ✅ Menghasilkan "yyyy-MM-dd"
+    } catch (e: Exception) {
+        Log.e("toIsoDateString", "${e.message}")
+        ""
+    }
 }
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun String.toFormattedDate(locale: Locale = Locale.ENGLISH): String {
     return try {
-        val instant = Instant.parse(this)
-        val formatter = DateTimeFormatter
-            .ofPattern("MMM, d yyyy", locale)
-            .withZone(ZoneId.systemDefault())
-        formatter.format(instant)
+        val localDate = LocalDate.parse(this)
+        val formatter = DateTimeFormatter.ofPattern("MMM, d yyyy", locale)
+        formatter.format(localDate)
     } catch (e: Exception) {
         "failed to format"
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun String.toMillis(): Long? {
+    return try {
+        val localDate = LocalDate.parse(this)
+        localDate
+            .atStartOfDay(ZoneOffset.UTC)
+            .toInstant()
+            .toEpochMilli()
+    } catch (e: Exception) {
+        Log.d("parse to millis", "${ e.message }")
+        null
     }
 }

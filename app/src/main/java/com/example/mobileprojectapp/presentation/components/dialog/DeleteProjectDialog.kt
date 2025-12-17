@@ -64,7 +64,7 @@ fun DeleteProjectDialog(
 
                 Text(
                     text = "Delete project",
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
                 )
 
                 Spacer(modifier = Modifier.height(5.dp))

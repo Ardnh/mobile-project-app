@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mobileprojectapp.domain.model.ProjectById
 import com.example.mobileprojectapp.domain.model.ProjectItem
+import com.example.mobileprojectapp.domain.model.UpdateProjectRequest
 import com.example.mobileprojectapp.domain.repository.ProjectExpensesItemRepository
 import com.example.mobileprojectapp.domain.repository.ProjectExpensesRepository
 import com.example.mobileprojectapp.domain.repository.ProjectTodolistItemRepository
@@ -36,6 +37,9 @@ class ProjectDetailsViewModel @Inject constructor(
     private val _deleteProjectState = MutableStateFlow<State<Unit>>(State.Idle)
     val deleteProjectState = _deleteProjectState.asStateFlow()
 
+    private val _updateProjectState = MutableStateFlow<State<Unit>>(State.Idle)
+    val updateProjectState = _updateProjectState.asStateFlow()
+
     // -----------------------------
     // API Result State
     // -----------------------------
@@ -49,11 +53,16 @@ class ProjectDetailsViewModel @Inject constructor(
     // -----------------------------
     // API Actions
     // -----------------------------
-    fun getProjectsByUserId(projectId: String){
+    fun getProjectsById(projectId: String){
 
-        val id = "get_project_by_id_project"
-        val job = viewModelScope.launch {
+        viewModelScope.launch {
             try {
+
+                Log.d("GET DETAIL", "RUN getProjectsById(projectId: String)")
+                if (_projectDetail.value is State.Loading) {
+                    Log.w("GET DETAIL", "Already processing, skipping")
+                    return@launch
+                }
 
                 _projectDetail.value = State.Loading
                 val result = repository.getProjectById(projectId)
@@ -70,8 +79,61 @@ class ProjectDetailsViewModel @Inject constructor(
                 _projectDetail.value = State.Error(e.message ?: "Unknown Error")
             }
         }
+    }
 
-        HttpAbortManager.register(id, job)
+    fun updateProjectById(
+        id: String?,
+        userId: String?,
+        name: String,
+        budget: String,
+        startDate: String,
+        endDate: String,
+        category: String
+    ){
+
+        viewModelScope.launch {
+            try {
+
+                if (_updateProjectState.value is State.Loading) {
+                    Log.w("UPDATE PROJECT", "Already processing, skipping")
+                    return@launch
+                }
+
+                _updateProjectState.value = State.Loading
+                if(id == null || userId == null){
+                    Log.w("UPDATE PROJECT", "Project ID OR USERID NULL")
+                    return@launch
+                }
+
+                val request = UpdateProjectRequest(
+                    userId = userId,
+                    name = name,
+                    categoryName = category,
+                    budget = budget.toLong(),
+                    startDate = startDate,
+                    endDate = endDate,
+                    isCompleted = false
+                )
+
+                val result = repository.updateProjectById(id, request)
+                result.fold(
+                    onSuccess = { data ->
+                        _updateProjectState.value = State.Success(data)
+                    },
+                    onFailure = { throwable ->
+                        _updateProjectState.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+
+            } catch (e: Exception){
+                _updateProjectState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                if(id !== null){
+                    getProjectsById(id)
+                }
+            }
+        }
+
     }
 
     fun updateProjectTodolistById(){

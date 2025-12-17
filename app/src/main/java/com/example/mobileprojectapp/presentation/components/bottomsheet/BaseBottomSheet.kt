@@ -59,6 +59,7 @@ import kotlinx.coroutines.launch
 fun BaseBottomSheet(
     showBottomSheet: Boolean,
     title: String,
+    categories: List<String> = emptyList(),
     selectedCategory: String,
     onClickTrigger: () -> Unit,
     onDismiss: () -> Unit,
@@ -72,11 +73,6 @@ fun BaseBottomSheet(
     var selectedCategoryState by remember { mutableStateOf("") }
     var newCategoryState by remember { mutableStateOf("") }
 
-    val items = listOf(
-        "Kotlin", "Jetpack Compose", "Android", "Material Design",
-        "UI/UX", "Mobile Development", "Clean Architecture", "MVVM",
-    )
-
     fun onSaveCategory(){
         if(newCategoryState.isNotBlank()){
             onValueSelected(newCategoryState)
@@ -88,7 +84,7 @@ fun BaseBottomSheet(
 
     LaunchedEffect(newCategoryState) {
         if(newCategoryState.isNotBlank()){
-            selectedCategoryState = ""
+            selectedCategoryState = newCategoryState
         }
     }
 
@@ -157,7 +153,7 @@ fun BaseBottomSheet(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items.forEach { item ->
+                        categories.forEach { item ->
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(30.dp))

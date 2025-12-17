@@ -50,6 +50,7 @@ import kotlinx.coroutines.launch
 fun CreateProjectDialog(
     loading: State<Unit>,
     onDismiss: () -> Unit,
+    categoryList: List<String> = emptyList(),
     onCreateProject: (
         name: String,
         budget: String,
@@ -110,7 +111,7 @@ fun CreateProjectDialog(
 
                 CustomTextField(
                     value = budget,
-                    onValueChange = { it -> budget},
+                    onValueChange = { budget = it },
                     placeholder = "Budget",
                     isNumericOnly = true
                 )
@@ -141,6 +142,7 @@ fun CreateProjectDialog(
 
                 BaseBottomSheet(
                     title = "Project Category",
+                    categories = categoryList,
                     selectedCategory = category,
                     showBottomSheet = showBottomSheet,
                     onClickTrigger = { showBottomSheet = true },
@@ -162,7 +164,7 @@ fun CreateProjectDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
                         onClick = { createProject() },
-                        enabled = loading is State.Loading,
+                        enabled = loading !is State.Loading,
                         modifier = Modifier
                             .width(70.dp)
                     ) {

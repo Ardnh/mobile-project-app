@@ -1,6 +1,7 @@
 package com.example.mobileprojectapp.presentation.components.dialog
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -21,20 +22,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.rounded.CalendarMonth
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.KeyboardArrowUp
-import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.example.mobileprojectapp.presentation.components.bottomsheet.BaseBottomSheet
 import com.example.mobileprojectapp.presentation.components.form.CustomInputSelectDate
@@ -52,10 +46,11 @@ fun UpdateProjectDialog(
     projectEndDate: String = "",
     projectCategory: String = "",
     onDismiss: () -> Unit,
+    onUpdateProject: (name: String, budget: String, startDate: String, endDate: String, category: String) -> Unit
 ) {
 
     var name by remember { mutableStateOf(projectName) }
-    var budget by remember { mutableStateOf(projectBudget) }
+    var budget by remember { mutableStateOf("") }
     var startDate by remember { mutableStateOf(projectStartDate) }
     var endDate by remember { mutableStateOf(projectEndDate) }
     var category by remember { mutableStateOf(projectCategory) }
@@ -63,6 +58,14 @@ fun UpdateProjectDialog(
     var showBottomSheet by remember { mutableStateOf(false) }
     var showDatePickerStartDate by remember { mutableStateOf(false) }
     var showDatePickerEndDate by remember { mutableStateOf(false) }
+
+    fun onSaveUpdateProject(){
+        onUpdateProject( name, budget, startDate, endDate, category )
+    }
+
+    LaunchedEffect(projectBudget) {
+        budget = projectBudget.replace(".", "")
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -91,8 +94,11 @@ fun UpdateProjectDialog(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
 
-                Text("Update project")
-
+                Text(
+                    text = "Update project",
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(modifier = Modifier.height(5.dp))
                 CustomTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -142,7 +148,7 @@ fun UpdateProjectDialog(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
-                        onClick = {  },
+                        onClick = { onSaveUpdateProject() },
                         modifier = Modifier
                             .width(70.dp)
                     ) {

@@ -169,6 +169,7 @@ class ProjectsViewModel @Inject constructor(private val repository: ProjectsRepo
                 val result = repository.createProject(request)
                 result.fold(
                     onSuccess = { data ->
+                        getProjectCategory()
                         getProjectsByUserId()
                     },
                     onFailure = { throwable ->
