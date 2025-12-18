@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mobileprojectapp.domain.model.ProjectById
+import com.example.mobileprojectapp.domain.model.ProjectCategory
 import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.domain.model.UpdateProjectRequest
 import com.example.mobileprojectapp.domain.repository.ProjectExpensesItemRepository
@@ -45,6 +46,8 @@ class ProjectDetailsViewModel @Inject constructor(
     // -----------------------------
     private val _projectDetail = MutableStateFlow<State<ProjectById>>(State.Idle)
     val projectDetail = _projectDetail.asStateFlow()
+    private val _projectCategory = MutableStateFlow<State<List<ProjectCategory>>>(State.Idle)
+    val projectCategory = _projectCategory.asStateFlow()
 
     // -----------------------------
     // UI Event Actions
@@ -78,6 +81,30 @@ class ProjectDetailsViewModel @Inject constructor(
             } catch (e: Exception){
                 _projectDetail.value = State.Error(e.message ?: "Unknown Error")
             }
+        }
+    }
+
+    suspend fun getProjectCategory(){
+        try {
+            _projectCategory.value = State.Loading
+
+            val userId = storage.getUserId()
+            if(userId == null){
+                _projectCategory.value = State.Error("User Id not found!")
+                return
+            }
+            val result = repository.getProjectCategory(userId = userId)
+            result.fold(
+                onSuccess = { data ->
+                    _projectCategory.value = State.Success(data)
+                },
+                onFailure = { throwable ->
+                    _projectCategory.value = State.Error(throwable.message ?: "Unknown Error")
+                }
+            )
+
+        } catch (e: Exception) {
+            _projectCategory.value = State.Error(e.message ?: "Unknown Error")
         }
     }
 

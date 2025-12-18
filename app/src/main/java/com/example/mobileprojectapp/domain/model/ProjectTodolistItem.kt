@@ -7,7 +7,7 @@ data class TodolistItem(
     val projectTodolistId: String,
     val name: String,
     val categoryName: String,
-    val isCompleted: Boolean,
+    var isCompleted: Boolean,
     val createdAt: String,
     val updatedAt: String,
     val deletedAt: Any?,

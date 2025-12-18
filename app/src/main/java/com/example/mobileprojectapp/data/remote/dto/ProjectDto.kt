@@ -35,8 +35,8 @@ data class UpdateProjectRequestDto(
     val userId: String?,
     @SerializedName("name")
     val name: String?,
-    @SerializedName("category")
-    val category: String?,
+    @SerializedName("category_name")
+    val categoryName: String?,
     @SerializedName("budget")
     val budget: Long?,
     @SerializedName("start_date")

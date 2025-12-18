@@ -162,7 +162,7 @@ class ProjectRepositoryImpl @Inject constructor(private val api : ApiService) : 
             val request = UpdateProjectRequestDto(
                 userId = req.userId,
                 name = req.name,
-                category = req.categoryName,
+                categoryName = req.categoryName,
                 budget = req.budget,
                 startDate = req.startDate,
                 endDate = req.endDate,

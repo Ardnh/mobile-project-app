@@ -1,10 +1,7 @@
 package com.example.mobileprojectapp.presentation.components.dialog
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -15,8 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
@@ -25,16 +20,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import com.example.mobileprojectapp.presentation.components.bottomsheet.BaseBottomSheet
+import com.example.mobileprojectapp.presentation.components.bottomsheet.CategoryBottomSheet
 import com.example.mobileprojectapp.presentation.components.form.CustomInputSelectDate
-import com.example.mobileprojectapp.presentation.components.form.CustomSelectInput
 import com.example.mobileprojectapp.presentation.components.form.CustomTextField
-import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +35,7 @@ fun UpdateProjectDialog(
     projectStartDate: String = "",
     projectEndDate: String = "",
     projectCategory: String = "",
+    categoryList: List<String> = emptyList(),
     onDismiss: () -> Unit,
     onUpdateProject: (name: String, budget: String, startDate: String, endDate: String, category: String) -> Unit
 ) {
@@ -129,13 +120,14 @@ fun UpdateProjectDialog(
                     onSelectDate = { value -> endDate = value }
                 )
 
-                BaseBottomSheet(
+                CategoryBottomSheet(
                     title = "Project Category",
                     selectedCategory = category,
                     showBottomSheet = showBottomSheet,
                     onClickTrigger = { showBottomSheet = true },
                     onDismiss = { showBottomSheet = false },
-                    onValueSelected = { it -> category = it }
+                    onValueSelected = { it -> category = it },
+                    categories = categoryList
                 )
 
                 Row(
