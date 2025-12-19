@@ -440,14 +440,16 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                     }
                                 } else {
                                     itemsIndexed(project.projectTodolists) { parentIndex, todo ->
-
                                         TodolistBottomSheet(
                                             showBottomSheet = todolistActiveIndex == parentIndex,
                                             title = todo.name,
                                             todoInfo = "${todo.totalCompletedTodo}/${todo.totalTodo}",
                                             todoList = todo.todolistItems,
                                             onClickTrigger = { todolistActiveIndex = parentIndex },
-                                            onDismiss = { todolistActiveIndex = -1 }
+                                            onDismiss = { todolistActiveIndex = -1 },
+                                            onUpdateTodo = { todo, isComplete ->
+
+                                            }
                                         )
 
                                     }

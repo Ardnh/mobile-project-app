@@ -47,6 +47,7 @@ fun TodolistBottomSheet(
     todoList: List<TodolistItem> = emptyList(),
     onClickTrigger: () -> Unit,
     onDismiss: () -> Unit,
+    onUpdateTodo: (todo: TodolistItem, isComplete: Boolean) -> Unit
 ) {
 
     val sheetState = rememberModalBottomSheetState(
@@ -162,7 +163,9 @@ fun TodolistBottomSheet(
                          )
                          Checkbox(
                              checked = it.isCompleted,
-                             onCheckedChange = { value ->  it.isCompleted = value }
+                             onCheckedChange = { value ->
+                                 onUpdateTodo(it, value)
+                             }
                          )
                      }
                      HorizontalDivider()
