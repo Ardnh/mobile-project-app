@@ -48,6 +48,11 @@ class ProjectDetailsViewModel @Inject constructor(
     val projectDetail = _projectDetail.asStateFlow()
     private val _projectCategory = MutableStateFlow<State<List<ProjectCategory>>>(State.Idle)
     val projectCategory = _projectCategory.asStateFlow()
+    private val _createTodolistState = MutableStateFlow<State<Unit>>(State.Idle)
+    val createTodolistState = _createTodolistState.asStateFlow()
+
+    private val _createExpensesState = MutableStateFlow<State<Unit>>(State.Idle)
+    val createExpensesState = _createExpensesState.asStateFlow()
 
     // -----------------------------
     // UI Event Actions
@@ -163,12 +168,111 @@ class ProjectDetailsViewModel @Inject constructor(
 
     }
 
-    fun updateProjectTodolistById(){
+    fun createProjectTodolist(projectId: String?, name: String){
+        viewModelScope.launch {
+            try {
 
+                if (_createTodolistState.value is State.Loading) {
+                    Log.w("CREATE PROJECT TODOLIST", "Already processing, skipping")
+                    return@launch
+                }
+
+                if(projectId == null) {
+                    _createTodolistState.value = State.Error("Project ID id null")
+                    return@launch
+                }
+
+                val result = projectTodolistRepository.createProjectTodolist(projectId = projectId, name = name)
+                result.fold(
+                    onSuccess = {
+                        _createTodolistState.value = State.Success(Unit)
+                    },
+                    onFailure = { throwable ->
+                        _createTodolistState.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+            } catch (e: Exception) {
+                _createTodolistState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                if(projectId !== null){
+                    getProjectsById(projectId)
+                }
+            }
+        }
+    }
+
+    fun createProjectExpenses(projectId: String?, name: String){
+        viewModelScope.launch {
+            viewModelScope.launch {
+                try {
+
+                    if (_createExpensesState.value is State.Loading) {
+                        Log.w("CREATE PROJECT EXPENSES", "Already processing, skipping")
+                        return@launch
+                    }
+
+                    if(projectId == null) {
+                        _createExpensesState.value = State.Error("Project ID id null")
+                        return@launch
+                    }
+
+                    val result = projectExpensesRepository.createProjectExpenses(projectId = projectId, name = name)
+                    result.fold(
+                        onSuccess = {
+                            _createExpensesState.value = State.Success(Unit)
+                        },
+                        onFailure = { throwable ->
+                            _createExpensesState.value = State.Error(throwable.message ?: "Unknown Error")
+                        }
+                    )
+                } catch (e: Exception) {
+                    _createExpensesState.value = State.Error(e.message ?: "Unknown Error")
+                } finally {
+                    if(projectId !== null){
+                        getProjectsById(projectId)
+                    }
+                }
+            }
+        }
+    }
+
+    fun updateProjectTodolistById(id: String, projectId: String?, name: String){
+        viewModelScope.launch {
+            try {
+
+                if (_createTodolistState.value is State.Loading) {
+                    Log.w("CREATE PROJECT TODOLIST", "Already processing, skipping")
+                    return@launch
+                }
+
+                if(projectId == null) {
+                    _createTodolistState.value = State.Error("Project ID id null")
+                    return@launch
+                }
+
+                val result = projectTodolistRepository.updateProjectTodolist(id = id, projectId = projectId, name = name)
+                result.fold(
+                    onSuccess = {
+                        _createTodolistState.value = State.Success(Unit)
+                    },
+                    onFailure = { throwable ->
+                        _createTodolistState.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+            } catch (e: Exception) {
+                _createTodolistState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                if(projectId !== null){
+                    getProjectsById(projectId)
+                }
+            }
+        }
     }
 
     fun updateTodolistItemById(){
+        viewModelScope.launch {
 
+        }
     }
 
     fun deleteProjectById(projectId: String?){

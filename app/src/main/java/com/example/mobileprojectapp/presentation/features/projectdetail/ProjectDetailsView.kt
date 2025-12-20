@@ -435,7 +435,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                             title = "Todolist is empty",
                                             description = "Start create new todolist",
                                             buttonLabel = "New todolist",
-                                            onClickBtn = null
+                                            onClickBtn = { showAddTodolistOrExpensesDialog = true }
                                         )
                                     }
                                 } else {
@@ -461,7 +461,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                         title = "Expenses is empty",
                                         description = "Start create new expenses",
                                         buttonLabel = "New expenses",
-                                        onClickBtn = null
+                                        onClickBtn = { showAddTodolistOrExpensesDialog = true }
                                     )
                                 } else {
                                     ExpensesContent()
@@ -480,7 +480,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
         AddTodolistDialog(
             title = "Add new Todolist",
             onDismiss = { showAddTodolistOrExpensesDialog = false },
-            onAddNewTodolist = {  }
+            onAddNewTodolist = { name -> viewModel.createProjectTodolist(projectId, name) },
         )
     }
 
@@ -488,7 +488,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
         AddExpensesDialog(
             title = "Add new Expenses",
             onDismiss = { showAddTodolistOrExpensesDialog = false },
-            onAddNewExpenses = {  }
+            onAddNewExpenses = { name -> viewModel.createProjectExpenses(projectId, name) }
         )
     }
 

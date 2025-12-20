@@ -294,7 +294,12 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
                         val projects = (projectListState as State.Success<List<ProjectItem>>).data
                         if(projects.isEmpty()){
                             item {
-                                EmptyProjectsView()
+                                EmptyProjectsView(
+                                    title = "Project is Empty",
+                                    description = "Start create new project",
+                                    buttonLabel = "New project",
+                                    onClickBtn = { navController.navigate("") }
+                                )
                             }
                         } else {
                             items (projects) { project ->

@@ -4,14 +4,19 @@ import com.example.mobileprojectapp.data.remote.api.ApiService
 import com.example.mobileprojectapp.data.remote.dto.CreateProjectTodolistRequestDto
 import com.example.mobileprojectapp.data.remote.dto.UpdateProjectTodolistRequestDto
 import com.example.mobileprojectapp.domain.model.CreateProjectTodolistRequest
+import com.example.mobileprojectapp.domain.model.ProjectById
 import com.example.mobileprojectapp.domain.repository.ProjectTodolistRepository
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
 class ProjectTodolistRepositoryImpl @Inject constructor(private val api : ApiService) : ProjectTodolistRepository{
-    override suspend fun createProjectTodolist(req: CreateProjectTodolistRequestDto): Result<Unit> {
+    override suspend fun createProjectTodolist(projectId: String, name: String): Result<Unit> {
         return try {
+            val req = CreateProjectTodolistRequestDto(
+                projectId = projectId,
+                name = name
+            )
             val response = api.createProjectTodolist(req)
             if(response.isSuccessful){
                 val body = response.body()
@@ -32,11 +37,15 @@ class ProjectTodolistRepositoryImpl @Inject constructor(private val api : ApiSer
         }
     }
 
-    override suspend fun updateProjectTodolist(
-        id: String,
-        req: UpdateProjectTodolistRequestDto
-    ): Result<Unit> {
+    override suspend fun updateProjectTodolist(id: String, projectId: String, name: String): Result<Unit> {
         return try {
+
+            val req = UpdateProjectTodolistRequestDto(
+                id = id,
+                projectId = projectId,
+                name = name
+            )
+
             val response = api.updateProjectTodolist(id, req)
             if(response.isSuccessful){
                 val body = response.body()

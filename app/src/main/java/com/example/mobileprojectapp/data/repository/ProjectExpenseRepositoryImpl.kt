@@ -9,8 +9,13 @@ import java.io.IOException
 import javax.inject.Inject
 
 class ProjectExpenseRepositoryImpl @Inject constructor(private val api : ApiService) : ProjectExpensesRepository {
-    override suspend fun createProjectExpenses(req: CreateProjectExpenseRequestDto): Result<Unit> {
+    override suspend fun createProjectExpenses(projectId: String, name: String): Result<Unit> {
         return try {
+
+            val req = CreateProjectExpenseRequestDto(
+                projectId = projectId,
+                name = name
+            )
             val response = api.createProjectExpense(req)
             if(response.isSuccessful){
                 val body = response.body()
@@ -33,9 +38,16 @@ class ProjectExpenseRepositoryImpl @Inject constructor(private val api : ApiServ
 
     override suspend fun updateProjectExpenses(
         id: String,
-        req: UpdateProjectExpenseRequestDto
+        projectId: String,
+        name: String
     ): Result<Unit> {
         return try {
+
+            val req = UpdateProjectExpenseRequestDto(
+                id = id,
+                projectId = projectId,
+                name = name
+            )
             val response = api.updateProjectExpense(id, req)
             if(response.isSuccessful){
                 val body = response.body()

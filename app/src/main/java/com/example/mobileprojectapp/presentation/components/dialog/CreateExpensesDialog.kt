@@ -28,7 +28,7 @@ import androidx.compose.ui.window.DialogProperties
 fun AddExpensesDialog(
     title: String = "Unknown title",
     onDismiss: () -> Unit,
-    onAddNewExpenses: () -> Unit,
+    onAddNewExpenses: (name: String) -> Unit,
 ) {
 
     Dialog(

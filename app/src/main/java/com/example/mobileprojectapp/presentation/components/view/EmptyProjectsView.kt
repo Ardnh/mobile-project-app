@@ -24,7 +24,7 @@ fun EmptyProjectsView(
     title: String = "No Title",
     description: String = "No Description",
     buttonLabel: String = "No Label",
-    onClickBtn: (() -> Unit)? = null
+    onClickBtn: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -52,7 +52,7 @@ fun EmptyProjectsView(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
         )
 
-        Button(onClick = { onClickBtn }) {
+        Button(onClick = { onClickBtn() }) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
             Text(buttonLabel)

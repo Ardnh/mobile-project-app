@@ -5,22 +5,32 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.mobileprojectapp.utils.State
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,7 +38,7 @@ import androidx.compose.ui.window.DialogProperties
 fun AddTodolistDialog(
     title: String = "Unknown title",
     onDismiss: () -> Unit,
-    onAddNewTodolist: () -> Unit,
+    onAddNewTodolist: (name: String) -> Unit,
 ) {
 
     Dialog(
@@ -58,32 +68,34 @@ fun AddTodolistDialog(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
 
-                Box(){
-                    Text(
-                        text = "Hello $title, this is todolist content"
-                    )
+                Column {
+                    Box(){
+                        Text(
+                            text = "Hello $title, this is todolist content"
+                        )
+                    }
                 }
 
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    horizontalArrangement = Arrangement.End,
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    TextButton(
-//                        onClick = { onDismiss() },
-//                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp)
-//                    ) {
-//                        Text("Close")
-//                    }
-//                    Spacer(modifier = Modifier.width(8.dp))
-//                    TextButton(
-//                        onClick = { onDeleteProject() },
-//                        enabled = loading !is State.Loading,
-//                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
-//                        modifier = Modifier
-//                            .width(70.dp)
-//                    ) {
-//
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = { onDismiss() },
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp)
+                    ) {
+                        Text("Close")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(
+                        onClick = {  },
+                        enabled = true,
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
+                        modifier = Modifier
+                            .width(70.dp)
+                    ) {
+
 //                        if(loading is State.Loading){
 //                            Box(
 //                                modifier = Modifier.size(25.dp)
@@ -98,8 +110,12 @@ fun AddTodolistDialog(
 //                                color = Color.Black
 //                            )
 //                        }
-//                    }
-//                }
+                        Text(
+                            text = "Yes",
+                            color = Color.Black
+                        )
+                    }
+                }
             }
         }
     }
