@@ -25,7 +25,7 @@ fun CustomTextField(
     modifier: Modifier = Modifier,
     errorMessage: String? = null,
     isPassword: Boolean = false,
-    isNumericOnly: Boolean = false, // Parameter baru untuk angka saja
+    isNumericOnly: Boolean = false,
     singleLine: Boolean = true,
     enabled: Boolean = true,
     onTrailingIconClick: (() -> Unit)? = null,

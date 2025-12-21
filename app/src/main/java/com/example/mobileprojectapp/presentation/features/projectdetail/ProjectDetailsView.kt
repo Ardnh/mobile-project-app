@@ -78,6 +78,7 @@ import com.example.mobileprojectapp.domain.model.ProjectById
 import com.example.mobileprojectapp.domain.model.ProjectCategory
 import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.presentation.components.accordion.Accordion
+import com.example.mobileprojectapp.presentation.components.bottomsheet.ExpensesBottomSheet
 import com.example.mobileprojectapp.presentation.components.bottomsheet.TodolistBottomSheet
 import com.example.mobileprojectapp.presentation.components.card.ProjectCard
 import com.example.mobileprojectapp.presentation.components.dialog.AddExpensesDialog
@@ -101,6 +102,8 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     val projectDetailState by viewModel.projectDetail.collectAsState()
     val deleteProjectState by viewModel.deleteProjectState.collectAsState()
     val categoryListState by viewModel.projectCategory.collectAsState()
+    val createTodolistState by viewModel.createTodolistState.collectAsState()
+    val createExpensesState by viewModel.createExpensesState.collectAsState()
 
     var updateProjectState by remember { mutableStateOf<ProjectById?>(null) }
 
@@ -120,6 +123,18 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
             viewModel.getProjectCategory()
         }
         isRefreshing = false
+    }
+
+    LaunchedEffect(createTodolistState) {
+        if(createTodolistState is State.Success){
+            showAddTodolistOrExpensesDialog = false
+        }
+    }
+
+    LaunchedEffect(createExpensesState) {
+        if(createExpensesState is State.Success){
+            showAddTodolistOrExpensesDialog = false
+        }
     }
 
     Scaffold(
@@ -451,20 +466,33 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
 
                                             }
                                         )
-
                                     }
                                 }
                             }
-                            1 -> item {
+                            1 -> {
                                 if(project.projectExpenses.isEmpty()){
-                                    EmptyProjectsView(
-                                        title = "Expenses is empty",
-                                        description = "Start create new expenses",
-                                        buttonLabel = "New expenses",
-                                        onClickBtn = { showAddTodolistOrExpensesDialog = true }
-                                    )
+                                    item {
+                                        EmptyProjectsView(
+                                            title = "Expenses is empty",
+                                            description = "Start create new expenses",
+                                            buttonLabel = "New expenses",
+                                            onClickBtn = { showAddTodolistOrExpensesDialog = true }
+                                        )
+                                    }
                                 } else {
-                                    ExpensesContent()
+                                    itemsIndexed(project.projectExpenses) { parentIndex, expense ->
+                                        ExpensesBottomSheet(
+                                            showBottomSheet = todolistActiveIndex == parentIndex,
+                                            title = expense.name,
+                                            expensesUsed = expense.expensesUsed,
+                                            expensesList = expense.expensesItem,
+                                            onClickTrigger = { todolistActiveIndex = parentIndex },
+                                            onDismiss = { todolistActiveIndex = -1 },
+                                            onUpdateExpenses = { todo, isComplete ->
+
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -479,16 +507,22 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     if(showAddTodolistOrExpensesDialog && selectedTab == 0){
         AddTodolistDialog(
             title = "Add new Todolist",
+            loading = createTodolistState is State.Loading,
             onDismiss = { showAddTodolistOrExpensesDialog = false },
-            onAddNewTodolist = { name -> viewModel.createProjectTodolist(projectId, name) },
+            onAddNewTodolist = { name ->
+                viewModel.createProjectTodolist(projectId, name)
+            },
         )
     }
 
     if(showAddTodolistOrExpensesDialog && selectedTab == 1){
         AddExpensesDialog(
             title = "Add new Expenses",
+            loading =  createExpensesState is State.Loading,
             onDismiss = { showAddTodolistOrExpensesDialog = false },
-            onAddNewExpenses = { name -> viewModel.createProjectExpenses(projectId, name) }
+            onAddNewExpenses = { name ->
+                viewModel.createProjectExpenses(projectId, name)
+            }
         )
     }
 
