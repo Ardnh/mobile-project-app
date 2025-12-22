@@ -10,8 +10,15 @@ import java.io.IOException
 import javax.inject.Inject
 
 class ProjectExpenseItemRepositoryImpl @Inject constructor(private val api : ApiService) : ProjectExpensesItemRepository {
-    override suspend fun createProjectExpensesItem(req: CreateProjectExpenseItemRequestDto): Result<Unit> {
+    override suspend fun createProjectExpensesItem(projectExpensesId: String, name: String, amount: Long, categoryName: String): Result<Unit> {
         return try {
+
+            val req = CreateProjectExpenseItemRequestDto(
+                projectExpenseId = projectExpensesId,
+                name = name,
+                amount = amount,
+                categoryName = categoryName
+            )
             val response = api.createProjectExpenseItem(req)
             if(response.isSuccessful){
                 val body = response.body()

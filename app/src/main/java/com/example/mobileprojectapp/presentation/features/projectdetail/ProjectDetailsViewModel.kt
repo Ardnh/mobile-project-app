@@ -50,9 +50,14 @@ class ProjectDetailsViewModel @Inject constructor(
     val projectCategory = _projectCategory.asStateFlow()
     private val _createTodolistState = MutableStateFlow<State<Unit>>(State.Idle)
     val createTodolistState = _createTodolistState.asStateFlow()
+    private val _createTodolistItemState = MutableStateFlow<State<Unit>>(State.Idle)
+    val createTodolistItemState = _createTodolistItemState.asStateFlow()
 
     private val _createExpensesState = MutableStateFlow<State<Unit>>(State.Idle)
     val createExpensesState = _createExpensesState.asStateFlow()
+    private val _createExpenseItemState = MutableStateFlow<State<Unit>>(State.Idle)
+    val createExpenseItemState = _createExpenseItemState.asStateFlow()
+
 
     // -----------------------------
     // UI Event Actions
@@ -201,6 +206,40 @@ class ProjectDetailsViewModel @Inject constructor(
         }
     }
 
+    fun createProjectTodolistItem(projectId: String?, todolistId: String, categoryName: String, name: String){
+        viewModelScope.launch {
+            try {
+                if (_createTodolistItemState.value is State.Loading) {
+                    Log.w("CREATE PROJECT TODOLIST", "Already processing, skipping")
+                    return@launch
+                }
+
+                Log.d("CREATE TODOLIST ITEM", "project id: $projectId")
+                Log.d("CREATE TODOLIST ITEM", "todolist id: $todolistId")
+                Log.d("CREATE TODOLIST ITEM", "category name: $categoryName")
+                Log.d("CREATE TODOLIST ITEM", "name: $name")
+
+                val result = projectTodolistItemRepository.createProjectTodolistItem(
+                    todolistId = todolistId,
+                    name = name,
+                    categoryName = categoryName
+                )
+                result.fold(
+                    onSuccess = {
+                        _createTodolistItemState.value = State.Success(Unit)
+                    },
+                    onFailure = { throwable ->
+                        _createTodolistItemState.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+            } catch(e: Exception){
+                _createTodolistItemState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                projectId?.let { getProjectsById(projectId) }
+            }
+        }
+    }
+
     fun createProjectExpenses(projectId: String?, name: String){
         viewModelScope.launch {
             viewModelScope.launch {
@@ -232,6 +271,36 @@ class ProjectDetailsViewModel @Inject constructor(
                         getProjectsById(projectId)
                     }
                 }
+            }
+        }
+    }
+
+    fun createProjectExpensesItem(projectId: String?, expensesId: String, categoryName: String, name: String, amount: String){
+        viewModelScope.launch {
+            try {
+                if (_createExpenseItemState.value is State.Loading) {
+                    Log.w("CREATE PROJECT EXPENSES", "Already processing, skipping")
+                    return@launch
+                }
+
+                val result = projectExpensesItemRepository.createProjectExpensesItem(
+                    projectExpensesId = expensesId,
+                    name = name,
+                    amount = amount.toLong(),
+                    categoryName = categoryName
+                )
+                result.fold(
+                    onSuccess = {
+                        _createExpenseItemState.value = State.Success(Unit)
+                    },
+                    onFailure = { throwable ->
+                        _createExpenseItemState.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+            } catch(e: Exception){
+                _createExpenseItemState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                projectId?.let { getProjectsById(projectId) }
             }
         }
     }

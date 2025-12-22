@@ -40,7 +40,6 @@ fun CustomTextField(
         BasicTextField(
             value = value,
             onValueChange = { newValue ->
-                // Filter hanya angka jika isNumericOnly = true
                 if (isNumericOnly) {
                     if (newValue.all { it.isDigit() }) {
                         onValueChange(newValue)

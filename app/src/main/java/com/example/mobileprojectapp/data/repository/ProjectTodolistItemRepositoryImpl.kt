@@ -12,8 +12,15 @@ import java.io.IOException
 import javax.inject.Inject
 
 class ProjectTodolistItemRepositoryImpl @Inject constructor(private val api : ApiService) : ProjectTodolistItemRepository {
-    override suspend fun createProjectTodolistItem(req: CreateProjectTodolistItemRequestDto): Result<Unit> {
+    override suspend fun createProjectTodolistItem(todolistId: String, name: String, categoryName: String): Result<Unit> {
         return try {
+
+            val req = CreateProjectTodolistItemRequestDto(
+                projectTodolistId = todolistId,
+                name = name,
+                categoryName = categoryName,
+                isCompleted = false
+            )
             val response = api.createProjectTodolistItem(req)
             if(response.isSuccessful){
                 val body = response.body()

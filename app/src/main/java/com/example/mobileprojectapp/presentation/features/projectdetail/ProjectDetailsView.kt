@@ -61,6 +61,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,13 +77,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.mobileprojectapp.domain.model.ProjectById
 import com.example.mobileprojectapp.domain.model.ProjectCategory
+import com.example.mobileprojectapp.domain.model.ProjectExpense
 import com.example.mobileprojectapp.domain.model.ProjectItem
+import com.example.mobileprojectapp.domain.model.ProjectTodolist
 import com.example.mobileprojectapp.presentation.components.accordion.Accordion
 import com.example.mobileprojectapp.presentation.components.bottomsheet.ExpensesBottomSheet
 import com.example.mobileprojectapp.presentation.components.bottomsheet.TodolistBottomSheet
 import com.example.mobileprojectapp.presentation.components.card.ProjectCard
 import com.example.mobileprojectapp.presentation.components.dialog.AddExpensesDialog
 import com.example.mobileprojectapp.presentation.components.dialog.AddTodolistDialog
+import com.example.mobileprojectapp.presentation.components.dialog.CrateTodolistItemDialog
+import com.example.mobileprojectapp.presentation.components.dialog.CreateExpensesItemDialog
 import com.example.mobileprojectapp.presentation.components.dialog.DeleteProjectDialog
 import com.example.mobileprojectapp.presentation.components.dialog.UpdateProjectDialog
 import com.example.mobileprojectapp.presentation.components.dialog.UpdateTodolistDialog
@@ -104,8 +109,12 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     val categoryListState by viewModel.projectCategory.collectAsState()
     val createTodolistState by viewModel.createTodolistState.collectAsState()
     val createExpensesState by viewModel.createExpensesState.collectAsState()
+    val createTodolistItemState by viewModel.createTodolistItemState.collectAsState()
+    val createExpensesItemState by viewModel.createExpenseItemState.collectAsState()
 
     var updateProjectState by remember { mutableStateOf<ProjectById?>(null) }
+    var addNewProjectTodolistItemState by remember { mutableStateOf<ProjectTodolist?>(null) }
+    var addNewProjectExpensesItemState by remember { mutableStateOf<ProjectExpense?>(null) }
 
     var isRefreshing by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -115,7 +124,24 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     var showUpdateTodolistItemDialog by remember { mutableStateOf(false) }
     var showDeleteProjectDialog by remember { mutableStateOf(false) }
     var showAddTodolistOrExpensesDialog by remember { mutableStateOf(false) }
+    var showAddTodolistItemDialog by remember { mutableStateOf(false) }
+    var showAddExpensesItemDialog by remember { mutableStateOf(false) }
     val tabs = listOf("Todolist", "Expenses")
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { createTodolistItemState }
+            .collect {
+                if (it is State.Success) {
+                    showAddTodolistItemDialog = false
+                }
+            }
+    }
+
+    LaunchedEffect(createExpensesItemState) {
+        if(createExpensesItemState is State.Success){
+            showAddExpensesItemDialog = false
+        }
+    }
 
     LaunchedEffect(projectId, isRefreshing) {
         if (!projectId.isNullOrBlank()) {
@@ -136,6 +162,8 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
             showAddTodolistOrExpensesDialog = false
         }
     }
+
+
 
     Scaffold(
         floatingActionButton = {
@@ -191,20 +219,20 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
 
                 when (projectDetailState) {
                     is State.Loading -> {
-                        item {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(100.dp)
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    color = Color.White,
-                                    strokeWidth = 2.dp
-                                )
-                            }
-                        }
+//                        item {
+//                            Box(
+//                                contentAlignment = Alignment.Center,
+//                                modifier = Modifier
+//                                    .fillMaxWidth()
+//                                    .height(100.dp)
+//                            ) {
+//                                CircularProgressIndicator(
+//                                    modifier = Modifier.size(20.dp),
+//                                    color = Color.White,
+//                                    strokeWidth = 2.dp
+//                                )
+//                            }
+//                        }
                     }
 
                     is State.Error -> {
@@ -459,11 +487,14 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                             showBottomSheet = todolistActiveIndex == parentIndex,
                                             title = todo.name,
                                             todoInfo = "${todo.totalCompletedTodo}/${todo.totalTodo}",
+                                            category = todo.name,
                                             todoList = todo.todolistItems,
                                             onClickTrigger = { todolistActiveIndex = parentIndex },
                                             onDismiss = { todolistActiveIndex = -1 },
-                                            onUpdateTodo = { todo, isComplete ->
-
+                                            onUpdateTodo = { todo, isComplete -> },
+                                            onAddNewTodolistItem = {
+                                                addNewProjectTodolistItemState = todo
+                                                showAddTodolistItemDialog = true
                                             }
                                         )
                                     }
@@ -488,6 +519,10 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                             expensesList = expense.expensesItem,
                                             onClickTrigger = { todolistActiveIndex = parentIndex },
                                             onDismiss = { todolistActiveIndex = -1 },
+                                            onAddNewExpensesItem = {
+                                                addNewProjectExpensesItemState = expense
+                                                showAddExpensesItemDialog = true
+                                            },
                                             onUpdateExpenses = { todo, isComplete ->
 
                                             }
@@ -501,6 +536,45 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                     State.Idle -> {}
                 }
             }
+        }
+    }
+
+    if(showAddExpensesItemDialog) {
+        addNewProjectExpensesItemState?.let { state ->
+            CreateExpensesItemDialog(
+                title = "Create expense item",
+                loading = false,
+                categoryName = state.name,
+                onDismiss = { showAddExpensesItemDialog = false },
+                onAddNewExpensesItem = { name, amount ->
+                    viewModel.createProjectExpensesItem(
+                        projectId = projectId,
+                        expensesId = state.id,
+                        categoryName = state.name,
+                        name = name,
+                        amount = amount
+                    )
+                }
+            )
+        }
+    }
+
+    if(showAddTodolistItemDialog){
+        addNewProjectTodolistItemState?.let { state ->
+            CrateTodolistItemDialog(
+                title = "Create todolist item",
+                loading = false,
+                categoryName = state.name,
+                onDismiss = { showAddTodolistItemDialog = false },
+                onAddNewTodolistItem = { name ->
+                    viewModel.createProjectTodolistItem(
+                        projectId = projectId,
+                        todolistId = state.id,
+                        categoryName = state.name,
+                        name = name
+                    )
+                }
+            )
         }
     }
 
@@ -526,31 +600,32 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
         )
     }
 
-    if(showUpdateProjectDialog && updateProjectState !== null){
-
-        val categoryList = if(categoryListState is State.Success) (categoryListState as State.Success<List<ProjectCategory>>).data.map { it.categoryName } else emptyList()
-        UpdateProjectDialog(
-            projectName = updateProjectState?.name ?: "",
-            projectBudget = updateProjectState?.budget ?: "",
-            projectStartDate = updateProjectState?.startDate ?: "",
-            projectEndDate = updateProjectState?.endDate ?: "",
-            projectCategory = updateProjectState?.categoryName ?: "",
-            onDismiss = { showUpdateProjectDialog = false },
-            categoryList = categoryList,
-            onUpdateProject = { name, budget, startDate, endDate, category ->
-                viewModel.updateProjectById(
-                    id = updateProjectState?.id,
-                    userId = updateProjectState?.userId,
-                    name = name,
-                    budget = budget,
-                    startDate = startDate,
-                    endDate = endDate,
-                    category = category
-                )
-                showUpdateProjectDialog = false
-                isProjectMenuExpanded = false
-            }
-        )
+    if(showUpdateProjectDialog){
+        updateProjectState?.let { state ->
+            val categoryList = if(categoryListState is State.Success) (categoryListState as State.Success<List<ProjectCategory>>).data.map { it.categoryName } else emptyList()
+            UpdateProjectDialog(
+                projectName = state.name,
+                projectBudget = state.budget,
+                projectStartDate = state.startDate,
+                projectEndDate = state.endDate,
+                projectCategory = state.categoryName,
+                onDismiss = { showUpdateProjectDialog = false },
+                categoryList = categoryList,
+                onUpdateProject = { name, budget, startDate, endDate, category ->
+                    viewModel.updateProjectById(
+                        id = state.id,
+                        userId = state.userId,
+                        name = name,
+                        budget = budget,
+                        startDate = startDate,
+                        endDate = endDate,
+                        category = category
+                    )
+                    showUpdateProjectDialog = false
+                    isProjectMenuExpanded = false
+                }
+            )
+        }
     }
 
     if(showUpdateTodolistItemDialog){
@@ -559,20 +634,22 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
         )
     }
 
-    if(showDeleteProjectDialog && updateProjectState != null){
-        DeleteProjectDialog(
-            loading = deleteProjectState,
-            title = updateProjectState?.name ?: "",
-            onDismiss = {
-                showDeleteProjectDialog = false
-                updateProjectState = null
-            },
-            onDeleteProject = {
-                viewModel.deleteProjectById(updateProjectState?.id)
-                showDeleteProjectDialog = false
-                navController.navigateUp()
-            }
-        )
+    if(showDeleteProjectDialog){
+        updateProjectState?.let{ state ->
+            DeleteProjectDialog(
+                loading = deleteProjectState,
+                title = state.name,
+                onDismiss = {
+                    showDeleteProjectDialog = false
+                    updateProjectState = null
+                },
+                onDeleteProject = {
+                    viewModel.deleteProjectById(state.id)
+                    showDeleteProjectDialog = false
+                    navController.navigateUp()
+                }
+            )
+        }
     }
 
 }

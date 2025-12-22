@@ -31,7 +31,7 @@ data class CreateProjectTodolistItemRequestDto(
     val categoryName: String,
 
     @SerializedName("is_completed")
-    val isCompleted: Boolean  // *bool di Go = Boolean di Kotlin (tidak null karena required)
+    val isCompleted: Boolean
 )
 
 data class UpdateProjectTodolistItemRequestDto(

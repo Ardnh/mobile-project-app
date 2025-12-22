@@ -31,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -44,10 +43,12 @@ fun TodolistBottomSheet(
     showBottomSheet: Boolean,
     title: String,
     todoInfo: String,
+    category: String,
     todoList: List<TodolistItem> = emptyList(),
     onClickTrigger: () -> Unit,
     onDismiss: () -> Unit,
-    onUpdateTodo: (todo: TodolistItem, isComplete: Boolean) -> Unit
+    onUpdateTodo: (todo: TodolistItem, isComplete: Boolean) -> Unit,
+    onAddNewTodolistItem: () -> Unit
 ) {
 
     val sheetState = rememberModalBottomSheetState(
@@ -126,7 +127,7 @@ fun TodolistBottomSheet(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(20.dp))
                                 .background(MaterialTheme.colorScheme.primary)
-                                .clickable{  }
+                                .clickable{ onAddNewTodolistItem() }
                         ){
                             Row(
                                 modifier = Modifier

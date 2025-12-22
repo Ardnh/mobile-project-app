@@ -46,7 +46,8 @@ fun ExpensesBottomSheet(
     expensesList: List<ExpensesItem> = emptyList(),
     onClickTrigger: () -> Unit,
     onDismiss: () -> Unit,
-    onUpdateExpenses: (todo: ExpensesItem, isComplete: Boolean) -> Unit
+    onUpdateExpenses: (todo: ExpensesItem, isComplete: Boolean) -> Unit,
+    onAddNewExpensesItem: () -> Unit
 ){
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
@@ -125,7 +126,7 @@ fun ExpensesBottomSheet(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(20.dp))
                                 .background(MaterialTheme.colorScheme.primary)
-                                .clickable { }
+                                .clickable { onAddNewExpensesItem() }
                         ){
                             Row(
                                 modifier = Modifier
