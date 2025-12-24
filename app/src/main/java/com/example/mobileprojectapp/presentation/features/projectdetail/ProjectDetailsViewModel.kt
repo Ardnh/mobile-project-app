@@ -165,9 +165,7 @@ class ProjectDetailsViewModel @Inject constructor(
             } catch (e: Exception){
                 _updateProjectState.value = State.Error(e.message ?: "Unknown Error")
             } finally {
-                if(id !== null){
-                    getProjectsById(id)
-                }
+                id?.let { getProjectsById(id) }
             }
         }
 
@@ -199,9 +197,7 @@ class ProjectDetailsViewModel @Inject constructor(
             } catch (e: Exception) {
                 _createTodolistState.value = State.Error(e.message ?: "Unknown Error")
             } finally {
-                if(projectId !== null){
-                    getProjectsById(projectId)
-                }
+                projectId?.let { getProjectsById(projectId) }
             }
         }
     }
@@ -213,11 +209,6 @@ class ProjectDetailsViewModel @Inject constructor(
                     Log.w("CREATE PROJECT TODOLIST", "Already processing, skipping")
                     return@launch
                 }
-
-                Log.d("CREATE TODOLIST ITEM", "project id: $projectId")
-                Log.d("CREATE TODOLIST ITEM", "todolist id: $todolistId")
-                Log.d("CREATE TODOLIST ITEM", "category name: $categoryName")
-                Log.d("CREATE TODOLIST ITEM", "name: $name")
 
                 val result = projectTodolistItemRepository.createProjectTodolistItem(
                     todolistId = todolistId,
@@ -267,9 +258,7 @@ class ProjectDetailsViewModel @Inject constructor(
                 } catch (e: Exception) {
                     _createExpensesState.value = State.Error(e.message ?: "Unknown Error")
                 } finally {
-                    if(projectId !== null){
-                        getProjectsById(projectId)
-                    }
+                    projectId?.let { getProjectsById(projectId) }
                 }
             }
         }
@@ -331,9 +320,7 @@ class ProjectDetailsViewModel @Inject constructor(
             } catch (e: Exception) {
                 _createTodolistState.value = State.Error(e.message ?: "Unknown Error")
             } finally {
-                if(projectId !== null){
-                    getProjectsById(projectId)
-                }
+                projectId?.let { getProjectsById(projectId) }
             }
         }
     }
@@ -405,6 +392,32 @@ class ProjectDetailsViewModel @Inject constructor(
     }
 
     fun deleteTodolistItemById(projectId: String){
+        viewModelScope.launch {
+            try {
+
+                if (_projectDetail.value is State.Loading) {
+                    Log.w("CREATE PROJECT", "Already processing, skipping")
+                    return@launch
+                }
+
+                _projectDetail.value = State.Loading
+                val result = repository.deleteProjectById(projectId)
+                result.fold(
+                    onSuccess = { data ->
+
+                    },
+                    onFailure = { throwable ->
+                        _projectDetail.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+
+            } catch (e: Exception){
+                _projectDetail.value = State.Error(e.message ?: "Unknown Error")
+            }
+        }
+    }
+
+    fun deleteExpenseItemById(projectId: String){
         viewModelScope.launch {
             try {
 

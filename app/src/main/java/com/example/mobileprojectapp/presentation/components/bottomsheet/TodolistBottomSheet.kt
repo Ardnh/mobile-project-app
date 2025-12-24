@@ -12,12 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowRight
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -36,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mobileprojectapp.domain.model.TodolistItem
+import com.example.mobileprojectapp.presentation.components.view.EmptyProjectsView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +52,9 @@ fun TodolistBottomSheet(
     onClickTrigger: () -> Unit,
     onDismiss: () -> Unit,
     onUpdateTodo: (todo: TodolistItem, isComplete: Boolean) -> Unit,
-    onAddNewTodolistItem: () -> Unit
+    onAddNewTodolistItem: () -> Unit,
+    onUpdateTodolistItem: (todo: TodolistItem) -> Unit,
+    onDeleteTodolistItem: (id: String, title: String) -> Unit
 ) {
 
     val sheetState = rememberModalBottomSheetState(
@@ -112,65 +118,106 @@ fun TodolistBottomSheet(
                         color = MaterialTheme.colorScheme.primary,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(15.dp))
                     HorizontalDivider()
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(15.dp))
                 }
 
-                item {
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Box(
+                if(todoList.isEmpty()){
+                    item{
+                        EmptyProjectsView(
+                            title = "Todolist item is empty",
+                            description = "Start create new todolist item",
+                            buttonLabel = "New todo item",
+                            onClickBtn = { onAddNewTodolistItem() }
+                        )
+                    }
+                } else {
+                    item {
+                        Row(
+                            horizontalArrangement = Arrangement.End,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(MaterialTheme.colorScheme.primary)
-                                .clickable{ onAddNewTodolistItem() }
-                        ){
-                            Row(
+                                .fillMaxWidth()
+                                .padding(bottom = 20.dp)
+                        ) {
+                            Box(
                                 modifier = Modifier
-                                    .padding(horizontal = 10.dp, vertical = 5.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Add,
-                                    contentDescription = "Add new todo",
-                                    tint = Color.White
-                                )
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .clickable{ onAddNewTodolistItem() }
+                            ){
+                                Row(
+                                    modifier = Modifier
+                                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Add,
+                                        contentDescription = "Add new todo",
+                                        tint = Color.White
+                                    )
 
-                                Text(
-                                    text = "Todo",
-                                    color = Color.White
-                                )
+                                    Text(
+                                        text = "Todo",
+                                        color = Color.White
+                                    )
+                                }
                             }
                         }
                     }
-                }
 
-                items(todoList) { it ->
-                     Row(
-                         verticalAlignment = Alignment.CenterVertically,
-                         modifier = Modifier
-                             .fillMaxWidth()
-                     ) {
-                         Text(
-                             text = it.name,
-                             maxLines = 2,
-                             overflow = TextOverflow.Ellipsis,
-                             modifier = Modifier
-                                 .weight(1f)
-                                 .padding(vertical = 5.dp)
-                         )
-                         Checkbox(
-                             checked = it.isCompleted,
-                             onCheckedChange = { value ->
-                                 onUpdateTodo(it, value)
-                             }
-                         )
-                     }
-                     HorizontalDivider()
-                 }
+                    items(todoList) { it ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Checkbox(
+                                checked = it.isCompleted,
+                                onCheckedChange = { value ->
+                                    onUpdateTodo(it, value)
+                                }
+                            )
+                            Text(
+                                text = it.name,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(vertical = 5.dp)
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .clickable{
+                                        onUpdateTodolistItem(it)
+                                    }
+                            ){
+                                Icon(
+                                    imageVector = Icons.Rounded.Edit,
+                                    contentDescription = "Edit expense item",
+                                    modifier = Modifier
+                                        .padding(5.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .clickable{
+                                        onDeleteTodolistItem(it.id, it.name)
+                                    }
+                            ){
+                                Icon(
+                                    imageVector = Icons.Rounded.Delete,
+                                    contentDescription = "Delete expense item",
+                                    modifier = Modifier
+                                        .padding(5.dp)
+                                )
+                            }
+                        }
+                        HorizontalDivider()
+                    }
+                }
             }
         }
     }

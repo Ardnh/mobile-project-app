@@ -1,6 +1,5 @@
 package com.example.mobileprojectapp.domain.model
 
-import com.google.gson.annotations.SerializedName
 import java.time.LocalDate
 
 data class ProjectItem(
@@ -39,7 +38,7 @@ data class ProjectById(
     val startDate: String,
     val endDate: String,
     val categoryName: String,
-    val budgetUsed: Long,
+    val budgetUsed: String,
     val totalTodolistItem: Long,
     val totalTodolistCompletedItem: Long,
     val projectExpenses: List<ProjectExpense>,

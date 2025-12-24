@@ -61,7 +61,7 @@ fun ProjectByIdDto.toDomain() : ProjectById {
         startDate = startDate.split("T").first(),
         endDate = endDate.split("T").first(),
         categoryName = categoryName,
-        budgetUsed = budgetUsed,
+        budgetUsed = budgetUsed.toNumberFormat(),
         totalTodolistItem = totalTodolistItem,
         totalTodolistCompletedItem = totalTodolistCompletedItem,
         projectExpenses = projectExpenses,

@@ -1,5 +1,6 @@
 package com.example.mobileprojectapp.presentation.components.bottomsheet
 
+import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,12 +13,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowRight
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -25,12 +29,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -42,12 +48,14 @@ import com.example.mobileprojectapp.domain.model.ExpensesItem
 fun ExpensesBottomSheet(
     showBottomSheet: Boolean,
     title: String,
-    expensesUsed: Long,
+    expensesUsed: String,
     expensesList: List<ExpensesItem> = emptyList(),
     onClickTrigger: () -> Unit,
     onDismiss: () -> Unit,
     onUpdateExpenses: (todo: ExpensesItem, isComplete: Boolean) -> Unit,
-    onAddNewExpensesItem: () -> Unit
+    onAddNewExpensesItem: () -> Unit,
+    onUpdateExpensesItem: (expense: ExpensesItem) -> Unit,
+    onDeleteExpensesItem: (id: String, title: String) -> Unit,
 ){
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
@@ -121,6 +129,7 @@ fun ExpensesBottomSheet(
                         horizontalArrangement = Arrangement.End,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(bottom = 20.dp)
                     ) {
                         Box(
                             modifier = Modifier
@@ -152,6 +161,7 @@ fun ExpensesBottomSheet(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(40.dp)
                     ) {
                         Text(
                             text = it.name,
@@ -163,13 +173,48 @@ fun ExpensesBottomSheet(
                         )
 
                         Text(
-                            text = "${it.amount}",
+                            text = "$ ${it.amount}",
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
-                                .weight(1f)
                                 .padding(vertical = 5.dp)
                         )
+                        VerticalDivider(
+                            color = Color.Gray,
+                            modifier = Modifier
+                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .clickable{
+                                    onUpdateExpensesItem(it)
+                                }
+                        ){
+                            Icon(
+                                imageVector = Icons.Rounded.Edit,
+                                contentDescription = "Edit expense item",
+                                modifier = Modifier
+                                    .padding(5.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .clickable{
+                                    onDeleteExpensesItem(it.id, it.name)
+                                }
+                        ){
+                            Icon(
+                                imageVector = Icons.Rounded.Delete,
+                                contentDescription = "Delete expense item",
+                                modifier = Modifier
+                                    .padding(5.dp)
+                            )
+                        }
                     }
                     HorizontalDivider()
                 }

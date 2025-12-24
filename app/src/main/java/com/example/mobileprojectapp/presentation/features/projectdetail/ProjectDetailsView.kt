@@ -75,20 +75,24 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.mobileprojectapp.domain.model.ExpensesItem
 import com.example.mobileprojectapp.domain.model.ProjectById
 import com.example.mobileprojectapp.domain.model.ProjectCategory
 import com.example.mobileprojectapp.domain.model.ProjectExpense
 import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.domain.model.ProjectTodolist
+import com.example.mobileprojectapp.domain.model.TodolistItem
 import com.example.mobileprojectapp.presentation.components.accordion.Accordion
 import com.example.mobileprojectapp.presentation.components.bottomsheet.ExpensesBottomSheet
 import com.example.mobileprojectapp.presentation.components.bottomsheet.TodolistBottomSheet
 import com.example.mobileprojectapp.presentation.components.card.ProjectCard
 import com.example.mobileprojectapp.presentation.components.dialog.AddExpensesDialog
 import com.example.mobileprojectapp.presentation.components.dialog.AddTodolistDialog
+import com.example.mobileprojectapp.presentation.components.dialog.BaseDeleteDialog
 import com.example.mobileprojectapp.presentation.components.dialog.CrateTodolistItemDialog
 import com.example.mobileprojectapp.presentation.components.dialog.CreateExpensesItemDialog
 import com.example.mobileprojectapp.presentation.components.dialog.DeleteProjectDialog
+import com.example.mobileprojectapp.presentation.components.dialog.UpdateExpensesItemDialog
 import com.example.mobileprojectapp.presentation.components.dialog.UpdateProjectDialog
 import com.example.mobileprojectapp.presentation.components.dialog.UpdateTodolistDialog
 import com.example.mobileprojectapp.presentation.components.dialog.UpdateTodolistItemDialog
@@ -98,6 +102,12 @@ import com.example.mobileprojectapp.presentation.features.home.HomeViewModel
 import com.example.mobileprojectapp.presentation.theme.ColorPalette
 import com.example.mobileprojectapp.utils.State
 import com.google.android.material.tabs.TabItem
+
+
+data class DeleteItem(
+    val id: String,
+    val title: String
+)
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -113,32 +123,36 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     val createExpensesItemState by viewModel.createExpenseItemState.collectAsState()
 
     var updateProjectState by remember { mutableStateOf<ProjectById?>(null) }
+    var updateTodolistItemState by remember { mutableStateOf<TodolistItem?>(null) }
+    var updateExpenseItemState by remember { mutableStateOf<ExpensesItem?>(null) }
     var addNewProjectTodolistItemState by remember { mutableStateOf<ProjectTodolist?>(null) }
     var addNewProjectExpensesItemState by remember { mutableStateOf<ProjectExpense?>(null) }
+    var deleteTodolistOrExpenseItemNameState by remember { mutableStateOf<DeleteItem?>(null) }
 
     var isRefreshing by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableIntStateOf(0) }
     var todolistActiveIndex by remember { mutableIntStateOf(-1) }
     var isProjectMenuExpanded by remember { mutableStateOf(false) }
     var showUpdateProjectDialog by remember { mutableStateOf(false) }
-    var showUpdateTodolistItemDialog by remember { mutableStateOf(false) }
     var showDeleteProjectDialog by remember { mutableStateOf(false) }
     var showAddTodolistOrExpensesDialog by remember { mutableStateOf(false) }
     var showAddTodolistItemDialog by remember { mutableStateOf(false) }
     var showAddExpensesItemDialog by remember { mutableStateOf(false) }
+    var showUpdateTodolistItemDialog by remember { mutableStateOf(false) }
+    var showUpdateExpensesItemDialog by remember { mutableStateOf(false) }
+    var showDeleteTodolistItemDialog by remember { mutableStateOf(false) }
+    var showDeleteExpensesItemDialog by remember { mutableStateOf(false) }
     val tabs = listOf("Todolist", "Expenses")
 
-    LaunchedEffect(Unit) {
-        snapshotFlow { createTodolistItemState }
-            .collect {
-                if (it is State.Success) {
-                    showAddTodolistItemDialog = false
-                }
-            }
+    LaunchedEffect(createTodolistItemState) {
+        if (createTodolistItemState is State.Success) {
+            showAddTodolistItemDialog = false
+        }
     }
 
     LaunchedEffect(createExpensesItemState) {
         if(createExpensesItemState is State.Success){
+            Log.d("CREATE EXPENSES ITEM", "createExpensesItemState STATE IS SUCCESS")
             showAddExpensesItemDialog = false
         }
     }
@@ -495,6 +509,17 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                             onAddNewTodolistItem = {
                                                 addNewProjectTodolistItemState = todo
                                                 showAddTodolistItemDialog = true
+                                            },
+                                            onUpdateTodolistItem = { todoItem ->
+                                                updateTodolistItemState = todoItem
+                                                showUpdateTodolistItemDialog = true
+                                            },
+                                            onDeleteTodolistItem = { id, title ->
+                                                deleteTodolistOrExpenseItemNameState = DeleteItem(
+                                                    id = id,
+                                                    title = title
+                                                )
+                                                showDeleteTodolistItemDialog = true
                                             }
                                         )
                                     }
@@ -523,8 +548,17 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                 addNewProjectExpensesItemState = expense
                                                 showAddExpensesItemDialog = true
                                             },
-                                            onUpdateExpenses = { todo, isComplete ->
-
+                                            onUpdateExpenses = { todo, isComplete -> },
+                                            onUpdateExpensesItem = { expense ->
+                                                updateExpenseItemState = expense
+                                                showUpdateExpensesItemDialog = true
+                                            },
+                                            onDeleteExpensesItem = { id, title ->
+                                                deleteTodolistOrExpenseItemNameState = DeleteItem(
+                                                    id = id,
+                                                    title = title
+                                                )
+                                                showDeleteExpensesItemDialog = true
                                             }
                                         )
                                     }
@@ -539,10 +573,59 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
         }
     }
 
+    if(showUpdateExpensesItemDialog) {
+        updateExpenseItemState?.let { state ->
+            UpdateExpensesItemDialog(
+                item = state,
+                loading = false,
+                onDismiss = { showUpdateExpensesItemDialog = false },
+                onSaveUpdatedItem = {  }
+            )
+        }
+    }
+
+    if(showUpdateTodolistItemDialog){
+        updateTodolistItemState?.let { state ->
+            UpdateTodolistItemDialog(
+                item = state,
+                title = "Update todolist item",
+                loading = false,
+                onDismiss = { showUpdateTodolistItemDialog = false },
+                onSaveUpdatedItem = { },
+            )
+        }
+    }
+
+    if(showDeleteTodolistItemDialog){
+        deleteTodolistOrExpenseItemNameState?.let { state ->
+            BaseDeleteDialog(
+                loading = false,
+                dialogTitle = "Todolist item",
+                title = state.title,
+                description = "Delete this todo item",
+                onDismiss = { showDeleteTodolistItemDialog = false },
+                onDelete = { viewModel.deleteTodolistItemById(state.id) },
+            )
+        }
+    }
+
+    if(showDeleteExpensesItemDialog){
+        deleteTodolistOrExpenseItemNameState?.let { state ->
+            BaseDeleteDialog(
+                loading = false,
+                dialogTitle = "Expense item",
+                title = state.title,
+                description = "Delete this expense item",
+                onDismiss = { showDeleteExpensesItemDialog = false },
+                onDelete = { viewModel.deleteExpenseItemById(state.id) },
+            )
+        }
+    }
+
     if(showAddExpensesItemDialog) {
         addNewProjectExpensesItemState?.let { state ->
             CreateExpensesItemDialog(
-                title = "Create expense item",
+                title = "Add expense item",
                 loading = false,
                 categoryName = state.name,
                 onDismiss = { showAddExpensesItemDialog = false },
@@ -562,7 +645,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     if(showAddTodolistItemDialog){
         addNewProjectTodolistItemState?.let { state ->
             CrateTodolistItemDialog(
-                title = "Create todolist item",
+                title = "Add todolist item",
                 loading = false,
                 categoryName = state.name,
                 onDismiss = { showAddTodolistItemDialog = false },
@@ -626,12 +709,6 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 }
             )
         }
-    }
-
-    if(showUpdateTodolistItemDialog){
-        UpdateTodolistItemDialog(
-            onDismiss = { showUpdateTodolistItemDialog = false }
-        )
     }
 
     if(showDeleteProjectDialog){

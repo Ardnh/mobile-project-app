@@ -3,6 +3,6 @@ data class ProjectExpense(
     val id: String,
     val projectId: String,
     val name: String,
-    val expensesUsed: Long,
+    val expensesUsed: String,
     val expensesItem: List<ExpensesItem>,
 )

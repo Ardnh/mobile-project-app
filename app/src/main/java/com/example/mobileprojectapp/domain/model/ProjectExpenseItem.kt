@@ -4,6 +4,6 @@ data class ExpensesItem(
     val id: String,
     val projectExpensesId: String,
     val name: String,
-    val amount: Long,
+    val amount: String,
     val categoryName: String,
 )
