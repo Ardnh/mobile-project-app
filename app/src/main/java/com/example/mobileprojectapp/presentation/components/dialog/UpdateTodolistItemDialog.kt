@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.mobileprojectapp.domain.model.TodolistItem
 import com.example.mobileprojectapp.presentation.components.form.CustomTextField
 
@@ -55,7 +56,14 @@ fun UpdateTodolistItemDialog(
         updateItemState = item
     }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true,
+            usePlatformDefaultWidth = false
+        )
+    ) {
         Card(
             shape = RoundedCornerShape(25.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
@@ -162,7 +170,7 @@ fun UpdateTodolistItemDialog(
                             enabled = updateItemState?.name?.isNotBlank() == true && !loading,
                             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
                             modifier = Modifier
-                                .width(70.dp)
+                                .width(80.dp)
                         ) {
 
                             if(loading){

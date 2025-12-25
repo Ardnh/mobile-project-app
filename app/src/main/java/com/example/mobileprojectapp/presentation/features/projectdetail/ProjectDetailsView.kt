@@ -576,10 +576,11 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     if(showUpdateExpensesItemDialog) {
         updateExpenseItemState?.let { state ->
             UpdateExpensesItemDialog(
+                title = "Update expense item",
                 item = state,
                 loading = false,
                 onDismiss = { showUpdateExpensesItemDialog = false },
-                onSaveUpdatedItem = {  }
+                onSaveUpdatedItem = { },
             )
         }
     }
