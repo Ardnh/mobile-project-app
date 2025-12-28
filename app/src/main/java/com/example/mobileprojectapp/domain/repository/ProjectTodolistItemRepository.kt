@@ -5,6 +5,6 @@ import com.example.mobileprojectapp.data.remote.dto.UpdateProjectTodolistItemReq
 
 interface ProjectTodolistItemRepository {
     suspend fun createProjectTodolistItem(todolistId: String, name: String, categoryName: String) : Result<Unit>
-    suspend fun updateProjectTodolistItem(id: String, req: UpdateProjectTodolistItemRequestDto) : Result<Unit>
+    suspend fun updateProjectTodolistItem(id: String, projectTodolistId: String, name: String, categoryName: String, isCompleted: Boolean) : Result<Unit>
     suspend fun deleteProjectTodolistItem(id: String) : Result<Unit>
 }

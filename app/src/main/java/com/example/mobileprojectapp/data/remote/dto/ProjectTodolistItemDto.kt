@@ -49,7 +49,4 @@ data class UpdateProjectTodolistItemRequestDto(
 
     @SerializedName("is_completed")
     val isCompleted: Boolean,
-
-    @SerializedName("updated_at")
-    val updatedAt: String  // ISO 8601 format: "2024-01-15T10:30:00Z"
 )

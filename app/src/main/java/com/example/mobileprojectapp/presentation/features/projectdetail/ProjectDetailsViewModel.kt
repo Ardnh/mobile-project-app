@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.mobileprojectapp.domain.model.ProjectById
 import com.example.mobileprojectapp.domain.model.ProjectCategory
 import com.example.mobileprojectapp.domain.model.ProjectItem
+import com.example.mobileprojectapp.domain.model.TodolistItem
 import com.example.mobileprojectapp.domain.model.UpdateProjectRequest
 import com.example.mobileprojectapp.domain.repository.ProjectExpensesItemRepository
 import com.example.mobileprojectapp.domain.repository.ProjectExpensesRepository
@@ -57,6 +58,10 @@ class ProjectDetailsViewModel @Inject constructor(
     val createExpensesState = _createExpensesState.asStateFlow()
     private val _createExpenseItemState = MutableStateFlow<State<Unit>>(State.Idle)
     val createExpenseItemState = _createExpenseItemState.asStateFlow()
+    private val _updateTodolistItemState = MutableStateFlow<State<Unit>>(State.Idle)
+    val updateTodolistItemState = _updateTodolistItemState.asStateFlow()
+    private val _updateExpenseItemState = MutableStateFlow<State<Unit>>(State.Idle)
+    val updateExpenseItemState = _updateExpenseItemState.asStateFlow()
 
 
     // -----------------------------
@@ -325,9 +330,40 @@ class ProjectDetailsViewModel @Inject constructor(
         }
     }
 
-    fun updateTodolistItemById(){
+    fun updateTodolistItemById(projectId: String? ,item: TodolistItem){
         viewModelScope.launch {
+            try {
 
+                if (_updateTodolistItemState.value is State.Loading) {
+                    Log.w("CREATE PROJECT TODOLIST", "Already processing, skipping")
+                    return@launch
+                }
+
+                if(projectId == null) {
+                    _updateTodolistItemState.value = State.Error("Project ID id null")
+                    return@launch
+                }
+
+                val result = projectTodolistItemRepository.updateProjectTodolistItem(
+                    id = item.id,
+                    projectTodolistId = item.projectTodolistId,
+                    name = item.name,
+                    categoryName = item.categoryName,
+                    isCompleted = item.isCompleted
+                )
+                result.fold(
+                    onSuccess = {
+                        _updateTodolistItemState.value = State.Success(Unit)
+                    },
+                    onFailure = { throwable ->
+                        _updateTodolistItemState.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+            } catch (e: Exception) {
+                _updateTodolistItemState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                projectId?.let { getProjectsById(projectId) }
+            }
         }
     }
 

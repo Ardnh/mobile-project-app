@@ -592,7 +592,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 title = "Update todolist item",
                 loading = false,
                 onDismiss = { showUpdateTodolistItemDialog = false },
-                onSaveUpdatedItem = { },
+                onSaveUpdatedItem = { it -> viewModel.updateTodolistItemById(projectId,it) },
             )
         }
     }

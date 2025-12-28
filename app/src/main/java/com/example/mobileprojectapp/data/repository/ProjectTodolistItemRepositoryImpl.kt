@@ -43,9 +43,21 @@ class ProjectTodolistItemRepositoryImpl @Inject constructor(private val api : Ap
 
     override suspend fun updateProjectTodolistItem(
         id: String,
-        req: UpdateProjectTodolistItemRequestDto
+        projectTodolistId: String,
+        name: String,
+        categoryName: String,
+        isCompleted: Boolean
     ): Result<Unit> {
         return try {
+
+            val req = UpdateProjectTodolistItemRequestDto(
+                id = id,
+                projectTodolistId = projectTodolistId,
+                name = name,
+                categoryName = categoryName,
+                isCompleted = isCompleted,
+            )
+
             val response = api.updateProjectTodolistItem(id, req)
             if(response.isSuccessful){
                 val body = response.body()
