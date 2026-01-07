@@ -104,7 +104,7 @@ fun BaseDeleteDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
                         onClick = { onDelete() },
-                        enabled = loading,
+                        enabled = !loading,
                         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
                         modifier = Modifier
                             .width(70.dp)

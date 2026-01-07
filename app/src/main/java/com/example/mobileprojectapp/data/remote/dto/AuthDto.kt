@@ -26,8 +26,3 @@ data class LoginResponseDto(
     @SerializedName("expired_at")
     val expiredAt: String
 )
-
-//data class TokenDataDto (
-//    @SerializedName("token")
-//    val token: String
-//)

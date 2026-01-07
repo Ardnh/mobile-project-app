@@ -392,7 +392,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                         fontSize = 15.sp
                                                     )
                                                     Text(
-                                                        text = "${project.budgetUsed}",
+                                                        text = project.budgetUsed,
                                                         fontWeight = FontWeight.SemiBold
                                                     )
                                                 }
@@ -580,7 +580,16 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 item = state,
                 loading = false,
                 onDismiss = { showUpdateExpensesItemDialog = false },
-                onSaveUpdatedItem = { },
+                onSaveUpdatedItem = { it ->
+                    viewModel.updateProjectExpensesItem(
+                        projectId = projectId,
+                        expensesId = it.id,
+                        categoryName = it.categoryName,
+                        name = it.name,
+                        amount = it.amount
+                    )
+                    showUpdateExpensesItemDialog = false
+                },
             )
         }
     }
@@ -592,7 +601,10 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 title = "Update todolist item",
                 loading = false,
                 onDismiss = { showUpdateTodolistItemDialog = false },
-                onSaveUpdatedItem = { it -> viewModel.updateTodolistItemById(projectId,it) },
+                onSaveUpdatedItem = { it ->
+                    viewModel.updateTodolistItemById(projectId,it)
+                    showUpdateTodolistItemDialog = false
+                },
             )
         }
     }
@@ -605,7 +617,11 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 title = state.title,
                 description = "Delete this todo item",
                 onDismiss = { showDeleteTodolistItemDialog = false },
-                onDelete = { viewModel.deleteTodolistItemById(state.id) },
+                onDelete = {
+                    viewModel.deleteTodolistItemById(state.id)
+                    deleteTodolistOrExpenseItemNameState = null
+                    showDeleteTodolistItemDialog = false
+                },
             )
         }
     }
@@ -618,7 +634,11 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 title = state.title,
                 description = "Delete this expense item",
                 onDismiss = { showDeleteExpensesItemDialog = false },
-                onDelete = { viewModel.deleteExpenseItemById(state.id) },
+                onDelete = {
+                    viewModel.deleteExpenseItemById(state.id)
+                    deleteTodolistOrExpenseItemNameState = null
+                    showDeleteExpensesItemDialog = false
+                },
             )
         }
     }
@@ -638,6 +658,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                         name = name,
                         amount = amount
                     )
+                    showAddExpensesItemDialog = false
                 }
             )
         }
@@ -657,6 +678,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                         categoryName = state.name,
                         name = name
                     )
+                    showAddTodolistItemDialog = false
                 }
             )
         }

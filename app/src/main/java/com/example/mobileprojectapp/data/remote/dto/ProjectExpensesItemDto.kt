@@ -35,7 +35,7 @@ data class UpdateProjectExpenseItemRequestDto(
     val name: String,
 
     @SerializedName("amount")
-    val amount: Double,
+    val amount: Long,
 
     @SerializedName("category_name")
     val categoryName: String

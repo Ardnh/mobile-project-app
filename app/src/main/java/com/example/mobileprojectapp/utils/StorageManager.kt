@@ -91,7 +91,7 @@ class SecureStorageManager(private val context: Context) {
 
     fun saveString(key: String, value: String) {
         try {
-            sharedPreferences.edit().putString(key, value).apply()
+            sharedPreferences.edit { putString(key, value) }
         } catch (e: Exception) {
             Log.e(TAG, "Error saving string for key: $key", e)
         }
@@ -110,7 +110,7 @@ class SecureStorageManager(private val context: Context) {
 
     fun saveInt(key: String, value: Int) {
         try {
-            sharedPreferences.edit().putInt(key, value).apply()
+            sharedPreferences.edit { putInt(key, value) }
         } catch (e: Exception) {
             Log.e(TAG, "Error saving int for key: $key", e)
         }
@@ -129,7 +129,7 @@ class SecureStorageManager(private val context: Context) {
 
     fun saveBoolean(key: String, value: Boolean) {
         try {
-            sharedPreferences.edit().putBoolean(key, value).apply()
+            sharedPreferences.edit { putBoolean(key, value) }
         } catch (e: Exception) {
             Log.e(TAG, "Error saving boolean for key: $key", e)
         }
@@ -148,7 +148,7 @@ class SecureStorageManager(private val context: Context) {
 
     fun saveFloat(key: String, value: Float) {
         try {
-            sharedPreferences.edit().putFloat(key, value).apply()
+            sharedPreferences.edit { putFloat(key, value) }
         } catch (e: Exception) {
             Log.e(TAG, "Error saving float for key: $key", e)
         }
@@ -167,7 +167,7 @@ class SecureStorageManager(private val context: Context) {
 
     fun saveLong(key: String, value: Long) {
         try {
-            sharedPreferences.edit().putLong(key, value).apply()
+            sharedPreferences.edit { putLong(key, value) }
         } catch (e: Exception) {
             Log.e(TAG, "Error saving long for key: $key", e)
         }
@@ -186,7 +186,7 @@ class SecureStorageManager(private val context: Context) {
 
     fun saveStringSet(key: String, value: Set<String>) {
         try {
-            sharedPreferences.edit().putStringSet(key, value).apply()
+            sharedPreferences.edit { putStringSet(key, value) }
         } catch (e: Exception) {
             Log.e(TAG, "Error saving string set for key: $key", e)
         }
@@ -220,7 +220,7 @@ class SecureStorageManager(private val context: Context) {
      */
     fun remove(key: String) {
         try {
-            sharedPreferences.edit().remove(key).apply()
+            sharedPreferences.edit { remove(key) }
         } catch (e: Exception) {
             Log.e(TAG, "Error removing key: $key", e)
         }

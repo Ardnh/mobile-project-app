@@ -40,6 +40,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.mobileprojectapp.domain.model.ExpensesItem
 import com.example.mobileprojectapp.presentation.components.form.CustomTextField
+import com.example.mobileprojectapp.utils.toCleanAmount
 
 @Composable
 fun UpdateExpensesItemDialog(
@@ -53,7 +54,13 @@ fun UpdateExpensesItemDialog(
     var updateItemState by remember { mutableStateOf<ExpensesItem?>(null) }
 
     LaunchedEffect(item) {
-        updateItemState = item
+        updateItemState = ExpensesItem(
+            id = item.id,
+            projectExpensesId = item.projectExpensesId,
+            name = item.name,
+            amount = item.amount.toCleanAmount(),
+            categoryName = item.categoryName
+        )
     }
 
     Dialog(
@@ -178,7 +185,11 @@ fun UpdateExpensesItemDialog(
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         TextButton(
-                            onClick = {  },
+                            onClick = {
+                                updateItemState?.let { it ->
+                                    onSaveUpdatedItem(it)
+                                }
+                            },
                             enabled = true,
                             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
                             modifier = Modifier

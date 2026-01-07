@@ -5,6 +5,6 @@ import com.example.mobileprojectapp.data.remote.dto.UpdateProjectExpenseItemRequ
 
 interface ProjectExpensesItemRepository {
     suspend fun createProjectExpensesItem(projectExpensesId: String, name: String, amount: Long, categoryName: String) : Result<Unit>
-    suspend fun updateProjectExpensesItem(id: String, req: UpdateProjectExpenseItemRequestDto) : Result<Unit>
+    suspend fun updateProjectExpensesItem(id: String, name: String, amount: Long, categoryName: String) : Result<Unit>
     suspend fun deleteProjectExpensesItem(id: String) : Result<Unit>
 }
