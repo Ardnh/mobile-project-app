@@ -584,6 +584,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                     viewModel.updateProjectExpensesItem(
                         projectId = projectId,
                         expensesId = it.id,
+                        projectExpenseId = it.projectExpensesId,
                         categoryName = it.categoryName,
                         name = it.name,
                         amount = it.amount
@@ -618,7 +619,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 description = "Delete this todo item",
                 onDismiss = { showDeleteTodolistItemDialog = false },
                 onDelete = {
-                    viewModel.deleteTodolistItemById(state.id)
+                    viewModel.deleteTodolistItemById(projectId, state.id)
                     deleteTodolistOrExpenseItemNameState = null
                     showDeleteTodolistItemDialog = false
                 },
@@ -635,7 +636,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 description = "Delete this expense item",
                 onDismiss = { showDeleteExpensesItemDialog = false },
                 onDelete = {
-                    viewModel.deleteExpenseItemById(state.id)
+                    viewModel.deleteExpenseItemById(projectId, state.id)
                     deleteTodolistOrExpenseItemNameState = null
                     showDeleteExpensesItemDialog = false
                 },

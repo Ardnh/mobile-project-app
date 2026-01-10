@@ -39,11 +39,11 @@ class ProjectExpenseItemRepositoryImpl @Inject constructor(private val api : Api
         }
     }
 
-    override suspend fun updateProjectExpensesItem(id: String, name: String, amount: Long, categoryName: String): Result<Unit> {
+    override suspend fun updateProjectExpensesItem(id: String, projectExpeseId: String, name: String, amount: Long, categoryName: String): Result<Unit> {
         return try {
 
             val req = UpdateProjectExpenseItemRequestDto(
-                projectExpenseId = id,
+                projectExpenseId = projectExpeseId,
                 name = name,
                 amount = amount,
                 categoryName = categoryName

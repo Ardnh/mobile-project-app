@@ -242,95 +242,209 @@ class ProjectDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Membuat kategori expenses baru untuk project
+     *
+     * @param projectId ID project yang akan ditambahkan expenses-nya
+     * @param name Nama kategori expenses
+     */
     fun createProjectExpenses(projectId: String?, name: String){
         viewModelScope.launch {
             viewModelScope.launch {
                 try {
+                    Log.d("CREATE_EXPENSES", "Starting createProjectExpenses")
+                    Log.d("CREATE_EXPENSES", "ProjectId: $projectId, Name: $name")
 
                     if (_createExpensesState.value is State.Loading) {
-                        Log.w("CREATE PROJECT EXPENSES", "Already processing, skipping")
+                        Log.w("CREATE_EXPENSES", "Already processing, skipping duplicate request")
                         return@launch
                     }
 
                     if(projectId == null) {
-                        _createExpensesState.value = State.Error("Project ID id null")
+                        Log.e("CREATE_EXPENSES", "Project ID is null")
+                        _createExpensesState.value = State.Error("Project ID is null")
                         return@launch
                     }
 
-                    val result = projectExpensesRepository.createProjectExpenses(projectId = projectId, name = name)
+                    Log.d("CREATE_EXPENSES", "Setting state to Loading")
+                    _createExpensesState.value = State.Loading
+
+                    Log.d("CREATE_EXPENSES", "Calling repository.createProjectExpenses")
+                    val result = projectExpensesRepository.createProjectExpenses(
+                        projectId = projectId,
+                        name = name
+                    )
+
                     result.fold(
                         onSuccess = {
+                            Log.d("CREATE_EXPENSES", "Successfully created expenses category")
+                            Log.d("CREATE_EXPENSES", "Response: $it")
                             _createExpensesState.value = State.Success(Unit)
                         },
                         onFailure = { throwable ->
+                            Log.e("CREATE_EXPENSES", "Failed to create expenses category")
+                            Log.e("CREATE_EXPENSES", "Error: ${throwable.message}", throwable)
                             _createExpensesState.value = State.Error(throwable.message ?: "Unknown Error")
                         }
                     )
                 } catch (e: Exception) {
+                    Log.e("CREATE_EXPENSES", "Exception occurred: ${e.message}", e)
                     _createExpensesState.value = State.Error(e.message ?: "Unknown Error")
                 } finally {
-                    projectId?.let { getProjectsById(projectId) }
+                    Log.d("CREATE_EXPENSES", "Refreshing project data")
+                    projectId?.let {
+                        getProjectsById(projectId)
+                        Log.d("CREATE_EXPENSES", "Project refresh completed")
+                    }
                 }
             }
         }
     }
 
-    fun createProjectExpensesItem(projectId: String?, expensesId: String, categoryName: String, name: String, amount: String){
+    /**
+     * Membuat item baru dalam kategori expenses
+     *
+     * @param projectId ID project untuk refresh data setelah create
+     * @param expensesId ID kategori expenses tempat item akan ditambahkan
+     * @param categoryName Nama kategori expenses
+     * @param name Nama item expenses
+     * @param amount Jumlah biaya (dalam string, akan dikonversi ke Long)
+     */
+    fun createProjectExpensesItem(
+        projectId: String?,
+        expensesId: String,
+        categoryName: String,
+        name: String,
+        amount: String
+    ){
         viewModelScope.launch {
             try {
+                Log.d("CREATE_EXPENSE_ITEM", "Starting createProjectExpensesItem")
+                Log.d("CREATE_EXPENSE_ITEM", "ProjectId: $projectId")
+                Log.d("CREATE_EXPENSE_ITEM", "ExpensesId: $expensesId")
+                Log.d("CREATE_EXPENSE_ITEM", "CategoryName: $categoryName")
+                Log.d("CREATE_EXPENSE_ITEM", "Name: $name")
+                Log.d("CREATE_EXPENSE_ITEM", "Amount: $amount")
+
                 if (_createExpenseItemState.value is State.Loading) {
-                    Log.w("CREATE PROJECT EXPENSES", "Already processing, skipping")
+                    Log.w("CREATE_EXPENSE_ITEM", "Already processing, skipping duplicate request")
                     return@launch
                 }
 
+                Log.d("CREATE_EXPENSE_ITEM", "Setting state to Loading")
+                _createExpenseItemState.value = State.Loading
+
+                Log.d("CREATE_EXPENSE_ITEM", "Converting amount to Long")
+                val amountLong = amount.toLong()
+                Log.d("CREATE_EXPENSE_ITEM", "Amount converted: $amountLong")
+
+                Log.d("CREATE_EXPENSE_ITEM", "Calling repository.createProjectExpensesItem")
                 val result = projectExpensesItemRepository.createProjectExpensesItem(
                     projectExpensesId = expensesId,
                     name = name,
-                    amount = amount.toLong(),
+                    amount = amountLong,
                     categoryName = categoryName
                 )
+
                 result.fold(
                     onSuccess = {
+                        Log.d("CREATE_EXPENSE_ITEM", "Successfully created expense item")
+                        Log.d("CREATE_EXPENSE_ITEM", "Response: $it")
                         _createExpenseItemState.value = State.Success(Unit)
                     },
                     onFailure = { throwable ->
+                        Log.e("CREATE_EXPENSE_ITEM", "Failed to create expense item")
+                        Log.e("CREATE_EXPENSE_ITEM", "Error: ${throwable.message}", throwable)
                         _createExpenseItemState.value = State.Error(throwable.message ?: "Unknown Error")
                     }
                 )
+            } catch(e: NumberFormatException){
+                Log.e("CREATE_EXPENSE_ITEM", "Invalid amount format: $amount", e)
+                _createExpenseItemState.value = State.Error("Invalid amount format")
             } catch(e: Exception){
+                Log.e("CREATE_EXPENSE_ITEM", "Exception occurred: ${e.message}", e)
                 _createExpenseItemState.value = State.Error(e.message ?: "Unknown Error")
             } finally {
-                projectId?.let { getProjectsById(projectId) }
+                Log.d("CREATE_EXPENSE_ITEM", "Refreshing project data")
+                projectId?.let {
+                    getProjectsById(projectId)
+                    Log.d("CREATE_EXPENSE_ITEM", "Project refresh completed")
+                } ?: Log.w("CREATE_EXPENSE_ITEM", "ProjectId is null, skipping refresh")
             }
         }
     }
 
-    fun updateProjectExpensesItem(projectId: String?, expensesId: String, categoryName: String, name: String, amount: String){
+    /**
+     * Mengupdate item expenses yang sudah ada
+     *
+     * @param projectId ID project untuk refresh data setelah update
+     * @param expensesId ID item expenses yang akan diupdate
+     * @param categoryName Nama kategori expenses
+     * @param name Nama item expenses baru
+     * @param amount Jumlah biaya baru (dalam string, akan dikonversi ke Long)
+     */
+    fun updateProjectExpensesItem(
+        projectId: String?,
+        expensesId: String,
+        projectExpenseId: String,
+        categoryName: String,
+        name: String,
+        amount: String
+    ){
         viewModelScope.launch {
             try {
+                Log.d("UPDATE_EXPENSE_ITEM", "Starting updateProjectExpensesItem")
+                Log.d("UPDATE_EXPENSE_ITEM", "ProjectId: $projectId")
+                Log.d("UPDATE_EXPENSE_ITEM", "ExpensesId: $expensesId")
+                Log.d("UPDATE_EXPENSE_ITEM", "CategoryName: $categoryName")
+                Log.d("UPDATE_EXPENSE_ITEM", "Name: $name")
+                Log.d("UPDATE_EXPENSE_ITEM", "Amount: $amount")
+
                 if (_updateExpenseItemState.value is State.Loading) {
-                    Log.w("CREATE PROJECT EXPENSES", "Already processing, skipping")
+                    Log.w("UPDATE_EXPENSE_ITEM", "Already processing, skipping duplicate request")
                     return@launch
                 }
 
+                Log.d("UPDATE_EXPENSE_ITEM", "Setting state to Loading")
+                _updateExpenseItemState.value = State.Loading
+
+                Log.d("UPDATE_EXPENSE_ITEM", "Converting amount to Long")
+                val amountLong = amount.toLong()
+                Log.d("UPDATE_EXPENSE_ITEM", "Amount converted: $amountLong")
+
+                Log.d("UPDATE_EXPENSE_ITEM", "Calling repository.updateProjectExpensesItem")
                 val result = projectExpensesItemRepository.updateProjectExpensesItem(
                     id = expensesId,
+                    projectExpeseId = projectExpenseId,
                     name = name,
-                    amount = amount.toLong(),
+                    amount = amountLong,
                     categoryName = categoryName
                 )
+
                 result.fold(
                     onSuccess = {
+                        Log.d("UPDATE_EXPENSE_ITEM", "Successfully updated expense item")
+                        Log.d("UPDATE_EXPENSE_ITEM", "Response: $it")
                         _updateExpenseItemState.value = State.Success(Unit)
                     },
                     onFailure = { throwable ->
+                        Log.e("UPDATE_EXPENSE_ITEM", "Failed to update expense item")
+                        Log.e("UPDATE_EXPENSE_ITEM", "Error: ${throwable.message}", throwable)
                         _updateExpenseItemState.value = State.Error(throwable.message ?: "Unknown Error")
                     }
                 )
+            } catch(e: NumberFormatException){
+                Log.e("UPDATE_EXPENSE_ITEM", "Invalid amount format: $amount", e)
+                _updateExpenseItemState.value = State.Error("Invalid amount format")
             } catch(e: Exception){
+                Log.e("UPDATE_EXPENSE_ITEM", "Exception occurred: ${e.message}", e)
                 _updateExpenseItemState.value = State.Error(e.message ?: "Unknown Error")
             } finally {
-                projectId?.let { getProjectsById(projectId) }
+                Log.d("UPDATE_EXPENSE_ITEM", "Refreshing project data")
+                projectId?.let {
+                    getProjectsById(projectId)
+                    Log.d("UPDATE_EXPENSE_ITEM", "Project refresh completed")
+                } ?: Log.w("UPDATE_EXPENSE_ITEM", "ProjectId is null, skipping refresh")
             }
         }
     }
@@ -474,11 +588,16 @@ class ProjectDetailsViewModel @Inject constructor(
         }
     }
 
-    fun deleteTodolistItemById(id: String) {
+    fun deleteTodolistItemById(projectId: String?, id: String) {
         viewModelScope.launch {
             try {
                 if (_deleteTodolistItemState.value is State.Loading) {
                     Log.w("DELETE_TODOLIST", "Delete already in progress, skipping. id=$id")
+                    return@launch
+                }
+
+                if(projectId == null){
+                    Log.w("Delete PROJECT", "Project ID NULL")
                     return@launch
                 }
 
@@ -490,6 +609,7 @@ class ProjectDetailsViewModel @Inject constructor(
                 result.fold(
                     onSuccess = {
                         Log.d("DELETE_TODOLIST", "Successfully deleted todolist item. id=$id")
+                        getProjectsById(projectId)
                         _deleteTodolistItemState.value = State.Idle
                     },
                     onFailure = { throwable ->
@@ -504,13 +624,12 @@ class ProjectDetailsViewModel @Inject constructor(
                 )
             } catch (e: Exception) {
                 Log.e("DELETE_TODOLIST", "Unexpected error. id=$id", e)
-                _deleteTodolistItemState.value =
-                    State.Error(e.message ?: "Unknown Error")
+                _deleteTodolistItemState.value = State.Error(e.message ?: "Unknown Error")
             }
         }
     }
 
-    fun deleteExpenseItemById(id: String) {
+    fun deleteExpenseItemById(projectId: String?, id: String) {
         viewModelScope.launch {
             try {
                 if (_deleteExpenseItemState.value is State.Loading) {
@@ -540,8 +659,11 @@ class ProjectDetailsViewModel @Inject constructor(
                 )
             } catch (e: Exception) {
                 Log.e("DELETE_EXPENSE", "Unexpected error. id=$id", e)
-                _deleteExpenseItemState.value =
-                    State.Error(e.message ?: "Unknown Error")
+                _deleteExpenseItemState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                projectId?.let { it ->
+                    getProjectsById(it)
+                }
             }
         }
     }
