@@ -42,6 +42,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mobileprojectapp.domain.model.ExpensesItem
+import com.example.mobileprojectapp.presentation.components.button.ButtonContent
+import com.example.mobileprojectapp.presentation.components.button.ButtonIcon
+import com.example.mobileprojectapp.presentation.components.view.EmptyProjectsView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,7 +55,7 @@ fun ExpensesBottomSheet(
     expensesList: List<ExpensesItem> = emptyList(),
     onClickTrigger: () -> Unit,
     onDismiss: () -> Unit,
-    onUpdateExpenses: (todo: ExpensesItem, isComplete: Boolean) -> Unit,
+    onUpdateCategoryExpenses: () -> Unit,
     onAddNewExpensesItem: () -> Unit,
     onUpdateExpensesItem: (expense: ExpensesItem) -> Unit,
     onDeleteExpensesItem: (id: String, title: String) -> Unit,
@@ -109,16 +112,37 @@ fun ExpensesBottomSheet(
                 contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp)
             ) {
                 item {
-                    Text(
-                        text = title,
-                        modifier = Modifier
-                            .weight(1f),
-                        maxLines = 2,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = title,
+                            modifier = Modifier
+                                .weight(1f),
+                            maxLines = 2,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Row {
+                            ButtonIcon(
+                                content = ButtonContent.IconOnly(
+                                    icon = Icons.Rounded.Delete,
+                                ),
+                                onClick = { }
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            ButtonIcon(
+                                content = ButtonContent.IconOnly(
+                                    icon = Icons.Rounded.Edit,
+                                ),
+                                onClick = { onUpdateCategoryExpenses() }
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(10.dp))
                     HorizontalDivider()
                     Spacer(modifier = Modifier.height(10.dp))
@@ -156,67 +180,78 @@ fun ExpensesBottomSheet(
                     }
                 }
 
-                items(expensesList) { it ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(40.dp)
-                    ) {
-                        Text(
-                            text = it.name,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(vertical = 5.dp)
+                if(expensesList.isEmpty()){
+                    item{
+                        EmptyProjectsView(
+                            title = "Expense item is empty",
+                            description = "Start create new expense item",
+                            buttonLabel = "New expense item",
+                            onClickBtn = { onAddNewExpensesItem() }
                         )
-
-                        Text(
-                            text = "$ ${it.amount}",
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .padding(vertical = 5.dp)
-                        )
-                        VerticalDivider(
-                            color = Color.Gray,
-                            modifier = Modifier
-                                .padding(horizontal = 10.dp, vertical = 5.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .clickable{
-                                    onUpdateExpensesItem(it)
-                                }
-                        ){
-                            Icon(
-                                imageVector = Icons.Rounded.Edit,
-                                contentDescription = "Edit expense item",
-                                modifier = Modifier
-                                    .padding(5.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .clickable{
-                                    onDeleteExpensesItem(it.id, it.name)
-                                }
-                        ){
-                            Icon(
-                                imageVector = Icons.Rounded.Delete,
-                                contentDescription = "Delete expense item",
-                                modifier = Modifier
-                                    .padding(5.dp)
-                            )
-                        }
                     }
-                    HorizontalDivider()
+                } else {
+                    items(expensesList) { it ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(40.dp)
+                        ) {
+                            Text(
+                                text = it.name,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(vertical = 5.dp)
+                            )
+
+                            Text(
+                                text = "$ ${it.amount}",
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier
+                                    .padding(vertical = 5.dp)
+                            )
+                            VerticalDivider(
+                                color = Color.Gray,
+                                modifier = Modifier
+                                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                                    .clip(RoundedCornerShape(20.dp))
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .clickable{
+                                        onUpdateExpensesItem(it)
+                                    }
+                            ){
+                                Icon(
+                                    imageVector = Icons.Rounded.Edit,
+                                    contentDescription = "Edit expense item",
+                                    modifier = Modifier
+                                        .padding(5.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .clickable{
+                                        onDeleteExpensesItem(it.id, it.name)
+                                    }
+                            ){
+                                Icon(
+                                    imageVector = Icons.Rounded.Delete,
+                                    contentDescription = "Delete expense item",
+                                    modifier = Modifier
+                                        .padding(5.dp)
+                                )
+                            }
+                        }
+                        HorizontalDivider()
+                    }
                 }
             }
         }

@@ -92,9 +92,10 @@ import com.example.mobileprojectapp.presentation.components.dialog.BaseDeleteDia
 import com.example.mobileprojectapp.presentation.components.dialog.CrateTodolistItemDialog
 import com.example.mobileprojectapp.presentation.components.dialog.CreateExpensesItemDialog
 import com.example.mobileprojectapp.presentation.components.dialog.DeleteProjectDialog
+import com.example.mobileprojectapp.presentation.components.dialog.UpdateCategoryExpensesDialog
+import com.example.mobileprojectapp.presentation.components.dialog.UpdateCategoryTodolistDialog
 import com.example.mobileprojectapp.presentation.components.dialog.UpdateExpensesItemDialog
 import com.example.mobileprojectapp.presentation.components.dialog.UpdateProjectDialog
-import com.example.mobileprojectapp.presentation.components.dialog.UpdateTodolistDialog
 import com.example.mobileprojectapp.presentation.components.dialog.UpdateTodolistItemDialog
 import com.example.mobileprojectapp.presentation.components.view.EmptyProjectsView
 import com.example.mobileprojectapp.presentation.components.view.ErrorView
@@ -128,12 +129,16 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     var addNewProjectTodolistItemState by remember { mutableStateOf<ProjectTodolist?>(null) }
     var addNewProjectExpensesItemState by remember { mutableStateOf<ProjectExpense?>(null) }
     var deleteTodolistOrExpenseItemNameState by remember { mutableStateOf<DeleteItem?>(null) }
+    var updateCategoryTodolistOrExpensesState by remember { mutableStateOf<UpdateCategoryTodolist?>(null) }
+    var deleteCategoryInfo by remember { mutableStateOf<DeleteCategoryInfo?>(null) }
 
     var isRefreshing by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableIntStateOf(0) }
     var todolistActiveIndex by remember { mutableIntStateOf(-1) }
     var isProjectMenuExpanded by remember { mutableStateOf(false) }
     var showUpdateProjectDialog by remember { mutableStateOf(false) }
+    var showUpdateCategoryTodolist by remember { mutableStateOf(false) }
+    var showUpdateCategoryExpense by remember { mutableStateOf(false) }
     var showDeleteProjectDialog by remember { mutableStateOf(false) }
     var showAddTodolistOrExpensesDialog by remember { mutableStateOf(false) }
     var showAddTodolistItemDialog by remember { mutableStateOf(false) }
@@ -142,6 +147,9 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     var showUpdateExpensesItemDialog by remember { mutableStateOf(false) }
     var showDeleteTodolistItemDialog by remember { mutableStateOf(false) }
     var showDeleteExpensesItemDialog by remember { mutableStateOf(false) }
+    var showDeleteCategoryTodolistDialog by remember { mutableStateOf(false) }
+    var showDeleteCategoryExpenseDialog by remember { mutableStateOf(false) }
+
     val tabs = listOf("Todolist", "Expenses")
 
     LaunchedEffect(createTodolistItemState) {
@@ -176,8 +184,6 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
             showAddTodolistOrExpensesDialog = false
         }
     }
-
-
 
     Scaffold(
         floatingActionButton = {
@@ -499,16 +505,27 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                     itemsIndexed(project.projectTodolists) { parentIndex, todo ->
                                         TodolistBottomSheet(
                                             showBottomSheet = todolistActiveIndex == parentIndex,
+                                            categoryTodolistId = todo.id,
                                             title = todo.name,
                                             todoInfo = "${todo.totalCompletedTodo}/${todo.totalTodo}",
                                             category = todo.name,
                                             todoList = todo.todolistItems,
                                             onClickTrigger = { todolistActiveIndex = parentIndex },
                                             onDismiss = { todolistActiveIndex = -1 },
-                                            onUpdateTodo = { todo, isComplete -> },
                                             onAddNewTodolistItem = {
                                                 addNewProjectTodolistItemState = todo
                                                 showAddTodolistItemDialog = true
+                                            },
+                                            onUpdateCategoryTodolist = {
+                                                updateCategoryTodolistOrExpensesState = UpdateCategoryTodolist(
+                                                        id = todo.id,
+                                                        projectId = todo.projectId,
+                                                        name = todo.name
+                                                    )
+                                                showUpdateCategoryTodolist = true
+                                            },
+                                            onUpdateTodolistItemStatus = { it ->
+                                                viewModel.updateTodolistItemById(projectId,it)
                                             },
                                             onUpdateTodolistItem = { todoItem ->
                                                 updateTodolistItemState = todoItem
@@ -548,7 +565,14 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                 addNewProjectExpensesItemState = expense
                                                 showAddExpensesItemDialog = true
                                             },
-                                            onUpdateExpenses = { todo, isComplete -> },
+                                            onUpdateCategoryExpenses = {
+                                                updateCategoryTodolistOrExpensesState = UpdateCategoryTodolist(
+                                                    id = expense.id,
+                                                    projectId = expense.projectId,
+                                                    name = expense.name
+                                                )
+                                                showUpdateCategoryExpense = true
+                                            },
                                             onUpdateExpensesItem = { expense ->
                                                 updateExpenseItemState = expense
                                                 showUpdateExpensesItemDialog = true
@@ -570,6 +594,68 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                     State.Idle -> {}
                 }
             }
+        }
+    }
+
+    if(showDeleteCategoryTodolistDialog){
+        deleteCategoryInfo?.let { it ->
+            BaseDeleteDialog(
+                loading = false,
+                dialogTitle = "Category todolist",
+                title = it.name,
+                description = "Delete this todolist category",
+                onDismiss = { showDeleteCategoryTodolistDialog = false },
+                onDelete = {
+                    deleteCategoryInfo = null
+                    showDeleteCategoryTodolistDialog = false
+                },
+            )
+        }
+    }
+
+    if(showDeleteCategoryExpenseDialog){
+        deleteCategoryInfo?.let { it ->
+            BaseDeleteDialog(
+                loading = false,
+                dialogTitle = "Category Expense",
+                title = it.name,
+                description = "Delete this expense category",
+                onDismiss = { showDeleteCategoryExpenseDialog = false },
+                onDelete = {
+                    deleteTodolistOrExpenseItemNameState = null
+                    showDeleteCategoryExpenseDialog = false
+                },
+            )
+        }
+    }
+
+    if(showUpdateCategoryExpense){
+        updateCategoryTodolistOrExpensesState?.let { it ->
+            UpdateCategoryExpensesDialog(
+                title = "Update Category Expense",
+                item = it,
+                loading = false,
+                onDismiss = { showUpdateCategoryExpense = false },
+                onUpdateTodolist = { it ->
+                    viewModel.updateCategoryExpensesById(it)
+                    showUpdateCategoryExpense = false
+                }
+            )
+        }
+    }
+
+    if(showUpdateCategoryTodolist){
+        updateCategoryTodolistOrExpensesState?.let { it ->
+            UpdateCategoryTodolistDialog(
+                title = "Update Category Todolist",
+                item = it,
+                loading = false,
+                onDismiss = { showUpdateCategoryTodolist = false },
+                onUpdateTodolist = { it ->
+                    viewModel.updateCategoryTodolistById(it)
+                    showUpdateCategoryTodolist = false
+                }
+            )
         }
     }
 

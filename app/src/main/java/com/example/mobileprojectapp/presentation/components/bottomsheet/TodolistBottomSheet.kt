@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowRight
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
@@ -39,20 +40,25 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mobileprojectapp.domain.model.TodolistItem
+import com.example.mobileprojectapp.presentation.components.button.ButtonContent
+import com.example.mobileprojectapp.presentation.components.button.ButtonIcon
 import com.example.mobileprojectapp.presentation.components.view.EmptyProjectsView
+import com.example.mobileprojectapp.presentation.features.projectdetail.UpdateCategoryTodolist
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodolistBottomSheet(
     showBottomSheet: Boolean,
+    categoryTodolistId: String,
     title: String,
     todoInfo: String,
     category: String,
     todoList: List<TodolistItem> = emptyList(),
     onClickTrigger: () -> Unit,
     onDismiss: () -> Unit,
-    onUpdateTodo: (todo: TodolistItem, isComplete: Boolean) -> Unit,
+    onUpdateCategoryTodolist: () -> Unit,
     onAddNewTodolistItem: () -> Unit,
+    onUpdateTodolistItemStatus: (todo: TodolistItem) -> Unit,
     onUpdateTodolistItem: (todo: TodolistItem) -> Unit,
     onDeleteTodolistItem: (id: String, title: String) -> Unit
 ) {
@@ -60,6 +66,13 @@ fun TodolistBottomSheet(
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
+
+    fun updateTodolistItemStatus(todo: TodolistItem, isComplete: Boolean){
+        val newTodo = todo.copy(
+            isCompleted = isComplete
+        )
+        onUpdateTodolistItemStatus(newTodo)
+    }
 
     Box(
         modifier = Modifier
@@ -108,16 +121,39 @@ fun TodolistBottomSheet(
                 contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp)
             ) {
                 item {
-                    Text(
-                        text = title,
-                        modifier = Modifier
-                            .weight(1f),
-                        maxLines = 2,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary,
-                        overflow = TextOverflow.Ellipsis
-                    )
+
+                     Row(
+                         verticalAlignment = Alignment.CenterVertically
+                     ) {
+                         Text(
+                             text = title,
+                             modifier = Modifier
+                                 .weight(1f),
+                             maxLines = 2,
+                             fontSize = 20.sp,
+                             fontWeight = FontWeight.SemiBold,
+                             color = MaterialTheme.colorScheme.primary,
+                             overflow = TextOverflow.Ellipsis
+                         )
+
+
+                         Row {
+                             ButtonIcon(
+                                 content = ButtonContent.IconOnly(
+                                     icon = Icons.Rounded.Delete,
+                                 ),
+                                 onClick = { }
+                             )
+                             Spacer(modifier = Modifier.width(5.dp))
+                             ButtonIcon(
+                                 content = ButtonContent.IconOnly(
+                                     icon = Icons.Rounded.Edit,
+                                 ),
+                                 onClick = { onUpdateCategoryTodolist() }
+                             )
+                         }
+                     }
+
                     Spacer(modifier = Modifier.height(15.dp))
                     HorizontalDivider()
                     Spacer(modifier = Modifier.height(15.dp))
@@ -140,28 +176,13 @@ fun TodolistBottomSheet(
                                 .fillMaxWidth()
                                 .padding(bottom = 20.dp)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(MaterialTheme.colorScheme.primary)
-                                    .clickable{ onAddNewTodolistItem() }
-                            ){
-                                Row(
-                                    modifier = Modifier
-                                        .padding(horizontal = 10.dp, vertical = 5.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Add,
-                                        contentDescription = "Add new todo",
-                                        tint = Color.White
-                                    )
-
-                                    Text(
-                                        text = "Todo",
-                                        color = Color.White
-                                    )
-                                }
-                            }
+                            ButtonIcon(
+                                content = ButtonContent.IconAndText(
+                                    icon = Icons.Rounded.Add,
+                                    text = "Todo"
+                                ),
+                                onClick = { onAddNewTodolistItem() }
+                            )
                         }
                     }
 
@@ -174,7 +195,7 @@ fun TodolistBottomSheet(
                             Checkbox(
                                 checked = it.isCompleted,
                                 onCheckedChange = { value ->
-                                    onUpdateTodo(it, value)
+                                    updateTodolistItemStatus(it, value)
                                 }
                             )
                             Text(

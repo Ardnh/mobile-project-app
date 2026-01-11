@@ -449,33 +449,133 @@ class ProjectDetailsViewModel @Inject constructor(
         }
     }
 
-    fun updateProjectTodolistById(id: String, projectId: String?, name: String){
+    /**
+     * Mengupdate kategori todolist yang sudah ada
+     *
+     * Fungsi ini melakukan operasi update asynchronous pada kategori project todolist.
+     * Includes duplicate request prevention, comprehensive logging, error handling,
+     * dan automatic data refresh setelah update selesai.
+     *
+     * @param item Object [UpdateCategoryTodolist] yang berisi:
+     *   - id: ID unik dari todolist yang akan diupdate
+     *   - projectId: ID project parent untuk refresh data
+     *   - name: Nama kategori baru
+     *
+     * **Behavior:**
+     * - Mencegah duplicate request dengan mengecek state loading
+     * - Update [_createTodolistState] untuk reflect status operasi
+     * - Log setiap step untuk debugging
+     * - Automatically refresh project data setelah update
+     *
+     * **State Flow:**
+     * ```
+     * [Check Loading] -> [Update API] -> [Success/Error] -> [Refresh Data]
+     * ```
+     *
+     * **Example Usage:**
+     * ```kotlin
+     * val updateItem = UpdateCategoryTodolist(
+     *     id = "todo-123",
+     *     projectId = "proj-456",
+     *     name = "Updated Work Tasks"
+     * )
+     * viewModel.updateCategoryTodolistById(updateItem)
+     * ```
+     *
+     * @see UpdateCategoryTodolist
+     * @see State
+     * @see getProjectsById
+     */
+    fun updateCategoryTodolistById(item: UpdateCategoryTodolist) {
         viewModelScope.launch {
             try {
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Starting updateCategoryTodolistById")
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Id: ${item.id}")
+                Log.d("UPDATE_CATEGORY_TODOLIST", "ProjectId: ${item.projectId}")
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Name: ${item.name}")
 
+                // Prevent duplicate/concurrent update requests
                 if (_createTodolistState.value is State.Loading) {
-                    Log.w("CREATE PROJECT TODOLIST", "Already processing, skipping")
+                    Log.w("UPDATE_CATEGORY_TODOLIST", "Already processing, skipping duplicate request")
                     return@launch
                 }
 
-                if(projectId == null) {
-                    _createTodolistState.value = State.Error("Project ID id null")
-                    return@launch
-                }
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Setting state to Loading")
+                _createTodolistState.value = State.Loading
 
-                val result = projectTodolistRepository.updateProjectTodolist(id = id, projectId = projectId, name = name)
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Calling repository.updateProjectTodolist")
+                val result = projectTodolistRepository.updateProjectTodolist(
+                    id = item.id,
+                    projectId = item.projectId,
+                    name = item.name
+                )
+
                 result.fold(
                     onSuccess = {
+                        Log.d("UPDATE_CATEGORY_TODOLIST", "Successfully updated category todolist")
+                        Log.d("UPDATE_CATEGORY_TODOLIST", "Response: $it")
                         _createTodolistState.value = State.Success(Unit)
                     },
                     onFailure = { throwable ->
+                        Log.e("UPDATE_CATEGORY_TODOLIST", "Failed to update category todolist")
+                        Log.e("UPDATE_CATEGORY_TODOLIST", "Error: ${throwable.message}", throwable)
                         _createTodolistState.value = State.Error(throwable.message ?: "Unknown Error")
                     }
                 )
             } catch (e: Exception) {
+                Log.e("UPDATE_CATEGORY_TODOLIST", "Exception occurred: ${e.message}", e)
                 _createTodolistState.value = State.Error(e.message ?: "Unknown Error")
             } finally {
-                projectId?.let { getProjectsById(projectId) }
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Refreshing project data")
+                getProjectsById(item.projectId)
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Project refresh completed")
+            }
+        }
+    }
+
+    fun updateCategoryExpensesById(item: UpdateCategoryTodolist){
+        viewModelScope.launch {
+            try {
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Starting updateCategoryTodolistById")
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Id: ${item.id}")
+                Log.d("UPDATE_CATEGORY_TODOLIST", "ProjectId: ${item.projectId}")
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Name: ${item.name}")
+
+                // Prevent duplicate/concurrent update requests
+                if (_createTodolistState.value is State.Loading) {
+                    Log.w("UPDATE_CATEGORY_TODOLIST", "Already processing, skipping duplicate request")
+                    return@launch
+                }
+
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Setting state to Loading")
+                _createTodolistState.value = State.Loading
+
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Calling repository.updateProjectTodolist")
+                val result = projectExpensesRepository.updateProjectExpenses(
+                    id = item.id,
+                    projectId = item.projectId,
+                    name = item.name
+                )
+
+                result.fold(
+                    onSuccess = {
+                        Log.d("UPDATE_CATEGORY_TODOLIST", "Successfully updated category todolist")
+                        Log.d("UPDATE_CATEGORY_TODOLIST", "Response: $it")
+                        _createTodolistState.value = State.Success(Unit)
+                    },
+                    onFailure = { throwable ->
+                        Log.e("UPDATE_CATEGORY_TODOLIST", "Failed to update category todolist")
+                        Log.e("UPDATE_CATEGORY_TODOLIST", "Error: ${throwable.message}", throwable)
+                        _createTodolistState.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+            } catch (e: Exception) {
+                Log.e("UPDATE_CATEGORY_TODOLIST", "Exception occurred: ${e.message}", e)
+                _createTodolistState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Refreshing project data")
+                getProjectsById(item.projectId)
+                Log.d("UPDATE_CATEGORY_TODOLIST", "Project refresh completed")
             }
         }
     }
