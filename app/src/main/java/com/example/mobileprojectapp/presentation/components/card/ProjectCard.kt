@@ -57,7 +57,7 @@ fun ProjectCard(project: ProjectItem, onClick: (id: String) -> Unit){
             .padding(bottom = 5.dp)
             .height(120.dp)
             .clip(RoundedCornerShape(20.dp))
-            .clickable{
+            .clickable {
                 onClick(project.projectId)
             }
 
@@ -164,14 +164,14 @@ fun ProjectCard(project: ProjectItem, onClick: (id: String) -> Unit){
                     .weight(0.25f)
             ) {
                 CircularProgressIndicator(
-                    progress = { 0.74f },
+                    progress = { project.completionPercentage },
                     modifier = Modifier.size(64.dp),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.secondary,
                 )
 
                 Text(
-                    text = "74%",
+                    text = "${ (project.completionPercentage*100).toInt() }%",
                     color = MaterialTheme.colorScheme.tertiary
                 )
             }

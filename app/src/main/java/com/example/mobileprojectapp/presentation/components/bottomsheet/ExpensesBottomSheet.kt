@@ -56,6 +56,7 @@ fun ExpensesBottomSheet(
     onClickTrigger: () -> Unit,
     onDismiss: () -> Unit,
     onUpdateCategoryExpenses: () -> Unit,
+    onDeleteCategoryExpenses: () -> Unit,
     onAddNewExpensesItem: () -> Unit,
     onUpdateExpensesItem: (expense: ExpensesItem) -> Unit,
     onDeleteExpensesItem: (id: String, title: String) -> Unit,
@@ -131,7 +132,7 @@ fun ExpensesBottomSheet(
                                 content = ButtonContent.IconOnly(
                                     icon = Icons.Rounded.Delete,
                                 ),
-                                onClick = { }
+                                onClick = { onDeleteCategoryExpenses() }
                             )
                             Spacer(modifier = Modifier.width(5.dp))
                             ButtonIcon(

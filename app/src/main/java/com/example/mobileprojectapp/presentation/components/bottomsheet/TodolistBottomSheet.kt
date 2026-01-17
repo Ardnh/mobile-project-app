@@ -1,5 +1,6 @@
 package com.example.mobileprojectapp.presentation.components.bottomsheet
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +58,7 @@ fun TodolistBottomSheet(
     onClickTrigger: () -> Unit,
     onDismiss: () -> Unit,
     onUpdateCategoryTodolist: () -> Unit,
+    onDeleteCategoryTodolist: () -> Unit,
     onAddNewTodolistItem: () -> Unit,
     onUpdateTodolistItemStatus: (todo: TodolistItem) -> Unit,
     onUpdateTodolistItem: (todo: TodolistItem) -> Unit,
@@ -142,7 +144,7 @@ fun TodolistBottomSheet(
                                  content = ButtonContent.IconOnly(
                                      icon = Icons.Rounded.Delete,
                                  ),
-                                 onClick = { }
+                                 onClick = { onDeleteCategoryTodolist() }
                              )
                              Spacer(modifier = Modifier.width(5.dp))
                              ButtonIcon(

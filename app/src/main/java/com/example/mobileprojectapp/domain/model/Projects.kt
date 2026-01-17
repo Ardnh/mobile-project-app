@@ -16,7 +16,7 @@ data class ProjectItem(
     val totalTodolistItem: Long,
     val daysRemaining: Long,
     val daysRemainingStatus: String,
-    val completionPercentage: Long
+    val completionPercentage: Float
 )
 
 data class ProjectCategory (

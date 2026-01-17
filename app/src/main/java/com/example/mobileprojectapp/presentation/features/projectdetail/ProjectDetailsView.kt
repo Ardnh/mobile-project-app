@@ -439,8 +439,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                             .background(
                                                 if (selectedTab == index) ColorPalette.Gray300
                                                 else Color.Transparent
-                                            )
-                                        ,
+                                            ),
                                         text = {
                                             Box(
                                                 contentAlignment = Alignment.Center,
@@ -524,6 +523,13 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                     )
                                                 showUpdateCategoryTodolist = true
                                             },
+                                            onDeleteCategoryTodolist = {
+                                                deleteCategoryInfo = DeleteCategoryInfo(
+                                                    id = todo.id,
+                                                    name = todo.name
+                                                )
+                                                showDeleteCategoryTodolistDialog = true
+                                            },
                                             onUpdateTodolistItemStatus = { it ->
                                                 viewModel.updateTodolistItemById(projectId,it)
                                             },
@@ -573,6 +579,13 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                 )
                                                 showUpdateCategoryExpense = true
                                             },
+                                            onDeleteCategoryExpenses = {
+                                                deleteCategoryInfo = DeleteCategoryInfo(
+                                                    id = expense.id,
+                                                    name = expense.name
+                                                )
+                                                showDeleteCategoryExpenseDialog = true
+                                            },
                                             onUpdateExpensesItem = { expense ->
                                                 updateExpenseItemState = expense
                                                 showUpdateExpensesItemDialog = true
@@ -590,7 +603,6 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                             }
                         }
                     }
-
                     State.Idle -> {}
                 }
             }
@@ -606,8 +618,10 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 description = "Delete this todolist category",
                 onDismiss = { showDeleteCategoryTodolistDialog = false },
                 onDelete = {
+                    viewModel.deleteCategoryTodolistById(projectId = projectId, categoryTodolistId = it.id)
                     deleteCategoryInfo = null
                     showDeleteCategoryTodolistDialog = false
+                    todolistActiveIndex = -1
                 },
             )
         }
@@ -622,8 +636,10 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 description = "Delete this expense category",
                 onDismiss = { showDeleteCategoryExpenseDialog = false },
                 onDelete = {
-                    deleteTodolistOrExpenseItemNameState = null
+                    viewModel.deleteCategoryExpensesById(projectId = projectId, categoryExpensesId = it.id)
+                    deleteCategoryInfo = null
                     showDeleteCategoryExpenseDialog = false
+                    todolistActiveIndex = -1
                 },
             )
         }
@@ -773,22 +789,24 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
 
     if(showAddTodolistOrExpensesDialog && selectedTab == 0){
         AddTodolistDialog(
-            title = "Add new Todolist",
+            title = "Add category Todolist",
             loading = createTodolistState is State.Loading,
             onDismiss = { showAddTodolistOrExpensesDialog = false },
             onAddNewTodolist = { name ->
                 viewModel.createProjectTodolist(projectId, name)
+                showAddTodolistOrExpensesDialog = false
             },
         )
     }
 
     if(showAddTodolistOrExpensesDialog && selectedTab == 1){
         AddExpensesDialog(
-            title = "Add new Expenses",
+            title = "Add new category Expenses",
             loading =  createExpensesState is State.Loading,
             onDismiss = { showAddTodolistOrExpensesDialog = false },
             onAddNewExpenses = { name ->
                 viewModel.createProjectExpenses(projectId, name)
+                showAddTodolistOrExpensesDialog = false
             }
         )
     }
@@ -833,6 +851,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 onDeleteProject = {
                     viewModel.deleteProjectById(state.id)
                     showDeleteProjectDialog = false
+                    navController.previousBackStackEntry?.savedStateHandle?.set("refresh_needed", true)
                     navController.navigateUp()
                 }
             )

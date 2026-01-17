@@ -1,5 +1,7 @@
 package com.example.mobileprojectapp.presentation.features.home
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,11 +23,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -52,11 +57,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.mobileprojectapp.domain.model.ProjectCategory
 import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.domain.model.ProjectSummary
 import com.example.mobileprojectapp.domain.model.UserProfile
 import com.example.mobileprojectapp.presentation.components.card.CategoryCard
 import com.example.mobileprojectapp.presentation.components.card.ProjectCard
+import com.example.mobileprojectapp.presentation.components.dialog.CreateProjectDialog
 import com.example.mobileprojectapp.presentation.components.view.EmptyProjectsView
 import com.example.mobileprojectapp.presentation.components.view.ErrorView
 import com.example.mobileprojectapp.presentation.features.home.components.SummarySection
@@ -64,6 +71,7 @@ import com.example.mobileprojectapp.presentation.navigation.NavigationEvent
 import com.example.mobileprojectapp.utils.State
 import kotlinx.coroutines.flow.collectLatest
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltViewModel()){
@@ -72,13 +80,19 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
     val projectCategoryState by viewModel.projectCategory.collectAsState()
     val projectSummaryState by viewModel.projectSummary.collectAsState()
     val userProfileState by viewModel.userProfile.collectAsState()
+    val createProjectState by viewModel.createProjectState.collectAsState()
+
+
+    val refreshNeeded by navController.currentBackStackEntry
+        ?.savedStateHandle
+        ?.getStateFlow("refresh_needed", false)
+        ?.collectAsState() ?: remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     var isRefreshing by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(0) }
     var expanded by remember { mutableStateOf(false) }
-
-
+    var showAddNewProjectDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = "navigation") {
         viewModel.navigationEvent.collectLatest { event ->
@@ -101,9 +115,20 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadInitialData()
+    LaunchedEffect(refreshNeeded) {
+        if (refreshNeeded) {
+            viewModel.loadInitialData() // Refresh data
+
+            // Reset flag
+            navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.set("refresh_needed", false)
+        }
     }
+
+//    LaunchedEffect(Unit) {
+//        viewModel.loadInitialData()
+//    }
 
     LaunchedEffect(isRefreshing) {
         viewModel.loadInitialData()
@@ -111,6 +136,22 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
     }
 
     Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    showAddNewProjectDialog = true
+                },
+                modifier = Modifier.size(56.dp),
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = "Add project",
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+        },
         topBar = {
             TopAppBar(
                 title = { Text("") },
@@ -318,5 +359,26 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
 
             }
         }
+    }
+
+    if(showAddNewProjectDialog){
+
+        val categoryList = if(projectCategoryState is State.Success) (projectCategoryState as State.Success<List<ProjectCategory>>).data.map { it -> it.categoryName } else emptyList()
+        CreateProjectDialog(
+            loading = createProjectState,
+            onDismiss = { showAddNewProjectDialog = false },
+            categoryList = categoryList,
+            onCreateProject = { name, budget, startDate, endDate, category ->
+                viewModel.createProjectByUserId(
+                    name = name,
+                    categoryName = category,
+                    budget = budget,
+                    startDate = startDate,
+                    endDate = endDate
+                )
+                showAddNewProjectDialog = false
+            }
+        )
+
     }
 }

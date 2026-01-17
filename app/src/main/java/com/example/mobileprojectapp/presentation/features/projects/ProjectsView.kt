@@ -247,7 +247,7 @@ fun ProjectsView(navController: NavHostController, viewModel: ProjectsViewModel 
                                     title = "Project is Empty",
                                     description = "Start create new project",
                                     buttonLabel = "New project",
-                                    onClickBtn = { navController.navigate("ProjectsView") }
+                                    onClickBtn = { showAddNewProjectDialog = true }
                                 )
                             }
                         } else {
@@ -276,7 +276,6 @@ fun ProjectsView(navController: NavHostController, viewModel: ProjectsViewModel 
     }
 
     if(showAddNewProjectDialog){
-
         val categoryList = if(projectCategoryState is State.Success) (projectCategoryState as State.Success<List<ProjectCategory>>).data.map { it -> it.categoryName } else emptyList()
         CreateProjectDialog(
             loading = createProjectState,

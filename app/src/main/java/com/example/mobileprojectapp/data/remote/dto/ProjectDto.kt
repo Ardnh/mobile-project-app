@@ -73,7 +73,7 @@ data class ProjectByUserIdDto(
     @SerializedName("days_remaining_status")
     val daysRemainingStatus: String,
     @SerializedName("completion_percentage")
-    val completionPercentage: Long
+    val completionPercentage: Float
 )
 
 data class ProjectCategoryByUserIdDto(

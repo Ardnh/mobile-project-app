@@ -3,6 +3,7 @@ package com.example.mobileprojectapp.presentation.features.home
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mobileprojectapp.domain.model.CreateProjectRequest
 import com.example.mobileprojectapp.domain.model.ProjectCategory
 import com.example.mobileprojectapp.domain.model.ProjectItem
 import com.example.mobileprojectapp.domain.model.ProjectSummary
@@ -12,6 +13,7 @@ import com.example.mobileprojectapp.presentation.navigation.NavigationEvent
 import com.example.mobileprojectapp.utils.HttpAbortManager
 import com.example.mobileprojectapp.utils.SecureStorageManager
 import com.example.mobileprojectapp.utils.State
+import com.example.mobileprojectapp.utils.toLong
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +47,8 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
 
     private val _projectList = MutableStateFlow<State<List<ProjectItem>>>(State.Idle)
     val projectList = _projectList.asStateFlow()
+    private val _createProjectState = MutableStateFlow<State<Unit>>(State.Idle)
+    val createProjectState = _createProjectState.asStateFlow()
 
     // -----------------------------
     // UI Event Actions
@@ -88,6 +92,57 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
             getSummaryByUserId()
             getProjectCategory()
             getProjectsByUserId()
+        }
+    }
+
+    fun createProjectByUserId(
+        name: String,
+        categoryName: String,
+        budget: String,
+        startDate: String,
+        endDate: String,
+    ){
+        viewModelScope.launch {
+            try {
+
+                if (_createProjectState.value is State.Loading) {
+                    Log.w("CREATE PROJECT", "Already processing, skipping")
+                    return@launch
+                }
+
+                _createProjectState.value = State.Loading
+                val userId = storage.getUserId()
+                if(userId == null){
+                    _createProjectState.value = State.Error("User Id not found!")
+                    return@launch
+                }
+
+                val startDateSplit = if(startDate.isNotBlank()) startDate.split("T").first() else ""
+                val endDateSplit = if(endDate.isNotBlank()) endDate.split("T").first() else ""
+                val request = CreateProjectRequest(
+                    userId = userId,
+                    name = name,
+                    categoryName = categoryName,
+                    budget = budget.toLong(),
+                    startDate = startDateSplit,
+                    endDate = endDateSplit,
+                    isCompleted = false
+                )
+
+                val result = projectRepository.createProject(request)
+                result.fold(
+                    onSuccess = { data ->
+                        getProjectCategory()
+                        getProjectsByUserId()
+                    },
+                    onFailure = { throwable ->
+                        _createProjectState.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+
+            } catch (e: Exception){
+                _createProjectState.value = State.Error(e.message ?: "Unknown Error")
+            }
         }
     }
 

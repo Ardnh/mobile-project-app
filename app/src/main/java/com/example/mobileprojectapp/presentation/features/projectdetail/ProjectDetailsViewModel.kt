@@ -68,6 +68,12 @@ class ProjectDetailsViewModel @Inject constructor(
     private val _deleteExpenseItemState = MutableStateFlow<State<Unit>>(State.Idle)
     val deleteExpenseItemState = _deleteExpenseItemState.asStateFlow()
 
+    private val _deleteCategoryTodolistState = MutableStateFlow<State<Unit>>(State.Idle)
+    val deleteCategoryTodolistState = _deleteCategoryTodolistState.asStateFlow()
+
+    private val _deleteCategoryExpensesState = MutableStateFlow<State<Unit>>(State.Idle)
+    val deleteCategoryExpensesState = _deleteCategoryExpensesState.asStateFlow()
+
 
 
     // -----------------------------
@@ -658,32 +664,69 @@ class ProjectDetailsViewModel @Inject constructor(
                 _deleteProjectState.value = State.Error(e.message ?: "Unknown Error")
             } finally {
                 _deleteProjectState.value = State.Idle
+
             }
         }
     }
 
-    fun deleteCategoryTodolistById(projectId: String){
+    fun deleteCategoryTodolistById(projectId: String?, categoryTodolistId: String){
         viewModelScope.launch {
             try {
 
-                if (_projectDetail.value is State.Loading) {
+                if (_deleteCategoryTodolistState.value is State.Loading) {
                     Log.w("CREATE PROJECT", "Already processing, skipping")
                     return@launch
                 }
 
-                _projectDetail.value = State.Loading
-                val result = repository.deleteProjectById(projectId)
+                _deleteCategoryTodolistState.value = State.Loading
+                val result = projectTodolistRepository.deleteProjectTodolist(categoryTodolistId)
                 result.fold(
                     onSuccess = { data ->
 
                     },
                     onFailure = { throwable ->
-                        _projectDetail.value = State.Error(throwable.message ?: "Unknown Error")
+                        _deleteCategoryTodolistState.value = State.Error(throwable.message ?: "Unknown Error")
                     }
                 )
 
             } catch (e: Exception){
-                _projectDetail.value = State.Error(e.message ?: "Unknown Error")
+                _deleteCategoryTodolistState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                _deleteCategoryTodolistState.value = State.Idle
+                projectId?.let {
+                    getProjectsById(projectId)
+                }
+            }
+        }
+    }
+
+    fun deleteCategoryExpensesById(projectId: String?, categoryExpensesId: String){
+        viewModelScope.launch {
+            try {
+
+                if (_deleteCategoryExpensesState.value is State.Loading) {
+                    Log.w("CREATE PROJECT", "Already processing, skipping")
+                    return@launch
+                }
+
+                _deleteCategoryExpensesState.value = State.Loading
+                val result = projectExpensesRepository.deleteProjectExpenses(categoryExpensesId)
+                result.fold(
+                    onSuccess = { data ->
+
+                    },
+                    onFailure = { throwable ->
+                        _deleteCategoryExpensesState.value = State.Error(throwable.message ?: "Unknown Error")
+                    }
+                )
+
+            } catch (e: Exception){
+                _deleteCategoryExpensesState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                _deleteCategoryExpensesState.value = State.Idle
+                projectId?.let {
+                    getProjectsById(projectId)
+                }
             }
         }
     }
