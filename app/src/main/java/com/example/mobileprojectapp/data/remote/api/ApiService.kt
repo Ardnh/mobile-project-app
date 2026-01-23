@@ -6,14 +6,18 @@ import com.example.mobileprojectapp.data.remote.dto.CreateProjectRequestDto
 import com.example.mobileprojectapp.data.remote.dto.CreateProjectTodolistItemRequestDto
 import com.example.mobileprojectapp.data.remote.dto.CreateProjectTodolistRequestDto
 import com.example.mobileprojectapp.data.remote.dto.CreateUserRequestDto
+import com.example.mobileprojectapp.data.remote.dto.ExpensesItemDto
 import com.example.mobileprojectapp.data.remote.dto.UpdateProjectRequestDto
 import com.example.mobileprojectapp.data.remote.dto.LoginRequestDto
 import com.example.mobileprojectapp.data.remote.dto.LoginResponseDto
 import com.example.mobileprojectapp.data.remote.dto.ProjectByIdDto
 import com.example.mobileprojectapp.data.remote.dto.ProjectByUserIdDto
 import com.example.mobileprojectapp.data.remote.dto.ProjectCategoryByUserIdDto
+import com.example.mobileprojectapp.data.remote.dto.ProjectExpenseDto
 import com.example.mobileprojectapp.data.remote.dto.ProjectSummaryByUserIdDto
+import com.example.mobileprojectapp.data.remote.dto.ProjectTodolistDto
 import com.example.mobileprojectapp.data.remote.dto.RegisterRequestDto
+import com.example.mobileprojectapp.data.remote.dto.TodolistItemDto
 import com.example.mobileprojectapp.data.remote.dto.UpdateProjectExpenseItemRequestDto
 import com.example.mobileprojectapp.data.remote.dto.UpdateProjectExpenseRequestDto
 import com.example.mobileprojectapp.data.remote.dto.UpdateProjectTodolistItemRequestDto
@@ -58,22 +62,6 @@ interface ApiService {
 
     @GET("users")
     suspend fun getUserById(): Response<BaseResponse<UserByTokenResponseDto>>
-
-    @POST("users")
-    suspend fun createUser(
-        @Body request: CreateUserRequestDto
-    ): Response<BaseResponse<Unit>>
-
-    @PUT("users/{id}")
-    suspend fun updateUser(
-        @Path("id") id: String,
-        @Body request: UpdateUserRequestDto
-    ): Response<BaseResponse<Unit>>
-
-    @DELETE("users/{id}")
-    suspend fun deleteUser(
-        @Path("id") id: String
-    ): Response<BaseResponse<Unit>>
 
     // ========================================
     // PROJECT ROUTES (Protected)
@@ -122,17 +110,16 @@ interface ApiService {
     // ========================================
     // PROJECT EXPENSES ROUTES (Protected)
     // ========================================
-
     @POST("project-expenses")
     suspend fun createProjectExpense(
         @Body request: CreateProjectExpenseRequestDto
-    ): Response<BaseResponse<Unit>>
+    ): Response<BaseResponse<ProjectExpenseDto>>
 
     @PUT("project-expenses/{id}")
     suspend fun updateProjectExpense(
         @Path("id") id: String,
         @Body request: UpdateProjectExpenseRequestDto
-    ): Response<BaseResponse<Unit>>
+    ): Response<BaseResponse<ProjectExpenseDto>>
 
     @DELETE("project-expenses/{id}")
     suspend fun deleteProjectExpense(
@@ -142,17 +129,16 @@ interface ApiService {
     // ========================================
     // PROJECT EXPENSES ITEM ROUTES (Protected)
     // ========================================
-
     @POST("project-expenses-item")
     suspend fun createProjectExpenseItem(
         @Body request: CreateProjectExpenseItemRequestDto
-    ): Response<BaseResponse<Unit>>
+    ): Response<BaseResponse<ExpensesItemDto>>
 
     @PUT("project-expenses-item/{id}")
     suspend fun updateProjectExpenseItem(
         @Path("id") id: String,
         @Body request: UpdateProjectExpenseItemRequestDto
-    ): Response<BaseResponse<Unit>>
+    ): Response<BaseResponse<ExpensesItemDto>>
 
     @DELETE("project-expenses-item/{id}")
     suspend fun deleteProjectExpenseItem(
@@ -162,17 +148,16 @@ interface ApiService {
     // ========================================
     // PROJECT TODOLIST ROUTES (Protected)
     // ========================================
-
     @POST("project-todolist")
     suspend fun createProjectTodolist(
         @Body request: CreateProjectTodolistRequestDto
-    ): Response<BaseResponse<Unit>>
+    ): Response<BaseResponse<ProjectTodolistDto>>
 
     @PUT("project-todolist/{id}")
     suspend fun updateProjectTodolist(
         @Path("id") id: String,
         @Body request: UpdateProjectTodolistRequestDto
-    ): Response<BaseResponse<Unit>>
+    ): Response<BaseResponse<ProjectTodolistDto>>
 
     @DELETE("project-todolist/{id}")
     suspend fun deleteProjectTodolist(
@@ -182,17 +167,16 @@ interface ApiService {
     // ========================================
     // PROJECT TODOLIST ITEM ROUTES (Protected)
     // ========================================
-
     @POST("project-todolist-item")
     suspend fun createProjectTodolistItem(
         @Body request: CreateProjectTodolistItemRequestDto
-    ): Response<BaseResponse<Unit>>
+    ): Response<BaseResponse<TodolistItemDto>>
 
     @PUT("project-todolist-item/{id}")
     suspend fun updateProjectTodolistItem(
         @Path("id") id: String,
         @Body request: UpdateProjectTodolistItemRequestDto
-    ): Response<BaseResponse<Unit>>
+    ): Response<BaseResponse<TodolistItemDto>>
 
     @DELETE("project-todolist-item/{id}")
     suspend fun deleteProjectTodolistItem(
