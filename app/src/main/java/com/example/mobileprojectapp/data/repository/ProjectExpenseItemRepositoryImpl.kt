@@ -4,13 +4,14 @@ import com.example.mobileprojectapp.data.mapper.toDomain
 import com.example.mobileprojectapp.data.remote.api.ApiService
 import com.example.mobileprojectapp.data.remote.dto.CreateProjectExpenseItemRequestDto
 import com.example.mobileprojectapp.data.remote.dto.UpdateProjectExpenseItemRequestDto
+import com.example.mobileprojectapp.domain.model.ExpensesItem
 import com.example.mobileprojectapp.domain.repository.ProjectExpensesItemRepository
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
 class ProjectExpenseItemRepositoryImpl @Inject constructor(private val api : ApiService) : ProjectExpensesItemRepository {
-    override suspend fun createProjectExpensesItem(projectExpensesId: String, name: String, amount: Long, categoryName: String): Result<Unit> {
+    override suspend fun createProjectExpensesItem(projectExpensesId: String, name: String, amount: Long, categoryName: String): Result<ExpensesItem> {
         return try {
 
             val req = CreateProjectExpenseItemRequestDto(
@@ -23,7 +24,8 @@ class ProjectExpenseItemRepositoryImpl @Inject constructor(private val api : Api
             if(response.isSuccessful){
                 val body = response.body()
                 if(body != null && body.success && body.data != null) {
-                    Result.success(Unit)
+                    val data = body.data.toDomain()
+                    Result.success(data)
                 } else {
                     Result.failure(Exception(body?.message ?: "Failed to get project category"))
                 }
@@ -39,7 +41,7 @@ class ProjectExpenseItemRepositoryImpl @Inject constructor(private val api : Api
         }
     }
 
-    override suspend fun updateProjectExpensesItem(id: String, projectExpeseId: String, name: String, amount: Long, categoryName: String): Result<Unit> {
+    override suspend fun updateProjectExpensesItem(id: String, projectExpeseId: String, name: String, amount: Long, categoryName: String): Result<ExpensesItem> {
         return try {
 
             val req = UpdateProjectExpenseItemRequestDto(
@@ -52,8 +54,9 @@ class ProjectExpenseItemRepositoryImpl @Inject constructor(private val api : Api
             val response = api.updateProjectExpenseItem(id, req)
             if(response.isSuccessful){
                 val body = response.body()
-                if(body != null && body.success) {
-                    Result.success(Unit)
+                if(body != null && body.success && body.data != null) {
+                    val data = body.data.toDomain()
+                    Result.success(data)
                 } else {
                     Result.failure(Exception(body?.message ?: "Failed to update project expense item"))
                 }

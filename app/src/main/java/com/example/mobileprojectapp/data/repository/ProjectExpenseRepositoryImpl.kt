@@ -1,15 +1,17 @@
 package com.example.mobileprojectapp.data.repository
 
+import com.example.mobileprojectapp.data.mapper.toDomain
 import com.example.mobileprojectapp.data.remote.api.ApiService
 import com.example.mobileprojectapp.data.remote.dto.CreateProjectExpenseRequestDto
 import com.example.mobileprojectapp.data.remote.dto.UpdateProjectExpenseRequestDto
+import com.example.mobileprojectapp.domain.model.ProjectExpense
 import com.example.mobileprojectapp.domain.repository.ProjectExpensesRepository
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
 class ProjectExpenseRepositoryImpl @Inject constructor(private val api : ApiService) : ProjectExpensesRepository {
-    override suspend fun createProjectExpenses(projectId: String, name: String): Result<Unit> {
+    override suspend fun createProjectExpenses(projectId: String, name: String): Result<ProjectExpense> {
         return try {
 
             val req = CreateProjectExpenseRequestDto(
@@ -20,7 +22,8 @@ class ProjectExpenseRepositoryImpl @Inject constructor(private val api : ApiServ
             if(response.isSuccessful){
                 val body = response.body()
                 if(body != null && body.success && body.data != null) {
-                    Result.success(Unit)
+                    val data = body.data.toDomain()
+                    Result.success(data)
                 } else {
                     Result.failure(Exception(body?.message ?: "Failed to create project expense"))
                 }
@@ -40,7 +43,7 @@ class ProjectExpenseRepositoryImpl @Inject constructor(private val api : ApiServ
         id: String,
         projectId: String,
         name: String
-    ): Result<Unit> {
+    ): Result<ProjectExpense> {
         return try {
 
             val req = UpdateProjectExpenseRequestDto(
@@ -51,8 +54,9 @@ class ProjectExpenseRepositoryImpl @Inject constructor(private val api : ApiServ
             val response = api.updateProjectExpense(id, req)
             if(response.isSuccessful){
                 val body = response.body()
-                if(body != null && body.success) {
-                    Result.success(Unit)
+                if(body != null && body.success && body.data != null) {
+                    val data = body.data.toDomain()
+                    Result.success(data)
                 } else {
                     Result.failure(Exception(body?.message ?: "Failed to update project expense"))
                 }
