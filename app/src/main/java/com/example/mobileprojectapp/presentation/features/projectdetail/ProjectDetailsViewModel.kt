@@ -188,7 +188,7 @@ class ProjectDetailsViewModel @Inject constructor(
 
     }
 
-    fun createProjectTodolist(projectId: String?, name: String){
+    fun createCategoryTodolist(projectId: String?, name: String){
         viewModelScope.launch {
             try {
 
@@ -288,10 +288,29 @@ class ProjectDetailsViewModel @Inject constructor(
                 )
 
                 result.fold(
-                    onSuccess = {
+                    onSuccess = { it ->
                         Log.d("UPDATE_CATEGORY_TODOLIST", "Successfully updated category todolist")
                         Log.d("UPDATE_CATEGORY_TODOLIST", "Response: $it")
                         _createTodolistState.value = State.Success(Unit)
+
+                        val currentProjectDetail = _projectDetail.value
+                        if(currentProjectDetail is State.Success){
+                            val data = currentProjectDetail.data
+                            val updatedProjectDetail = data.copy(
+                                projectTodolists = data.projectTodolists.map { todo ->
+                                    if(todo.id == it.id){
+                                        todo.copy(
+                                            name = it.name
+                                        )
+                                    } else {
+                                        todo
+                                    }
+                                }
+                            )
+
+                            _projectDetail.value = State.Success(updatedProjectDetail)
+                        }
+
                     },
                     onFailure = { throwable ->
                         Log.e("UPDATE_CATEGORY_TODOLIST", "Failed to update category todolist")
@@ -302,10 +321,6 @@ class ProjectDetailsViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e("UPDATE_CATEGORY_TODOLIST", "Exception occurred: ${e.message}", e)
                 _createTodolistState.value = State.Error(e.message ?: "Unknown Error")
-            } finally {
-                Log.d("UPDATE_CATEGORY_TODOLIST", "Refreshing project data")
-                getProjectsById(item.projectId)
-                Log.d("UPDATE_CATEGORY_TODOLIST", "Project refresh completed")
             }
         }
     }
@@ -364,7 +379,6 @@ class ProjectDetailsViewModel @Inject constructor(
             } catch (e: Exception) {
                 _createTodolistItemState.value = State.Error(e.message ?: "Unknown Error")
             }
-            // Removed finally block - no need to refetch
         }
     }
 
@@ -395,9 +409,36 @@ class ProjectDetailsViewModel @Inject constructor(
                 )
 
                 result.fold(
-                    onSuccess = {
+                    onSuccess = { it ->
                         Log.i("UPDATE_TODOLIST_ITEM", "Successfully updated item: ${item.id}")
                         _updateTodolistItemState.value = State.Success(Unit)
+                        val currentProjectDetail = _projectDetail.value
+                        if(currentProjectDetail is State.Success){
+                            val projectDetail = currentProjectDetail.data
+                            val updatedProjectDetail = projectDetail.copy(
+                                projectTodolists = projectDetail.projectTodolists.map { todo ->
+                                    if(todo.id == it.projectTodolistId){
+                                        todo.copy(
+                                            todolistItems = todo.todolistItems.map{ todoItem ->
+                                                if(it.id == todoItem.id){
+                                                    todoItem.copy(
+                                                        name = it.name,
+                                                        isCompleted = it.isCompleted
+                                                    )
+                                                } else {
+                                                    todoItem
+                                                }
+                                            }
+                                        )
+                                    } else {
+                                        todo
+                                    }
+                                }
+                            )
+
+                            _projectDetail.value = State.Success(updatedProjectDetail)
+                        }
+
                     },
                     onFailure = { throwable ->
                         Log.e("UPDATE_TODOLIST_ITEM", "Failed to update item: ${throwable.message}", throwable)
@@ -407,11 +448,6 @@ class ProjectDetailsViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e("UPDATE_TODOLIST_ITEM", "Exception caught during update: ${e.message}", e)
                 _updateTodolistItemState.value = State.Error(e.message ?: "Unknown Error")
-            } finally {
-                projectId?.let {
-                    Log.d("UPDATE_TODOLIST_ITEM", "Refreshing project data for projectId: $it")
-                    getProjectsById(projectId)
-                }
             }
         }
     }
@@ -422,7 +458,7 @@ class ProjectDetailsViewModel @Inject constructor(
      * @param projectId ID project yang akan ditambahkan expenses-nya
      * @param name Nama kategori expenses
      */
-    fun createProjectExpenses(projectId: String?, name: String){
+    fun createCategoryExpenses(projectId: String?, name: String){
         viewModelScope.launch {
             viewModelScope.launch {
                 try {
@@ -474,12 +510,6 @@ class ProjectDetailsViewModel @Inject constructor(
                 } catch (e: Exception) {
                     Log.e("CREATE_EXPENSES", "Exception occurred: ${e.message}", e)
                     _createExpensesState.value = State.Error(e.message ?: "Unknown Error")
-                } finally {
-                    Log.d("CREATE_EXPENSES", "Refreshing project data")
-                    projectId?.let {
-                        getProjectsById(projectId)
-                        Log.d("CREATE_EXPENSES", "Project refresh completed")
-                    }
                 }
             }
         }
@@ -524,10 +554,6 @@ class ProjectDetailsViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e("UPDATE_CATEGORY_TODOLIST", "Exception occurred: ${e.message}", e)
                 _createTodolistState.value = State.Error(e.message ?: "Unknown Error")
-            } finally {
-                Log.d("UPDATE_CATEGORY_TODOLIST", "Refreshing project data")
-                getProjectsById(item.projectId)
-                Log.d("UPDATE_CATEGORY_TODOLIST", "Project refresh completed")
             }
         }
     }
@@ -711,12 +737,6 @@ class ProjectDetailsViewModel @Inject constructor(
             } catch(e: Exception){
                 Log.e("UPDATE_EXPENSE_ITEM", "Exception occurred: ${e.message}", e)
                 _updateExpenseItemState.value = State.Error(e.message ?: "Unknown Error")
-            } finally {
-                Log.d("UPDATE_EXPENSE_ITEM", "Refreshing project data")
-                projectId?.let {
-                    getProjectsById(projectId)
-                    Log.d("UPDATE_EXPENSE_ITEM", "Project refresh completed")
-                } ?: Log.w("UPDATE_EXPENSE_ITEM", "ProjectId is null, skipping refresh")
             }
         }
     }
@@ -740,7 +760,7 @@ class ProjectDetailsViewModel @Inject constructor(
                 val result = repository.deleteProjectById(projectId)
                 result.fold(
                     onSuccess = { data ->
-
+                        _deleteProjectState.value = State.Success(Unit)
                     },
                     onFailure = { throwable ->
                         _deleteProjectState.value = State.Error(throwable.message ?: "Unknown Error")
@@ -769,7 +789,16 @@ class ProjectDetailsViewModel @Inject constructor(
                 val result = projectTodolistRepository.deleteProjectTodolist(categoryTodolistId)
                 result.fold(
                     onSuccess = { data ->
+                        val currentProjectDetail = _projectDetail.value
+                        if(currentProjectDetail is State.Success){
+                            val projectDetail = currentProjectDetail.data
 
+                            val updatedProjectDetail = projectDetail.copy(
+                                projectTodolists = projectDetail.projectTodolists.filter { it.id != categoryTodolistId }
+                            )
+
+                            _projectDetail.value = State.Success(updatedProjectDetail)
+                        }
                     },
                     onFailure = { throwable ->
                         _deleteCategoryTodolistState.value = State.Error(throwable.message ?: "Unknown Error")
@@ -778,11 +807,6 @@ class ProjectDetailsViewModel @Inject constructor(
 
             } catch (e: Exception){
                 _deleteCategoryTodolistState.value = State.Error(e.message ?: "Unknown Error")
-            } finally {
-                _deleteCategoryTodolistState.value = State.Idle
-                projectId?.let {
-                    getProjectsById(projectId)
-                }
             }
         }
     }
@@ -800,7 +824,15 @@ class ProjectDetailsViewModel @Inject constructor(
                 val result = projectExpensesRepository.deleteProjectExpenses(categoryExpensesId)
                 result.fold(
                     onSuccess = { data ->
+                        val currentProjectDetail = _projectDetail.value
+                        if(currentProjectDetail is State.Success){
+                            val projectDetail = currentProjectDetail.data
+                            val updatedProject = projectDetail.copy(
+                                projectExpenses = projectDetail.projectExpenses.filter { it.id != categoryExpensesId }
+                            )
 
+                            _projectDetail.value = State.Success(updatedProject)
+                        }
                     },
                     onFailure = { throwable ->
                         _deleteCategoryExpensesState.value = State.Error(throwable.message ?: "Unknown Error")
@@ -809,25 +841,15 @@ class ProjectDetailsViewModel @Inject constructor(
 
             } catch (e: Exception){
                 _deleteCategoryExpensesState.value = State.Error(e.message ?: "Unknown Error")
-            } finally {
-                _deleteCategoryExpensesState.value = State.Idle
-                projectId?.let {
-                    getProjectsById(projectId)
-                }
             }
         }
     }
 
-    fun deleteTodolistItemById(projectId: String?, id: String) {
+    fun deleteTodolistItemById(categoryTodolistId: String, id: String) {
         viewModelScope.launch {
             try {
                 if (_deleteTodolistItemState.value is State.Loading) {
                     Log.w("DELETE_TODOLIST", "Delete already in progress, skipping. id=$id")
-                    return@launch
-                }
-
-                if(projectId == null){
-                    Log.w("Delete PROJECT", "Project ID NULL")
                     return@launch
                 }
 
@@ -839,8 +861,27 @@ class ProjectDetailsViewModel @Inject constructor(
                 result.fold(
                     onSuccess = {
                         Log.d("DELETE_TODOLIST", "Successfully deleted todolist item. id=$id")
-                        getProjectsById(projectId)
+//                        getProjectsById(projectId)
                         _deleteTodolistItemState.value = State.Idle
+
+                        val currentProjectTodolist = _projectDetail.value
+                        if(currentProjectTodolist is State.Success){
+                            val projectDetail = currentProjectTodolist.data
+                            val updatedProject = projectDetail.copy(
+                                projectTodolists = projectDetail.projectTodolists.map { todo ->
+                                    if(todo.id == categoryTodolistId) {
+                                        todo.copy(
+                                            todolistItems = todo.todolistItems.filter { it.id != id }
+                                        )
+                                    } else {
+                                        todo
+                                    }
+                                }
+                            )
+
+                            _projectDetail.value = State.Success(updatedProject)
+                        }
+
                     },
                     onFailure = { throwable ->
                         Log.e(
@@ -859,7 +900,7 @@ class ProjectDetailsViewModel @Inject constructor(
         }
     }
 
-    fun deleteExpenseItemById(projectId: String?, id: String) {
+    fun deleteExpenseItemById(categoryExpenseId: String,  id: String) {
         viewModelScope.launch {
             try {
                 if (_deleteExpenseItemState.value is State.Loading) {
@@ -871,11 +912,29 @@ class ProjectDetailsViewModel @Inject constructor(
                 _deleteExpenseItemState.value = State.Loading
 
                 val result = projectExpensesItemRepository.deleteProjectExpensesItem(id)
-
                 result.fold(
                     onSuccess = {
                         Log.d("DELETE_EXPENSE", "Successfully deleted expense item. id=$id")
                         _deleteExpenseItemState.value = State.Idle
+
+                        val currentProjectTodolist = _projectDetail.value
+                        if(currentProjectTodolist is State.Success){
+                            val projectDetail = currentProjectTodolist.data
+                            val updatedProject = projectDetail.copy(
+                                projectExpenses = projectDetail.projectExpenses.map { expense ->
+                                    if(expense.id == categoryExpenseId) {
+                                        expense.copy(
+                                            expensesItem = expense.expensesItem.filter { it.id !== categoryExpenseId }
+                                        )
+                                    } else {
+                                        expense
+                                    }
+                                }
+                            )
+
+                            _projectDetail.value = State.Success(updatedProject)
+                        }
+
                     },
                     onFailure = { throwable ->
                         Log.e(
@@ -890,10 +949,6 @@ class ProjectDetailsViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e("DELETE_EXPENSE", "Unexpected error. id=$id", e)
                 _deleteExpenseItemState.value = State.Error(e.message ?: "Unknown Error")
-            } finally {
-                projectId?.let { it ->
-                    getProjectsById(it)
-                }
             }
         }
     }

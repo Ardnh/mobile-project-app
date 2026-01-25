@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -58,7 +59,10 @@ import com.example.mobileprojectapp.utils.State
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun LoginView(navController: NavHostController, viewModel: LoginViewModel = hiltViewModel()) {
+fun LoginView(
+    navController: NavHostController,
+    viewModel: LoginViewModel = hiltViewModel()
+) {
     val formState by viewModel.loginForm.collectAsState()
     val loginState by viewModel.loginResult.collectAsState()
 
@@ -73,12 +77,8 @@ fun LoginView(navController: NavHostController, viewModel: LoginViewModel = hilt
                         launchSingleTop = true
                     }
                 }
-                is NavigationEvent.NavigateBack -> {
-                    navController.navigateUp()
-                }
-
-                is NavigationEvent.NavigateToDetail -> {}
-                NavigationEvent.NavigateToLogin -> {}
+                is NavigationEvent.NavigateBack -> navController.navigateUp()
+                else -> {}
             }
         }
     }
@@ -94,193 +94,184 @@ fun LoginView(navController: NavHostController, viewModel: LoginViewModel = hilt
 
     Scaffold(
         snackbarHost = {
-
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.TopCenter
-            ){
+            ) {
                 SnackbarHost(
                     hostState = snackbarHostState,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight(Alignment.Top)
+                        .wrapContentHeight()
                         .padding(top = 25.dp),
                     snackbar = { data ->
                         CustomSnackbar(
                             message = data.visuals.message,
                             actionLabel = data.visuals.actionLabel,
-                            onActionClick = { data.performAction() },
+                            onActionClick = { data.performAction() }
                         )
                     }
                 )
             }
         }
     ) { innerPadding ->
-        Column(
+
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            Spacer(modifier = Modifier.height(30.dp))
-            Box(
-                modifier = Modifier
-                    .padding(20.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.secondary,
-                        shape = RoundedCornerShape(30.dp)
-                    )
-            ){
-                Image(
-                    painter = painterResource(id = R.drawable.auth_icon),
-                    contentDescription = "Auth Icon",
-                    modifier = Modifier
-                        .padding(30.dp)
-                        .size(80.dp)
-                )
+
+            item {
+                Spacer(modifier = Modifier.height(30.dp))
             }
 
-            Text(
-                "Q Project's",
-                style = TextStyle(
-                    fontFamily = KaushanFontFamily,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 36.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            )
-
-            Box(
-                modifier = Modifier.height(40.dp)
-            ){}
-
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 40.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start
-            ) {
-                Text(
-                    "Login",
-                    style = TextStyle(
-                        fontFamily = FontFamily(PrimaryFontFamily),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 25.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                )
-            }
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier
-                    .padding(horizontal = 40.dp, vertical = 30.dp)
-                    .fillMaxWidth(),
-            ) {
-
-                // Username field
-                CustomTextField(
-                    value = formState.username,
-                    onValueChange = { viewModel.onUsernameChange(it) },
-                    placeholder = "Username",
-                    errorMessage = formState.usernameError
-                )
-
-                // Password field
-                CustomTextField(
-                    value = formState.password,
-                    onValueChange = { viewModel.onPasswordChange(it) },
-                    placeholder = "Password",
-                    errorMessage = formState.passwordError,
-                    isPassword = true
-                )
-
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                ) {
-                    Text(
-                        text = "Forgot Password ?",
-                        fontSize = 14.sp
-                    )
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Button(
-                        enabled = loginState !is State.Loading,
-                        onClick = {
-                            viewModel.login()
-//                            navController.navigate("HomeView")
-                        },
-                        colors = ButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = Color.White,
-                            disabledContainerColor = MaterialTheme.colorScheme.primary,
-                            disabledContentColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        if (loginState is State.Loading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text("Sign In")
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(80.dp))
-
+            item {
                 Box(
-                    contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp)
+                        .padding(20.dp)
                         .background(
                             color = MaterialTheme.colorScheme.secondary,
                             shape = RoundedCornerShape(30.dp)
                         )
                 ) {
-                    Text(
-                        text = "Sign in with google",
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Don't have account ?",
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "Sign Up",
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Medium,
+                    Image(
+                        painter = painterResource(id = R.drawable.auth_icon),
+                        contentDescription = "Auth Icon",
                         modifier = Modifier
-                            .clickable{
-                                navController.navigate("registerView")
-                            }
+                            .padding(30.dp)
+                            .size(80.dp)
                     )
                 }
-
             }
 
+            item {
+                Text(
+                    "Q Project's",
+                    style = TextStyle(
+                        fontFamily = KaushanFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 36.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(40.dp))
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 40.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Text(
+                        "Login",
+                        style = TextStyle(
+                            fontFamily = FontFamily(PrimaryFontFamily),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 25.sp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                }
+            }
+
+            item {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 40.dp, vertical = 30.dp)
+                        .fillMaxWidth()
+                ) {
+
+                    CustomTextField(
+                        value = formState.username,
+                        onValueChange = viewModel::onUsernameChange,
+                        placeholder = "Username",
+                        errorMessage = formState.usernameError
+                    )
+
+                    CustomTextField(
+                        value = formState.password,
+                        onValueChange = viewModel::onPasswordChange,
+                        placeholder = "Password",
+                        errorMessage = formState.passwordError,
+                        isPassword = true
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Text("Forgot Password ?", fontSize = 14.sp)
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Button(
+                            enabled = loginState !is State.Loading,
+                            onClick = { viewModel.login() },
+                            colors = ButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = Color.White,
+                                disabledContainerColor = MaterialTheme.colorScheme.primary,
+                                disabledContentColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            if (loginState is State.Loading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = Color.White,
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Text("Sign In")
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(80.dp))
+
+//                    Box(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .height(40.dp)
+//                            .background(
+//                                color = MaterialTheme.colorScheme.secondary,
+//                                shape = RoundedCornerShape(30.dp)
+//                            ),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Text("Sign in with google")
+//                    }
+//
+//                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text("Don't have account ?")
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Sign Up",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.clickable {
+                                navController.navigate("registerView")
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
-
 }

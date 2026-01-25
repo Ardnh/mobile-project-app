@@ -62,7 +62,7 @@ fun TodolistBottomSheet(
     onAddNewTodolistItem: () -> Unit,
     onUpdateTodolistItemStatus: (todo: TodolistItem) -> Unit,
     onUpdateTodolistItem: (todo: TodolistItem) -> Unit,
-    onDeleteTodolistItem: (id: String, title: String) -> Unit
+    onDeleteTodolistItem: (categoryId: String, id: String, title: String) -> Unit
 ) {
 
     val sheetState = rememberModalBottomSheetState(
@@ -227,7 +227,7 @@ fun TodolistBottomSheet(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(20.dp))
                                     .clickable{
-                                        onDeleteTodolistItem(it.id, it.name)
+                                        onDeleteTodolistItem(it.projectTodolistId, it.id, it.name)
                                     }
                             ){
                                 Icon(

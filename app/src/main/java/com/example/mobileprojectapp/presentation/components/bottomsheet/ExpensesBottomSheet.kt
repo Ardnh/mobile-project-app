@@ -59,7 +59,7 @@ fun ExpensesBottomSheet(
     onDeleteCategoryExpenses: () -> Unit,
     onAddNewExpensesItem: () -> Unit,
     onUpdateExpensesItem: (expense: ExpensesItem) -> Unit,
-    onDeleteExpensesItem: (id: String, title: String) -> Unit,
+    onDeleteExpensesItem: (categoryId: String, id: String, title: String) -> Unit,
 ){
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
@@ -240,7 +240,7 @@ fun ExpensesBottomSheet(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(20.dp))
                                     .clickable{
-                                        onDeleteExpensesItem(it.id, it.name)
+                                        onDeleteExpensesItem(it.projectExpensesId, it.id, it.name)
                                     }
                             ){
                                 Icon(

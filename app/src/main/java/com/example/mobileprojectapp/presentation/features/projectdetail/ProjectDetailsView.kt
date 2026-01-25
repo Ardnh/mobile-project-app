@@ -106,6 +106,7 @@ import com.google.android.material.tabs.TabItem
 
 
 data class DeleteItem(
+    val categoryId: String,
     val id: String,
     val title: String
 )
@@ -239,20 +240,20 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
 
                 when (projectDetailState) {
                     is State.Loading -> {
-//                        item {
-//                            Box(
-//                                contentAlignment = Alignment.Center,
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .height(100.dp)
-//                            ) {
-//                                CircularProgressIndicator(
-//                                    modifier = Modifier.size(20.dp),
-//                                    color = Color.White,
-//                                    strokeWidth = 2.dp
-//                                )
-//                            }
-//                        }
+                        item {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(100.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = Color.White,
+                                    strokeWidth = 2.dp
+                                )
+                            }
+                        }
                     }
 
                     is State.Error -> {
@@ -537,8 +538,9 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                 updateTodolistItemState = todoItem
                                                 showUpdateTodolistItemDialog = true
                                             },
-                                            onDeleteTodolistItem = { id, title ->
+                                            onDeleteTodolistItem = { categoryId, id, title ->
                                                 deleteTodolistOrExpenseItemNameState = DeleteItem(
+                                                    categoryId = categoryId,
                                                     id = id,
                                                     title = title
                                                 )
@@ -590,8 +592,9 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                 updateExpenseItemState = expense
                                                 showUpdateExpensesItemDialog = true
                                             },
-                                            onDeleteExpensesItem = { id, title ->
+                                            onDeleteExpensesItem = { categoryId, id, title ->
                                                 deleteTodolistOrExpenseItemNameState = DeleteItem(
+                                                    categoryId = categoryId,
                                                     id = id,
                                                     title = title
                                                 )
@@ -721,7 +724,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 description = "Delete this todo item",
                 onDismiss = { showDeleteTodolistItemDialog = false },
                 onDelete = {
-                    viewModel.deleteTodolistItemById(projectId, state.id)
+                    viewModel.deleteTodolistItemById(categoryTodolistId = state.categoryId , state.id)
                     deleteTodolistOrExpenseItemNameState = null
                     showDeleteTodolistItemDialog = false
                 },
@@ -738,7 +741,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 description = "Delete this expense item",
                 onDismiss = { showDeleteExpensesItemDialog = false },
                 onDelete = {
-                    viewModel.deleteExpenseItemById(projectId, state.id)
+                    viewModel.deleteExpenseItemById(categoryExpenseId = state.categoryId, state.id)
                     deleteTodolistOrExpenseItemNameState = null
                     showDeleteExpensesItemDialog = false
                 },
@@ -793,7 +796,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
             loading = createTodolistState is State.Loading,
             onDismiss = { showAddTodolistOrExpensesDialog = false },
             onAddNewTodolist = { name ->
-                viewModel.createProjectTodolist(projectId, name)
+                viewModel.createCategoryTodolist(projectId, name)
                 showAddTodolistOrExpensesDialog = false
             },
         )
@@ -805,7 +808,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
             loading =  createExpensesState is State.Loading,
             onDismiss = { showAddTodolistOrExpensesDialog = false },
             onAddNewExpenses = { name ->
-                viewModel.createProjectExpenses(projectId, name)
+                viewModel.createCategoryExpenses(projectId, name)
                 showAddTodolistOrExpensesDialog = false
             }
         )

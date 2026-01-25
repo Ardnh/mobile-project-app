@@ -45,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -82,7 +83,6 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
     val userProfileState by viewModel.userProfile.collectAsState()
     val createProjectState by viewModel.createProjectState.collectAsState()
 
-
     val refreshNeeded by navController.currentBackStackEntry
         ?.savedStateHandle
         ?.getStateFlow("refresh_needed", false)
@@ -90,7 +90,7 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
 
     val snackbarHostState = remember { SnackbarHostState() }
     var isRefreshing by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(0) }
+    var selectedIndex by remember { mutableIntStateOf(0) }
     var expanded by remember { mutableStateOf(false) }
     var showAddNewProjectDialog by remember { mutableStateOf(false) }
 
@@ -117,7 +117,7 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
 
     LaunchedEffect(refreshNeeded) {
         if (refreshNeeded) {
-            viewModel.loadInitialData() // Refresh data
+            viewModel.loadInitialData()
 
             // Reset flag
             navController.currentBackStackEntry
@@ -125,10 +125,6 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
                 ?.set("refresh_needed", false)
         }
     }
-
-//    LaunchedEffect(Unit) {
-//        viewModel.loadInitialData()
-//    }
 
     LaunchedEffect(isRefreshing) {
         viewModel.loadInitialData()
