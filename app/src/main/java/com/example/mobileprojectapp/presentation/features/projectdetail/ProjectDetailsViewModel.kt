@@ -17,6 +17,8 @@ import com.example.mobileprojectapp.presentation.features.home.ProjectByUserIdPa
 import com.example.mobileprojectapp.utils.HttpAbortManager
 import com.example.mobileprojectapp.utils.SecureStorageManager
 import com.example.mobileprojectapp.utils.State
+import com.example.mobileprojectapp.utils.toLong
+import com.example.mobileprojectapp.utils.toNumberFormat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -418,17 +420,24 @@ class ProjectDetailsViewModel @Inject constructor(
                             val updatedProjectDetail = projectDetail.copy(
                                 projectTodolists = projectDetail.projectTodolists.map { todo ->
                                     if(todo.id == it.projectTodolistId){
-                                        todo.copy(
-                                            todolistItems = todo.todolistItems.map{ todoItem ->
-                                                if(it.id == todoItem.id){
-                                                    todoItem.copy(
-                                                        name = it.name,
-                                                        isCompleted = it.isCompleted
-                                                    )
-                                                } else {
-                                                    todoItem
-                                                }
+
+                                        val updatedTodolistItems = todo.todolistItems.map{ todoItem ->
+                                            if(it.id == todoItem.id){
+                                                todoItem.copy(
+                                                    name = it.name,
+                                                    isCompleted = it.isCompleted
+                                                )
+                                            } else {
+                                                todoItem
                                             }
+                                        }
+
+                                        val updatedTotalCompletedTodo = updatedTodolistItems.count { it.isCompleted }
+                                        val isTodolistCompleted = updatedTodolistItems.size == updatedTotalCompletedTodo
+                                        todo.copy(
+                                            totalCompletedTodo = updatedTotalCompletedTodo.toLong(),
+                                            isTodolistCompleted = isTodolistCompleted,
+                                            todolistItems = updatedTodolistItems
                                         )
                                     } else {
                                         todo
@@ -614,18 +623,24 @@ class ProjectDetailsViewModel @Inject constructor(
                             val projectDetail = currentProjectDetail.data
                             val updatedProjectDetail = projectDetail.copy(
                                 projectExpenses = projectDetail.projectExpenses.map { expenses ->
-                                    if( expenses.id === it.projectExpensesId ){
+                                    if( expenses.id == it.projectExpensesId ){
+
+                                        val newExpensesItem = expenses.expensesItem + it
+                                        val sumCategoryExpenses = newExpensesItem.sumOf { it.amount.toLong() }
+
                                         expenses.copy(
-                                            expensesItem = expenses.expensesItem + it
+                                            expensesUsed = sumCategoryExpenses.toNumberFormat(),
+                                            expensesItem = newExpensesItem
                                         )
                                     } else {
                                         expenses
                                     }
                                 }
                             )
-                            _projectDetail.value = State.Success(updatedProjectDetail)
-                        }
 
+                            val sumBudgetUsed = updatedProjectDetail.projectExpenses.sumOf { it.expensesUsed.toLong() }.toNumberFormat()
+                            _projectDetail.value = State.Success(updatedProjectDetail.copy(budgetUsed = sumBudgetUsed))
+                        }
                     },
                     onFailure = { throwable ->
                         Log.e("CREATE_EXPENSE_ITEM", "Failed to create expense item")
@@ -633,9 +648,6 @@ class ProjectDetailsViewModel @Inject constructor(
                         _createExpenseItemState.value = State.Error(throwable.message ?: "Unknown Error")
                     }
                 )
-            } catch(e: NumberFormatException){
-                Log.e("CREATE_EXPENSE_ITEM", "Invalid amount format: $amount", e)
-                _createExpenseItemState.value = State.Error("Invalid amount format")
             } catch(e: Exception){
                 Log.e("CREATE_EXPENSE_ITEM", "Exception occurred: ${e.message}", e)
                 _createExpenseItemState.value = State.Error(e.message ?: "Unknown Error")
@@ -701,18 +713,26 @@ class ProjectDetailsViewModel @Inject constructor(
                             val projectDetail = currentProjectDetail.data
                             val updatedProjectDetail = projectDetail.copy(
                                 projectExpenses = projectDetail.projectExpenses.map { expenses ->
-                                    if( expenses.id === it.projectExpensesId ){
-                                        expenses.copy(
-                                            expensesItem = expenses.expensesItem.map { expensesItem ->
-                                                if( expensesItem.id === it.id ){
-                                                    expensesItem.copy(
-                                                        name = it.name,
-                                                        amount = it.amount
-                                                    )
-                                                } else {
-                                                    expensesItem
-                                                }
+                                    if( expenses.id == it.projectExpensesId ){
+                                        val updatedExpensesItem = expenses.expensesItem.map { expensesItem ->
+                                            if (expensesItem.id == it.id) {
+                                                expensesItem.copy(
+                                                    name = it.name,
+                                                    amount = it.amount
+                                                )
+                                            } else {
+                                                expensesItem
                                             }
+                                        }
+
+                                        // Hitung total SETELAH update
+                                        val categoryBudgetUsed = updatedExpensesItem.sumOf { item ->
+                                            item.amount.toLong()
+                                        }
+
+                                        expenses.copy(
+                                            expensesItem = updatedExpensesItem,
+                                            expensesUsed = categoryBudgetUsed.toNumberFormat()
                                         )
                                     } else {
                                         expenses
@@ -720,8 +740,8 @@ class ProjectDetailsViewModel @Inject constructor(
                                 }
                             )
 
-                            _projectDetail.value = State.Success(updatedProjectDetail)
-
+                            val budgetUsed = updatedProjectDetail.projectExpenses.sumOf { it.expensesUsed.toLong() }.toNumberFormat()
+                            _projectDetail.value = State.Success(updatedProjectDetail.copy(budgetUsed = budgetUsed))
                         }
 
                     },
@@ -731,9 +751,6 @@ class ProjectDetailsViewModel @Inject constructor(
                         _updateExpenseItemState.value = State.Error(throwable.message ?: "Unknown Error")
                     }
                 )
-            } catch(e: NumberFormatException){
-                Log.e("UPDATE_EXPENSE_ITEM", "Invalid amount format: $amount", e)
-                _updateExpenseItemState.value = State.Error("Invalid amount format")
             } catch(e: Exception){
                 Log.e("UPDATE_EXPENSE_ITEM", "Exception occurred: ${e.message}", e)
                 _updateExpenseItemState.value = State.Error(e.message ?: "Unknown Error")
@@ -792,7 +809,6 @@ class ProjectDetailsViewModel @Inject constructor(
                         val currentProjectDetail = _projectDetail.value
                         if(currentProjectDetail is State.Success){
                             val projectDetail = currentProjectDetail.data
-
                             val updatedProjectDetail = projectDetail.copy(
                                 projectTodolists = projectDetail.projectTodolists.filter { it.id != categoryTodolistId }
                             )
@@ -831,7 +847,8 @@ class ProjectDetailsViewModel @Inject constructor(
                                 projectExpenses = projectDetail.projectExpenses.filter { it.id != categoryExpensesId }
                             )
 
-                            _projectDetail.value = State.Success(updatedProject)
+                            val sumBudgetUsed = updatedProject.projectExpenses.sumOf { it.expensesUsed.toLong() }.toNumberFormat()
+                            _projectDetail.value = State.Success(updatedProject.copy(budgetUsed = sumBudgetUsed))
                         }
                     },
                     onFailure = { throwable ->
@@ -861,7 +878,6 @@ class ProjectDetailsViewModel @Inject constructor(
                 result.fold(
                     onSuccess = {
                         Log.d("DELETE_TODOLIST", "Successfully deleted todolist item. id=$id")
-//                        getProjectsById(projectId)
                         _deleteTodolistItemState.value = State.Idle
 
                         val currentProjectTodolist = _projectDetail.value
@@ -923,8 +939,12 @@ class ProjectDetailsViewModel @Inject constructor(
                             val updatedProject = projectDetail.copy(
                                 projectExpenses = projectDetail.projectExpenses.map { expense ->
                                     if(expense.id == categoryExpenseId) {
+
+                                        val newExpensesItem = expense.expensesItem.filter { it.id != id }
+                                        val sumExpensesUsed = newExpensesItem.sumOf { it.amount.toLong() }.toNumberFormat()
                                         expense.copy(
-                                            expensesItem = expense.expensesItem.filter { it.id !== categoryExpenseId }
+                                            expensesUsed = sumExpensesUsed,
+                                            expensesItem = newExpensesItem
                                         )
                                     } else {
                                         expense
@@ -932,7 +952,8 @@ class ProjectDetailsViewModel @Inject constructor(
                                 }
                             )
 
-                            _projectDetail.value = State.Success(updatedProject)
+                            val sumBudgetUsed = updatedProject.projectExpenses.sumOf { it.expensesUsed.toLong() }.toNumberFormat()
+                            _projectDetail.value = State.Success(updatedProject.copy(budgetUsed = sumBudgetUsed))
                         }
 
                     },

@@ -263,10 +263,10 @@ fun ProjectsView(navController: NavHostController, viewModel: ProjectsViewModel 
                     }
 
                     is State.Error -> {
-                        val projectError = (projectListState as State.Error).message
-                        item {
-                            ErrorView(projectError , onRetry = {  })
-                        }
+//                        val projectError = (projectListState as State.Error).message
+//                        item {
+//                            ErrorView(projectError , onRetry = {  })
+//                        }
                     }
 
                     State.Idle -> {}
@@ -278,7 +278,7 @@ fun ProjectsView(navController: NavHostController, viewModel: ProjectsViewModel 
     if(showAddNewProjectDialog){
         val categoryList = if(projectCategoryState is State.Success) (projectCategoryState as State.Success<List<ProjectCategory>>).data.map { it -> it.categoryName } else emptyList()
         CreateProjectDialog(
-            loading = createProjectState,
+            loading = createProjectState is State.Loading,
             onDismiss = { showAddNewProjectDialog = false },
             categoryList = categoryList,
             onCreateProject = { name, budget, startDate, endDate, category ->

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.Checkbox
@@ -53,7 +54,7 @@ fun TodolistBottomSheet(
     categoryTodolistId: String,
     title: String,
     todoInfo: String,
-    category: String,
+    isCategoryTodolistCompleted: Boolean,
     todoList: List<TodolistItem> = emptyList(),
     onClickTrigger: () -> Unit,
     onDismiss: () -> Unit,
@@ -106,6 +107,15 @@ fun TodolistBottomSheet(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+            if(isCategoryTodolistCompleted){
+                Icon(
+                    imageVector = Icons.Rounded.Check,
+                    contentDescription = "Show when all todo item is completed",
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                        .size(20.dp)
+                )
+            }
             Text(
                 text = todoInfo,
                 modifier = Modifier

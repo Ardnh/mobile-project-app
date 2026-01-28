@@ -73,6 +73,7 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
     // API Actions
     // -----------------------------
     fun loadInitialData(){
+
         viewModelScope.launch {
             val userId = storage.getUserId()
             val username = storage.getUsername()
@@ -142,6 +143,8 @@ class HomeViewModel @Inject constructor(private val projectRepository: ProjectsR
 
             } catch (e: Exception){
                 _createProjectState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                _createProjectState.value = State.Idle
             }
         }
     }

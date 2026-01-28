@@ -1,6 +1,7 @@
 package com.example.mobileprojectapp.presentation.features.home
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -117,12 +118,14 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
 
     LaunchedEffect(refreshNeeded) {
         if (refreshNeeded) {
+            isRefreshing = true
             viewModel.loadInitialData()
 
             // Reset flag
             navController.currentBackStackEntry
                 ?.savedStateHandle
                 ?.set("refresh_needed", false)
+            isRefreshing = false
         }
     }
 
@@ -335,7 +338,7 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
                                     title = "Project is Empty",
                                     description = "Start create new project",
                                     buttonLabel = "New project",
-                                    onClickBtn = { navController.navigate("") }
+                                    onClickBtn = { showAddNewProjectDialog = true }
                                 )
                             }
                         } else {
@@ -361,7 +364,7 @@ fun HomeView(navController: NavHostController, viewModel: HomeViewModel = hiltVi
 
         val categoryList = if(projectCategoryState is State.Success) (projectCategoryState as State.Success<List<ProjectCategory>>).data.map { it -> it.categoryName } else emptyList()
         CreateProjectDialog(
-            loading = createProjectState,
+            loading = createProjectState is State.Loading,
             onDismiss = { showAddNewProjectDialog = false },
             categoryList = categoryList,
             onCreateProject = { name, budget, startDate, endDate, category ->

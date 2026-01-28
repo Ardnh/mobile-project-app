@@ -508,7 +508,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                             categoryTodolistId = todo.id,
                                             title = todo.name,
                                             todoInfo = "${todo.totalCompletedTodo}/${todo.totalTodo}",
-                                            category = todo.name,
+                                            isCategoryTodolistCompleted = todo.isTodolistCompleted,
                                             todoList = todo.todolistItems,
                                             onClickTrigger = { todolistActiveIndex = parentIndex },
                                             onDismiss = { todolistActiveIndex = -1 },
@@ -853,6 +853,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                 },
                 onDeleteProject = {
                     viewModel.deleteProjectById(state.id)
+                    isProjectMenuExpanded = false
                     showDeleteProjectDialog = false
                     navController.previousBackStackEntry?.savedStateHandle?.set("refresh_needed", true)
                     navController.navigateUp()

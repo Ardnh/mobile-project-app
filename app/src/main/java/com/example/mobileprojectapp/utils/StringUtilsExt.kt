@@ -19,7 +19,11 @@ fun String.toLocalDateOrNull(): LocalDate? {
 }
 
 fun String?.toLong(default: Long = 0L): Long {
-    return this?.toLongOrNull() ?: default
+    return this?.replace(".", "")
+        ?.replace(",", "")
+        ?.replace(" ", "")
+        ?.toLongOrNull()
+        ?: default
 }
 
 fun String?.toCleanAmount(): String {

@@ -29,7 +29,7 @@ import com.example.mobileprojectapp.utils.State
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateProjectDialog(
-    loading: State<Unit>,
+    loading: Boolean,
     onDismiss: () -> Unit,
     categoryList: List<String> = emptyList(),
     onCreateProject: (
@@ -145,7 +145,7 @@ fun CreateProjectDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
                         onClick = { createProject() },
-                        enabled = loading !is State.Loading,
+                        enabled = !loading,
                         modifier = Modifier
                             .width(70.dp)
                     ) {
