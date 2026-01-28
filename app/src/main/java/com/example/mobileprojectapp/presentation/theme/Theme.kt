@@ -16,6 +16,7 @@ private val DarkColorScheme = darkColorScheme(
     background = ColorPalette.Gray50,
     secondary = ColorPalette.Gray200,
     tertiary = ColorPalette.Gray800,
+    onSecondary = ColorPalette.Gray300
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -23,6 +24,7 @@ private val LightColorScheme = lightColorScheme(
     background = ColorPalette.Gray50,
     secondary = ColorPalette.Gray200,
     tertiary = ColorPalette.Gray800,
+    onSecondary = ColorPalette.Gray300
 )
 
 @Composable

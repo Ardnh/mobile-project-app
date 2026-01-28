@@ -12,6 +12,7 @@ import com.example.mobileprojectapp.domain.model.ProjectCategory
 import com.example.mobileprojectapp.domain.model.ProjectSummary
 import com.example.mobileprojectapp.utils.toLocalDateOrNull
 import com.example.mobileprojectapp.utils.toNumberFormat
+import kotlin.math.roundToLong
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun ProjectByUserIdDto.toDomain(): ProjectItem {

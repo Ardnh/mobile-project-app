@@ -355,21 +355,27 @@ class ProjectDetailsViewModel @Inject constructor(
                         // Update existing project detail
                         val currentProjectDetail = _projectDetail.value
                         if (currentProjectDetail is State.Success) {
-                            val updatedProjectDetail = currentProjectDetail.data.copy(
-                                projectTodolists = currentProjectDetail.data.projectTodolists.map { todolist ->
-                                    if (todolist.id == newTodolistItem.projectTodolistId) {
-                                        todolist.copy(
-                                            todolistItems = todolist.todolistItems + newTodolistItem
-                                        )
-                                    } else {
-                                        todolist
-                                    }
+
+                            val newProjectTodolist = currentProjectDetail.data.projectTodolists.map { todolist ->
+                                if (todolist.id == newTodolistItem.projectTodolistId) {
+
+                                    val newTodoItems = todolist.todolistItems + newTodolistItem
+                                    todolist.copy(
+                                        totalTodo = newTodoItems.size.toLong(),
+                                        todolistItems = newTodoItems
+                                    )
+                                } else {
+                                    todolist
                                 }
+                            }
+
+                            val totalTodolistItem = newProjectTodolist.sumOf { it.totalTodo }
+                            val updatedProjectDetail = currentProjectDetail.data.copy(
+                                totalTodolistItem = totalTodolistItem,
+                                projectTodolists = newProjectTodolist
                             )
 
-                            updatedProjectDetail.let { it ->
-                                _projectDetail.value = State.Success(updatedProjectDetail)
-                            }
+                            _projectDetail.value = State.Success(updatedProjectDetail)
                         }
                     },
                     onFailure = { throwable ->
@@ -445,7 +451,10 @@ class ProjectDetailsViewModel @Inject constructor(
                                 }
                             )
 
-                            _projectDetail.value = State.Success(updatedProjectDetail)
+                            val newTotalCompletedTodoItem = updatedProjectDetail.projectTodolists.sumOf { it.totalCompletedTodo }
+                            _projectDetail.value = State.Success(updatedProjectDetail.copy(
+                                totalTodolistCompletedItem = newTotalCompletedTodoItem
+                            ))
                         }
 
                     },
@@ -809,11 +818,15 @@ class ProjectDetailsViewModel @Inject constructor(
                         val currentProjectDetail = _projectDetail.value
                         if(currentProjectDetail is State.Success){
                             val projectDetail = currentProjectDetail.data
+                            val newProjectTodolist = projectDetail.projectTodolists.filter { it.id != categoryTodolistId }
                             val updatedProjectDetail = projectDetail.copy(
-                                projectTodolists = projectDetail.projectTodolists.filter { it.id != categoryTodolistId }
+                                projectTodolists = newProjectTodolist
                             )
 
-                            _projectDetail.value = State.Success(updatedProjectDetail)
+                            val newTotalTodoItems = updatedProjectDetail.projectTodolists.sumOf { it.totalTodo }
+                            _projectDetail.value = State.Success(updatedProjectDetail.copy(
+                                totalTodolistItem = newTotalTodoItems
+                            ))
                         }
                     },
                     onFailure = { throwable ->
@@ -883,16 +896,22 @@ class ProjectDetailsViewModel @Inject constructor(
                         val currentProjectTodolist = _projectDetail.value
                         if(currentProjectTodolist is State.Success){
                             val projectDetail = currentProjectTodolist.data
-                            val updatedProject = projectDetail.copy(
-                                projectTodolists = projectDetail.projectTodolists.map { todo ->
-                                    if(todo.id == categoryTodolistId) {
-                                        todo.copy(
-                                            todolistItems = todo.todolistItems.filter { it.id != id }
-                                        )
-                                    } else {
-                                        todo
-                                    }
+                            val newCategoryTodolist = projectDetail.projectTodolists.map { todo ->
+                                val newTodoItems = todo.todolistItems.filter { it.id != id }
+                                if(todo.id == categoryTodolistId) {
+                                    todo.copy(
+                                        totalTodo = newTodoItems.size.toLong(),
+                                        todolistItems = newTodoItems
+                                    )
+                                } else {
+                                    todo
                                 }
+                            }
+
+                            val newCountTotalTodolistItems = newCategoryTodolist.sumOf { it.totalTodo }
+                            val updatedProject = projectDetail.copy(
+                                totalTodolistItem = newCountTotalTodolistItems,
+                                projectTodolists = newCategoryTodolist
                             )
 
                             _projectDetail.value = State.Success(updatedProject)
