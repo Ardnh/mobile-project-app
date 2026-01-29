@@ -189,19 +189,21 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {  },
+                onClick = { showAddTodolistOrExpensesDialog = true },
                 modifier = Modifier.size(56.dp),
                 containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.primary
+                contentColor = MaterialTheme.colorScheme.primary,
+                // Hilangkan ripple effect
+                interactionSource = remember { MutableInteractionSource() }
+                    .also {
+                        // Tidak ada indication = no ripple
+                    }
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Add,
                     contentDescription = "Add project",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clickable{
-                            showAddTodolistOrExpensesDialog = true
-                        }
+                    modifier = Modifier.size(40.dp)
+                    // Hapus clickable dari sini, sudah ada di FAB
                 )
             }
         },

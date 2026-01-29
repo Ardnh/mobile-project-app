@@ -213,7 +213,7 @@ class ProjectDetailsViewModel @Inject constructor(
                         if(currentDetail is State.Success){
                             val data = currentDetail.data
                             val updateDetailProject = data.copy(
-                                projectTodolists = currentDetail.data.projectTodolists + it
+                                projectTodolists = data.projectTodolists + it
                             )
                             _projectDetail.value = State.Success(updateDetailProject)
                         }
@@ -836,6 +836,8 @@ class ProjectDetailsViewModel @Inject constructor(
 
             } catch (e: Exception){
                 _deleteCategoryTodolistState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                _deleteCategoryTodolistState.value = State.Idle
             }
         }
     }
@@ -871,6 +873,8 @@ class ProjectDetailsViewModel @Inject constructor(
 
             } catch (e: Exception){
                 _deleteCategoryExpensesState.value = State.Error(e.message ?: "Unknown Error")
+            } finally {
+                _deleteCategoryExpensesState.value = State.Idle
             }
         }
     }
