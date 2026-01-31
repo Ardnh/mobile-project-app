@@ -65,6 +65,8 @@ fun ProjectByIdDto.toDomain() : ProjectById {
         budgetUsed = budgetUsed.toNumberFormat(),
         totalTodolistItem = totalTodolistItem,
         totalTodolistCompletedItem = totalTodolistCompletedItem,
+        daysRemaining = daysRemaining,
+        daysRemainingStatus = daysRemainingStatus,
         projectExpenses = projectExpenses,
         projectTodolists = projectTodolist
     )

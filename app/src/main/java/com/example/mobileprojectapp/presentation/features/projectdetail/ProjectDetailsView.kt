@@ -325,7 +325,7 @@ fun ProjectDetailsView(navController: NavHostController, viewModel: ProjectDetai
                                                                 .background(Color.White)
                                                         ){
                                                             Text(
-                                                                text = "13 days left",
+                                                                text = project.daysRemainingStatus,
                                                                 fontSize = 11.sp,
                                                                 lineHeight = 23.sp,
                                                                 modifier = Modifier

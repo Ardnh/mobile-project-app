@@ -109,6 +109,10 @@ data class ProjectByIdDto(
     val totalTodolistItem: Long,
     @SerializedName("total_todolist_completed_item")
     val totalTodolistCompletedItem: Long,
+    @SerializedName("days_remaining")
+    val daysRemaining: Long,
+    @SerializedName("days_remaining_status")
+    val daysRemainingStatus: String,
     @SerializedName("project_expenses")
     val projectExpenses: List<ProjectExpenseDto>,
     @SerializedName("project_todolists")

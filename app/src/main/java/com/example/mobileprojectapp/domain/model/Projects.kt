@@ -41,6 +41,8 @@ data class ProjectById(
     val budgetUsed: String,
     val totalTodolistItem: Long,
     val totalTodolistCompletedItem: Long,
+    val daysRemaining: Long,
+    val daysRemainingStatus: String,
     val projectExpenses: List<ProjectExpense>,
     val projectTodolists: List<ProjectTodolist>,
 )
